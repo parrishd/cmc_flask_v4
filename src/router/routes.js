@@ -7,7 +7,13 @@ const routes = [
       { path: '', component: () => import('pages/IndexPage.vue') }
     ]
   },
-
+  {
+    path: '/test',
+    component: () => import('layouts/BaseLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/MapBoxPage.vue') }
+    ]
+  },
   // Always leave this as last one,
   // but you can also remove it
   {
