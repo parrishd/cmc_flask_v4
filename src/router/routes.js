@@ -8,7 +8,7 @@ const routes = [
     ]
   },
   {
-    path: '/test',
+    path: '/mapbox',
     component: () => import('layouts/BaseLayout.vue'),
     children: [
       { path: '', component: () => import('pages/MapBoxPage.vue') }

@@ -4,12 +4,126 @@
 
 <script setup>
 import mapboxgl from 'mapbox-gl';
-import { onMounted} from "vue";
+import {onMounted, reactive} from "vue";
+import stations from '/src/assets/stations.json'
+
+
+let locs = reactive({
+  "type": "FeatureCollection",
+  "features": []
+});
+
+let selectedStation = reactive({})
+let map = reactive({})
+
+const getStations = () => {
+  console.log(map);
+  console.log("stations data!");
+  let locations = {
+    "type": "FeatureCollection",
+    "features": []
+  }
+    stations.forEach(s => {
+      let station = {
+        "type": "Feature",
+        "properties": {
+          "project":s.project,
+          "selected":false,
+          "code":s.code,
+          "name":s.name,
+          "id":s.id,
+          "latitude":s.latitude,
+          "longitude":s.longitude,
+          "huc12Name":s.huc12Name,
+          "huc6Name": s.huc6Name,
+          "cbseg2003": s.cbseg2003,
+          "cityCounty": s.cityCounty
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [s.longitude, s.latitude]
+        },
+        "id":s.id
+      }
+      locations.features.push(station);
+
+      console.log(s.project, s.id);
+    });
+  locs = locations
+  createMap()
+}
+
+const createMap = () => {
+  mapboxgl.accessToken = 'pk.eyJ1IjoibXlha2F2ZW5rYSIsImEiOiJjbDlxMDJrNmcwMmE2M3dxeDYyZWE0OWQ0In0.dKzXgJu-ZUH3epnFzxvllg';
+  map = new mapboxgl.Map({
+    container: "map",
+    style: 'mapbox://styles/mapbox/outdoors-v11',
+    center: [-76.4, 37.8],
+    zoom: 6.55
+  });
+  map.addControl(new mapboxgl.NavigationControl());
+  map.on("load", function() {
+  map.addSource("places", {
+      "type": "geojson",
+      "data": locs
+    });
+    updateStationsOnMap()
+  });
+}
+
+const updateStationsOnMap = () => {
+  map.getSource("places").setData(locs);
+  function setStation (e){
+    selectedStation = e.features[0].properties;
+  }
+  let color = '#ff11f3'
+  locs.features.forEach((f, index) => {
+    let project = f.properties['project'];
+    let layerID = 'poi-' + project;
+
+    if(project === 'DFLO'){
+      color = '#ff11f3'
+    }else if(project === 'CMON'){
+      color = '#c19e00'
+    }else if(project === 'MAIN'){
+      color = '#bf1f2f'
+    }else if(project === 'TRIB'){
+      color = '#ff9933'
+    }else if(project === 'CBIB'){
+      color = '#20c6b6'
+    }else {
+      color = '#9c51b6'
+    }
+    // Add a layer for this symbol type if it hasn't been added already.
+    if (!map.getLayer(layerID)) {
+      map.addLayer({
+        "id": layerID,
+        "type": 'circle',
+        "source": "places",
+        "paint": {
+          // 'circle-radius': 7,
+          'circle-color': color,
+          'circle-radius': [
+            'case',
+            ['boolean', ['feature-state', 'hover'], false],
+            22,
+            7
+          ],
+          'circle-stroke-color': 'white',
+          'circle-stroke-width': 1,
+          'circle-opacity': 0.5
+        },
+        "filter": ["==", "project", project]
+
+      });
+    }
+  })
+
+}
+
 
 const showMap = () => {
-  console.log("Shows map woot woot!");
   mapboxgl.accessToken = 'pk.eyJ1IjoibXlha2F2ZW5rYSIsImEiOiJjbDlxMDJrNmcwMmE2M3dxeDYyZWE0OWQ0In0.dKzXgJu-ZUH3epnFzxvllg';
-
 
   const map = new mapboxgl.Map({
     container: 'map',
@@ -100,56 +214,10 @@ const showMap = () => {
       'filter': ['==', '$type', 'Point']
     });
   })
-
-  // const map = new mapboxgl.Map({
-  //   container: 'map', // container ID
-  //   style: 'mapbox://styles/mapbox/streets-v11', // style URL
-  //   center: [-74.5, 40], // starting position [lng, lat]
-  //   zoom: 9, // starting zoom
-  //   projection: 'globe' // display the map as a 3D globe
-  // });
-  // const marker1 = new mapboxgl.Marker()
-  //   .setLngLat([12.554729, 55.70651])
-  //   .addTo(map);
-
-// Create a default Marker, colored black, rotated 45 degrees.
-//   const marker2 = new mapboxgl.Marker({ color: 'black', rotation: 45 })
-//     .setLngLat([-76.3230560000, 39.3030560000])
-//     .addTo(map);
-//    if (map != null) {
-//      console.log("map does exist...");
-
-     // map.on('style.load', () => {
-       // map.setFog({}); // Set the default atmosphere style
-       // map.addSource("usa", {
-       //   type: "geojson",
-       //   data:
-       //     "https://raw.githubusercontent.com/johan/world.geo.json/master/countries/USA.geo.json",
-       // });
-       // map.addLayer({
-       //   id: "usa-fill",
-       //   type: "fill",
-       //   source: "usa",
-       //   paint: {
-       //     "fill-color": "red",
-       //   },
-       // });
-   //     map.on("click", "usa-fill", function (e) {
-   //       new mapboxgl.Popup()
-   //         .setLngLat(e.lngLat)
-   //         .setHTML('Hello World.')
-   //         .addTo(map);
-   //     });
-   //
-   //
-   //   });
-   // } else {
-   //   console.log("map doesnt exist :(");
-   // }
 };
 
   onMounted( () => {
-    showMap();
+    getStations();
 })
 </script>
 

@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="q-pa-lg">
 
-    <q-card class="q-pa-lg" style="min-width: 1200px; min-height: 600px;">
+    <q-card class="q-pa-lg" style="min-width: 600px; min-height: 600px;">
       <MapBox/>
     </q-card>
 
