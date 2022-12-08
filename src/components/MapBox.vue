@@ -1,8 +1,10 @@
 <template>
+  <!-- MapBox GL JS instance -->
   <div id="map"/>
+  <!-- Toggle between data type by loading different source and layers -->
   <div class="data-type-widget">
     <q-card class="my-card">
-      <q-card-section >
+      <q-card-section>
         <p>Station Type</p>
 
         <q-option-group
@@ -13,34 +15,35 @@
       </q-card-section>
     </q-card>
   </div>
-      <div class="map-overlay">
-        <q-card class="my-card">
-          <q-card-section>
-          <q-list>
-              <p>Total Sampling Events</p>
+  <!-- Foo widget to show sampling events, not hooked up to reactive data -->
+  <div class="map-overlay">
+    <q-card class="my-card">
+      <q-card-section>
+        <q-list>
+          <p>Total Sampling Events</p>
 
-            <p>
-              <span class="dot-red"></span>
-              &#60; 10
-            </p>
-            <p>
+          <p>
+            <span class="dot-red"></span>
+            &#60; 10
+          </p>
+          <p>
 
-              <span class="dot-yellow"></span>
-              10 - 100
-            </p>
-            <p>
-                 <span class="dot-green"> </span>
-              &#62; 100
-            </p>
-          </q-list>
-          </q-card-section>
-        </q-card>
-    </div>
+            <span class="dot-yellow"></span>
+            10 - 100
+          </p>
+          <p>
+            <span class="dot-green"> </span>
+            &#62; 100
+          </p>
+        </q-list>
+      </q-card-section>
+    </q-card>
+  </div>
 
-<!--  toggle raster or vector map style. Check uncheck to show polygon data-->
+  <!-- toggle raster or vector map style. Check uncheck to show polygon data-->
   <div class="map-style">
     <q-card class="my-card">
-      <q-card-section >
+      <q-card-section>
         <q-option-group
           v-model="mapStyle"
           :options="mapStyleOptions"
@@ -48,7 +51,6 @@
         ></q-option-group>
 
         <q-checkbox v-model="showWatersheds"> Watersheds</q-checkbox>
-
       </q-card-section>
     </q-card>
   </div>
@@ -60,11 +62,19 @@ import {onMounted, reactive, ref, watch} from "vue";
 import stations from '/src/assets/stations.json'
 import stationsSecondSet from '/src/assets/station-richness-data.json'
 
+// *** Variables and constants ***
+
+// instance of MapBox GL JS
+let map = reactive({})
+
+// shows hides polygons that represent 50 states per foo geojson file
 let showWatersheds = ref(true);
+
+let isShowingPolygonPopUp = ref(false);
+
 // group of options to select to show map as aerial (raster) vs vector street map
 let mapStyle = ref('vector');
-
-let mapStyleOptions = ref([
+const mapStyleOptions = ref([
   {
     label: 'Street Map',
     value: 'vector'
@@ -77,8 +87,7 @@ let mapStyleOptions = ref([
 
 // group of options to select data type via radio toggle
 let stationTypeGroup = ref('benthic');
-
- let stationTypeOptions = ref([
+const stationTypeOptions = ref([
   {
     label: 'Benthic',
     value: 'benthic'
@@ -101,47 +110,43 @@ let locsBenthic = reactive({
   "features": []
 });
 
-let selectedStation = reactive({})
-let map = reactive({})
 
-let updateStation = (station) => {
-  selectedStation = station
-}
-
+// *** Watch properties ***
 watch(showWatersheds, () => {
-  if (showWatersheds.value) {
-    console.log('should be showing the polygon for Maine state');
-    addStatesPolygons();
-  } else {
-    console.log('should be hiding the polygon for Maine state');
-    removePolygons();
-  }
+  console.log('showWatersheds: ' + showWatersheds.value);
+  showHidePolygonStates();
 });
 
+// https://github.com/mapbox/mapbox-gl-js/issues/8660
+// https://github.com/mapbox/mapbox-gl-js/issues/2267
+// links above is for issues with layers and sources when toggling map styles
 watch(mapStyle, () => {
-  console.log("mapStyle.value " + mapStyle.value );
+  console.log('mapStyle.value " + mapStyle.value');
   if (mapStyle.value) {
     if (mapStyle.value === 'raster') {
       map.setStyle('mapbox://styles/mapbox/satellite-streets-v12');
     } else {
       map.setStyle('mapbox://styles/mapbox/streets-v12');
     }
-    // map.setStyle('mapbox://styles/mapbox/'
-    console.log("We selected different map style!");
   }
-  updateMarkersOnMap();
 });
 
+// toggle between data source to display, shown as data type toggle on the map
 watch(stationTypeGroup, () => {
-  console.log("stationTypeOptions.value " + stationTypeGroup.value );
+  console.log("stationTypeOptions.value " + stationTypeGroup.value);
   if (stationTypeGroup.value) {
-    updateMarkersOnMap("yoooooooooo test working!");
 
-    console.log("We selected data type!");
+    if (isShowingPolygonPopUp.value === true) {
+
+    }
+    removePopUps();
+    updateMarkersOnMap();
   }
 });
 
-// ==================== Funcs below, todo: get a template for this project
+
+//  *** Functions ***
+
 // used to populate static data from foo json files
 const getStations = () => {
   console.log(map);
@@ -227,25 +232,48 @@ const createMap = () => {
   map.addControl(new mapboxgl.NavigationControl());
 
   map.on('load', () => {
-    populateMap();
-    updateMarkersOnMap("yoooooooooo test working!");
+    addStatesPolygons();
+    updateMarkersOnMap();
   });
+  // map.on('styledata', () => {
+  //   console.log('A styledata event occurred.');
+  // });
+  // https://github.com/mapbox/mapbox-gl-js/issues/3979
+  // link above is a hack for updating layers once map style changes
+  map.on('style.load', () => {
+    console.log('A styledata event occurred.');
 
+    if (showWatersheds.value === true) {
+      // re-add polygons in case check box was still on
+      addStatesPolygons();
+    }
+    // re-add all the markers per whatever data type is selected
+    updateMarkersOnMap();
+  });
 };
 
-const populateMap = () => {
-  // Add a data source containing GeoJSON data.
-  // https://docs.mapbox.com/mapbox-gl-js/example/polygon-popup-on-click/
-  addStatesPolygons();
+const showHidePolygonStates = () => {
+  if (showWatersheds.value === true) {
+    console.log('should be showing the polygon for Maine state');
+    addStatesPolygons();
+    updateMarkersOnMap();
+  } else {
+    console.log('should be hiding the polygon for Maine state');
+    removePolygons();
+    removePopUps();
+  }
 };
+
+
+// removes the layers associated with geojsons states polygons and removes source after
 const removePolygons = () => {
   if (map.getSource("states")) {
     const layerForPolygon = 'states-layer';
-      const layerForPolygonOutline = 'outline';
+    const layerForPolygonOutline = 'states-layer-outline';
 
     if (map.getLayer(layerForPolygonOutline)) {
-        map.removeLayer(layerForPolygonOutline);
-      }
+      map.removeLayer(layerForPolygonOutline);
+    }
 
     if (map.getLayer(layerForPolygon)) {
       map.removeLayer(layerForPolygon);
@@ -254,137 +282,75 @@ const removePolygons = () => {
   }
 }
 
+// Add a data source containing GeoJSON data.
+// https://docs.mapbox.com/mapbox-gl-js/example/polygon-popup-on-click/
 const addStatesPolygons = () => {
-  // Add a source for the state polygons.
-  map.addSource('states', {
-    'type': 'geojson',
-    'data': 'https://docs.mapbox.com/mapbox-gl-js/assets/ne_110m_admin_1_states_provinces_shp.geojson'
-  });
 
-// Add a layer showing the state polygons.
-  map.addLayer({
-    'id': 'states-layer',
-    'type': 'fill',
-    'source': 'states',
-    'paint': {
-      'fill-color': 'rgba(200, 100, 240, 0.4)',
-      'fill-outline-color': 'rgba(200, 100, 240, 1)'
-    }
-  });
+  if (!map.getSource("states")) {
+    console.log('states exist already thats why we get an error!');
+
+    // Add a source for the state polygons.
+    map.addSource('states', {
+      'type': 'geojson',
+      'data': 'https://docs.mapbox.com/mapbox-gl-js/assets/ne_110m_admin_1_states_provinces_shp.geojson'
+    });
+
+// Add a clear layer showing that will be used for on click events
+    map.addLayer({
+      'id': 'states-layer',
+      'type': 'fill',
+      'source': 'states',
+      'paint': {
+        'fill-color': 'rgba(0, 0, 0, 0.0)',
+        // 'fill-outline-color': 'rgba(200, 100, 240, 1)',
+      }
+    });
+// Add an outline layer that will be visible and will outline geojson states polygons
+    map.addLayer({
+      'id': 'states-layer-outline',
+      'type': 'line',
+      'source': 'states',
+      'paint': {
+        'line-color': 'rgba(200, 100, 0, 0.9)',
+        'line-width': 3,
+      }
+    });
 
 // When a click event occurs on a feature in the states layer,
 // open a popup at the location of the click, with description
 // HTML from the click event's properties.
-  map.on('click', 'states-layer', (e) => {
-    new mapboxgl.Popup()
-      .setLngLat(e.lngLat)
-      .setHTML(e.features[0].properties.name)
-      .addTo(map);
-  });
+    map.on('click', 'states-layer', (e) => {
+      removePopUps();
+      new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(e.features[0].properties.name)
+        .addTo(map);
+
+      // flag used to persist this pop up if data type changes as those pop ups need to be removed.
+      isShowingPolygonPopUp.value = true;
+    });
 
 // Change the cursor to a pointer when
 // the mouse is over the states layer.
-  map.on('mouseenter', 'states-layer', () => {
-    map.getCanvas().style.cursor = 'pointer';
-  });
+    map.on('mouseenter', 'states-layer', () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
 
 // Change the cursor back to a pointer
 // when it leaves the states layer.
-  map.on('mouseleave', 'states-layer', () => {
-    map.getCanvas().style.cursor = '';
-  });
-};
+    map.on('mouseleave', 'states-layer', () => {
+      map.getCanvas().style.cursor = '';
+    });
+  }
+}
 
-// const addPolygons = () => {
-//   map.addSource('maine', {
-//     'type': 'geojson',
-//     'data': {
-//       'type': 'Feature',
-//       'geometry': {
-//         'type': 'Polygon',
-// // These coordinates outline Maine.
-//         'coordinates': [
-//           [
-//             [-67.13734, 45.13745],
-//             [-66.96466, 44.8097],
-//             [-68.03252, 44.3252],
-//             [-69.06, 43.98],
-//             [-70.11617, 43.68405],
-//             [-70.64573, 43.09008],
-//             [-70.75102, 43.08003],
-//             [-70.79761, 43.21973],
-//             [-70.98176, 43.36789],
-//             [-70.94416, 43.46633],
-//             [-71.08482, 45.30524],
-//             [-70.66002, 45.46022],
-//             [-70.30495, 45.91479],
-//             [-70.00014, 46.69317],
-//             [-69.23708, 47.44777],
-//             [-68.90478, 47.18479],
-//             [-68.2343, 47.35462],
-//             [-67.79035, 47.06624],
-//             [-67.79141, 45.70258],
-//             [-67.13734, 45.13745]
-//           ]
-//         ]
-//       }
-//     }
-//   });
-//
-// // Add a new layer to visualize the polygon.
-//   map.addLayer({
-//     'id': 'maine',
-//     'type': 'fill',
-//     'source': 'maine', // reference the data source
-//     'layout': {},
-//     'paint': {
-//       'fill-color': '#0080ff', // blue color fill
-//       'fill-opacity': 0.5
-//     }
-//   });
-// // Add a black outline around the polygon.
-//   map.addLayer({
-//     'id': 'outline',
-//     'type': 'line',
-//     'source': 'maine',
-//     'layout': {},
-//     'paint': {
-//       'line-color': '#000',
-//       'line-width': 3
-//     }
-//   });
-//
-//   map.on('click', 'maine', (e) => {
-//     const features = map.queryRenderedFeatures(e.point, {
-//       layers: ['maine'] // replace with your layer name
-//     });
-//     if (!features.length) {
-//       return;
-//     }
-//     const feature = features[0];
-//     console.log("here is that feature!")
-//     console.log(feature)
-//     const popup = new mapboxgl.Popup({offset: [0, -15]})
-//       .setLngLat(feature.geometry.coordinates[0])
-//       .setHTML(
-//         `<h3> Test </h3>
-//              <p>Maine state polygon demo</p>`
-//       )
-//       .addTo(map);
-//   });
-//
-//   map.on('mouseenter', 'maine', function () {
-//     map.getCanvas().style.cursor = 'pointer';
-//   });
-//   map.on('mouseleave', 'maine', function () {
-//     map.getCanvas().style.cursor = '';
-//   });
-// };
 
 // checks per data type id and then loops over the data to find and remove each layer prior to removing the source
 // used to clear out map on toggle of data source
 const removeLayerAndSources = () => {
   if (map.getSource("water")) {
+    console.log("remove water layer");
+
     locs.features.forEach((f) => {
       let project = f.properties['project'];
       let layerID = 'poi-' + project;
@@ -396,6 +362,8 @@ const removeLayerAndSources = () => {
   }
 
   if (map.getSource("benthic")) {
+    console.log("remove benthic layer");
+
     locsBenthic.features.forEach((f) => {
       let project = f.properties['project'];
       let layerID = 'poi-' + project;
@@ -412,6 +380,7 @@ const updateMarkersOnMap = () => {
   removeLayerAndSources();
 
   if (stationTypeGroup.value === 'water') {
+    console.log('updateMarkersOnMap for water');
     map.addSource("water", {
       "type": "geojson",
       "data": locs
@@ -458,45 +427,41 @@ const updateMarkersOnMap = () => {
           },
           "filter": ["==", "project", project]
         });
+
+        // setup on click event to show appropriate pop up
+        map.on('click', layerID, (e) => {
+          const features = map.queryRenderedFeatures(e.point, {
+            layers: [layerID] // replace with your layer name
+          });
+          if (!features.length) {
+            return;
+          }
+          const feature = features[0];
+          // remove pop up before adding new one
+          removePopUps();
+
+          const popup = new mapboxgl.Popup({offset: [0, -15]})
+            .setLngLat(feature.geometry.coordinates)
+            .setHTML(
+              `<h3> Station </h3>
+             <p>${feature.properties.code} - ${feature.properties.name}</p>`
+            );
+
+          popup.addTo(map);
+          setupMouseEventListeners(layerID);
+        });
       }
 
-      map.on('click', layerID, (e) => {
-        const features = map.queryRenderedFeatures(e.point, {
-          layers: [layerID] // replace with your layer name
-        });
-        if (!features.length) {
-          return;
-        }
-        const feature = features[0];
-        console.log("here is that feature!")
-        console.log(feature)
-        const popup = new mapboxgl.Popup({offset: [0, -15]})
-          .setLngLat(feature.geometry.coordinates)
-          .setHTML(
-            `<h3> Station </h3>
-             <p>${feature.properties.code} - ${feature.properties.name}</p>`
-          )
-          .addTo(map);
-      });
-
-      map.on('mouseenter', layerID, function () {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', layerID, function () {
-        map.getCanvas().style.cursor = '';
-      });
     })
   } else { // here show benthic foo static data from a station-richness-data json
+    console.log('updateMarkersOnMap for benthic');
     map.addSource("benthic", {
       "type": "geojson",
       "data": locsBenthic
     });
-
     map.getSource("benthic").setData(locsBenthic);
-    const setStation = () => {
-      selectedStation = e.features[0].properties;
-    }
-    let  color = '#20c'
+
+    let color = '#20c'
 
     locsBenthic.features.forEach((f, index) => {
       let project = f.properties['project'];
@@ -504,8 +469,6 @@ const updateMarkersOnMap = () => {
 
       // Add a layer for this symbol type if it hasn't been added already.
       if (!map.getLayer(layerID)) {
-        console.log("adding layer with id here");
-        console.log(layerID);
         map.addLayer({
           "id": layerID,
           "type": 'circle',
@@ -524,41 +487,50 @@ const updateMarkersOnMap = () => {
             'circle-opacity': 0.5
           },
           "filter": ["==", "project", project]
+        });
 
+        // setup on click event to show appropriate pop up
+        map.on('click', layerID, (e) => {
+          const features = map.queryRenderedFeatures(e.point, {
+            layers: [layerID] // replace with your layer name
+          });
+
+          if (!features.length) {
+            return;
+          }
+
+          const feature = features[0];
+          // remove pop up before adding new one
+          removePopUps();
+
+          const popup = new mapboxgl.Popup({offset: [0, -15]})
+            .setLngLat(feature.geometry.coordinates)
+            .setHTML(`<h3> Station </h3><p> test it out </p>`);
+
+          popup.addTo(map);
+          setupMouseEventListeners(layerID);
         });
       }
-
-      map.on('click', layerID, (e) => {
-        console.log(`A click event has occurred on a visible portion of the poi-label layer at ${e.lngLat}`);
-        const features = map.queryRenderedFeatures(e.point, {
-          layers: [layerID] // replace with your layer name
-        });
-        if (!features.length) {
-          return;
-        }
-        const feature = features[0];
-        console.log("here is that feature!")
-        console.log(feature)
-        const popup = new mapboxgl.Popup({offset: [0, -15]})
-          .setLngLat(feature.geometry.coordinates)
-          .setHTML(
-            `<h3> Station </h3>
-             <p>${feature.properties.code} - ${feature.properties.name}</p>`
-          )
-          .addTo(map);
-      });
-
-      map.on('mouseenter', layerID, function () {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', layerID, function () {
-        map.getCanvas().style.cursor = '';
-      });
-    })
+    });
   }
-
 };
 
+const setupMouseEventListeners = (layerID) => {
+  map.on('mouseenter', layerID, function () {
+    map.getCanvas().style.cursor = 'pointer';
+  });
+  map.on('mouseleave', layerID, function () {
+    map.getCanvas().style.cursor = '';
+  });
+};
+
+const removePopUps = () => {
+  const popups = document.getElementsByClassName("mapboxgl-popup");
+  console.log('TODO: manage to keep polygons layer pop up on data type toggle, only data type pop ups should be removed on that toggle');
+  if (popups.length) {
+    popups[0].remove();
+  }
+};
 
 onMounted(() => {
   getStations();
@@ -596,6 +568,7 @@ onMounted(() => {
 #map {
   height: 70vh;
 }
+
 .dot-green {
   height: 15px;
   width: 15px;
@@ -604,6 +577,7 @@ onMounted(() => {
   display: inline-block;
   vertical-align: middle;
 }
+
 .dot-red {
   height: 15px;
   width: 15px;
@@ -612,6 +586,7 @@ onMounted(() => {
   display: inline-block;
   vertical-align: middle;
 }
+
 .dot-yellow {
   height: 15px;
   width: 15px;
