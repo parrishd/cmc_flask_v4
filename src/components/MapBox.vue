@@ -62,7 +62,7 @@ import {onMounted, reactive, ref, watch} from "vue";
 import stations from '/src/assets/stations.json'
 import stationsSecondSet from '/src/assets/station-richness-data.json'
 
-// *** Variables and constants ***
+// *** Variables an+d constants ***
 
 // instance of MapBox GL JS
 let map = reactive({})
@@ -70,6 +70,7 @@ let map = reactive({})
 // shows hides polygons that represent 50 states per foo geojson file
 let showWatersheds = ref(true);
 
+// used to persist the polygons layer pop up in case we toggle data type
 let isShowingPolygonPopUp = ref(false);
 
 // group of options to select to show map as aerial (raster) vs vector street map
@@ -136,10 +137,11 @@ watch(stationTypeGroup, () => {
   console.log("stationTypeOptions.value " + stationTypeGroup.value);
   if (stationTypeGroup.value) {
 
-    if (isShowingPolygonPopUp.value === true) {
-
+    // on data type toggle only remove if popup is for station type layers
+    // otherwise if its polygons, the popup is tracked with isShowingPolygonPopUp to not remove it
+    if (isShowingPolygonPopUp.value === false) {
+      removePopUps();
     }
-    removePopUps();
     updateMarkersOnMap();
   }
 });
@@ -254,11 +256,11 @@ const createMap = () => {
 
 const showHidePolygonStates = () => {
   if (showWatersheds.value === true) {
-    console.log('should be showing the polygon for Maine state');
+    console.log('should be showing the polygons for states');
     addStatesPolygons();
     updateMarkersOnMap();
   } else {
-    console.log('should be hiding the polygon for Maine state');
+    console.log('should be hiding the polygons');
     removePolygons();
     removePopUps();
   }
@@ -321,13 +323,16 @@ const addStatesPolygons = () => {
 // HTML from the click event's properties.
     map.on('click', 'states-layer', (e) => {
       removePopUps();
-      new mapboxgl.Popup()
+     const popup =  new mapboxgl.Popup()
         .setLngLat(e.lngLat)
         .setHTML(e.features[0].properties.name)
         .addTo(map);
 
       // flag used to persist this pop up if data type changes as those pop ups need to be removed.
       isShowingPolygonPopUp.value = true;
+      popup.on('close', (e) => {
+        isShowingPolygonPopUp.value = false
+      })
     });
 
 // Change the cursor to a pointer when
@@ -440,12 +445,38 @@ const updateMarkersOnMap = () => {
           // remove pop up before adding new one
           removePopUps();
 
+          // const popup = new mapboxgl.Popup({offset: [0, -15]})
+          //   .setLngLat(feature.geometry.coordinates)
+          //   .setHTML(
+          //     `<h3> Station </h3>
+          //    <p>${feature.properties.code} - ${feature.properties.name}</p>`
+          //   );
+
           const popup = new mapboxgl.Popup({offset: [0, -15]})
             .setLngLat(feature.geometry.coordinates)
             .setHTML(
-              `<h3> Station </h3>
-             <p>${feature.properties.code} - ${feature.properties.name}</p>`
+              `<div>
+                <p>${feature.properties.code} - ${feature.properties.name}</p>
+                <button id='button-id'>View Details</button>
+               </div>`
             );
+          setTimeout(() => (
+            document.getElementById('button-id').addEventListener('click', testFoo)),
+            50
+          );
+
+          // check if i can creat a pop up component with 1-btn in it, is there a way to get components raw html.
+
+          // const popup = new mapboxgl.Popup({offset: [0, -15]})
+          //   .setLngLat(feature.geometry.coordinates)
+          //   .setHTML(
+          //     `<div>
+          //       <p>Some Text</p>
+          //       <q-btn  @click="alert('hello world')" >Button Title</q-btn>
+          //      </div>`
+          //   );
+
+
 
           popup.addTo(map);
           setupMouseEventListeners(layerID);
@@ -513,6 +544,10 @@ const updateMarkersOnMap = () => {
       }
     });
   }
+};
+
+const testFoo = () => {
+  console.log('it works!!! hahahaha')
 };
 
 const setupMouseEventListeners = (layerID) => {
