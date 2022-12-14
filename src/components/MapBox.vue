@@ -62,11 +62,12 @@ import {onMounted, reactive, ref, watch} from "vue";
 import stations from '/src/assets/stations.json'
 import stationsSecondSet from '/src/assets/station-richness-data.json'
 
-// *** Variables an+d constants ***
+// *** Variables and constants ***
 
 // instance of MapBox GL JS
 let map = reactive({})
 
+let isPolygonsClickEventSet = ref(false);
 // shows hides polygons that represent 50 states per foo geojson file
 let showWatersheds = ref(true);
 
@@ -99,6 +100,10 @@ const stationTypeOptions = ref([
   }
 ]);
 
+let waterLayerIdsMap = new Map();
+let benthicLayerIdsMap = new Map();
+
+
 // locs static foo data for demo on markers
 let locs = reactive({
   "type": "FeatureCollection",
@@ -115,7 +120,7 @@ let locsBenthic = reactive({
 // *** Watch properties ***
 watch(showWatersheds, () => {
   console.log('showWatersheds: ' + showWatersheds.value);
-  showHidePolygonStates();
+  togglePolygons();
 });
 
 // https://github.com/mapbox/mapbox-gl-js/issues/8660
@@ -140,7 +145,12 @@ watch(stationTypeGroup, () => {
     // on data type toggle only remove if popup is for station type layers
     // otherwise if its polygons, the popup is tracked with isShowingPolygonPopUp to not remove it
     if (isShowingPolygonPopUp.value === false) {
+      console.log('why not here?');
       removePopUps();
+    } else {
+      console.log('Strange');
+      console.log(isShowingPolygonPopUp.value);
+
     }
     updateMarkersOnMap();
   }
@@ -254,7 +264,7 @@ const createMap = () => {
   });
 };
 
-const showHidePolygonStates = () => {
+const togglePolygons = () => {
   if (showWatersheds.value === true) {
     console.log('should be showing the polygons for states');
     addStatesPolygons();
@@ -274,13 +284,20 @@ const removePolygons = () => {
     const layerForPolygonOutline = 'states-layer-outline';
 
     if (map.getLayer(layerForPolygonOutline)) {
+      console.log('removing layer for layerForPolygonOutline');
       map.removeLayer(layerForPolygonOutline);
     }
 
     if (map.getLayer(layerForPolygon)) {
+      console.log('removing layer for layerForPolygon')
+      // map.off('click', 'states-layer', onClickPolygon);
+      // map.off('mouseenter', 'states-layer')
+      // map.off('mouseleave', 'states-layer')
       map.removeLayer(layerForPolygon);
     }
-    map.removeSource('states');  // remove
+
+    // finally remove the source after removing layers and callbacks
+    map.removeSource('states');
   }
 }
 
@@ -290,7 +307,6 @@ const addStatesPolygons = () => {
 
   if (!map.getSource("states")) {
     console.log('states exist already thats why we get an error!');
-
     // Add a source for the state polygons.
     map.addSource('states', {
       'type': 'geojson',
@@ -318,37 +334,68 @@ const addStatesPolygons = () => {
       }
     });
 
-// When a click event occurs on a feature in the states layer,
-// open a popup at the location of the click, with description
-// HTML from the click event's properties.
-    map.on('click', 'states-layer', (e) => {
-      removePopUps();
-     const popup =  new mapboxgl.Popup()
-        .setLngLat(e.lngLat)
-        .setHTML(e.features[0].properties.name)
-        .addTo(map);
+    if (isPolygonsClickEventSet.value === false) {
+      isPolygonsClickEventSet.value = true;
+      // When a click event occurs on a feature in the states layer,
+      // open a popup at the location of the click, with description
+      // HTML from the click event's properties.
+      map.on('mouseenter', 'states-layer', onMouseEnterEvent);
+      map.on('mouseleave', 'states-layer', onMouseLeaveEvent);
+      map.on('click', 'states-layer', (e) => {
+        console.log('On click polygon event');
+        removePopUps();
+        const popup = new mapboxgl.Popup()
+          .setLngLat(e.lngLat)
+          .setHTML(e.features[0].properties.name)
+          .addTo(map);
 
-      // flag used to persist this pop up if data type changes as those pop ups need to be removed.
-      isShowingPolygonPopUp.value = true;
-      popup.on('close', (e) => {
-        isShowingPolygonPopUp.value = false
-      })
-    });
+        // flag used to persist this pop up if data type changes as those pop ups need to be removed.
+        isShowingPolygonPopUp.value = true;
+        popup.on('close', () => {
+          console.log("Why tho here? we set it false on close..");
+          isShowingPolygonPopUp.value = false
+        })
+      });
+    }
 
-// Change the cursor to a pointer when
-// the mouse is over the states layer.
-    map.on('mouseenter', 'states-layer', () => {
-      map.getCanvas().style.cursor = 'pointer';
-    });
+    // map.on('click', 'states-layer', onClickPolygon)
 
-// Change the cursor back to a pointer
-// when it leaves the states layer.
-    map.on('mouseleave', 'states-layer', () => {
-      map.getCanvas().style.cursor = '';
-    });
   }
 }
 
+// Change the cursor to a pointer when
+// the mouse is over the layer.
+const onMouseEnterEvent = () => {
+  map.getCanvas().style.cursor = 'pointer';
+}
+
+// Change the cursor back to a pointer
+// when it leaves the layer.
+const onMouseLeaveEvent = () => {
+  map.getCanvas().style.cursor = '';
+}
+
+// When a click event occurs on a feature in the states layer,
+// open a popup at the location of the click, with description
+// HTML from the click event's properties.
+// const onClickPolygon = (e) => {
+//   console.log(e)
+//   console.log('On click polygon event');
+//
+//   removePopUps();
+//   const popup = new mapboxgl.Popup()
+//     .setLngLat(e.lngLat)
+//     .setHTML(e.features[0].properties.name)
+//     .addTo(map);
+//
+//   // flag used to persist this pop up if data type changes as those pop ups need to be removed.
+//   console.log("Why tho here?");
+//   isShowingPolygonPopUp.value = true;
+//   popup.on('close', () => {
+//     isShowingPolygonPopUp.value = false
+//   })
+//   console.log("yoyoyoy testing foo");
+// }
 
 // checks per data type id and then loops over the data to find and remove each layer prior to removing the source
 // used to clear out map on toggle of data source
@@ -380,61 +427,121 @@ const removeLayerAndSources = () => {
   }
 };
 
-const updateMarkersOnMap = () => {
-  console.log('updateMarkersOnMap');
-  removeLayerAndSources();
+const onClickWaterLayer = (e) => {
+  // // map.on('click', layerID, (e) => {
+  // console.log("1 Click on layer. ");
+  //
+  // // const features = map.queryRenderedFeatures(e.point, {
+  // //   layers: [layerID] // replace with your layer name
+  // // });
+  // // if (!features.length) {
+  // //   return;
+  // // }
+  // // const feature = features[0];
+  // // remove pop up before adding new one
+  // removePopUps();
+  //
+  // // const popup = new mapboxgl.Popup({offset: [0, -15]})
+  // //   .setLngLat(feature.geometry.coordinates)
+  // //   .setHTML(
+  // //     `<h3> Station </h3>
+  // //    <p>${feature.properties.code} - ${feature.properties.name}</p>`
+  // //   );
+  // if (e.features[0].length) {
+  //   console.log('here features length : ' + e.features[0].length)
+  //   const popup = new mapboxgl.Popup()
+  //     .setLngLat(e.lngLat)
+  //     .setHTML(
+  //       `<div>
+  //               <p>${e.features[0].properties.code} - ${e.features[0].properties.name}</p>
+  //               <button id='button-id'>View Details</button>
+  //              </div>`
+  //     );
+  //   setTimeout(() => (
+  //       document.getElementById('button-id').addEventListener('click', testFoo)),
+  //     50
+  //   );
+  //   popup.addTo(map);
+  //
+  // } else {
+  //   console.log('boooooooo');
+  // }
+  // // todo: check if i can create a pop up component with 1-btn in it, is there a way to get components raw html.
+  //
+  // // const popup = new mapboxgl.Popup({offset: [0, -15]})
+  // //   .setLngLat(feature.geometry.coordinates)
+  // //   .setHTML(
+  // //     `<div>
+  // //       <p>Some Text</p>
+  // //       <q-btn  @click="alert('hello world')" >Button Title</q-btn>
+  // //      </div>`
+  // //   );
+  //
+  //
+  // // popup.addTo(map);
+  // // setupMouseEventListeners(layerID);
+  // // });
+}
 
-  if (stationTypeGroup.value === 'water') {
-    console.log('updateMarkersOnMap for water');
-    map.addSource("water", {
-      "type": "geojson",
-      "data": locs
-    });
+const setupWaterData = (e) => {
+  console.log('updateMarkersOnMap for water');
+  map.addSource("water", {
+    "type": "geojson",
+    "data": locs
+  });
 
-    map.getSource("water").setData(locs);
+  map.getSource("water").setData(locs);
 
-    let color = '#ff11f3'
-    locs.features.forEach((f, index) => {
-      let project = f.properties['project'];
-      let layerID = 'poi-' + project;
+  let color = '#ff11f3'
+  locs.features.forEach((f, index) => {
 
-      if (project === 'DFLO') {
-        color = '#ff11f3'
-      } else if (project === 'CMON') {
-        color = '#c19e00'
-      } else if (project === 'MAIN') {
-        color = '#bf1f2f'
-      } else if (project === 'TRIB') {
-        color = '#ff9933'
-      } else if (project === 'CBIB') {
-        color = '#20c6b6'
-      } else {
-        color = '#9c51b6'
-      }
-      // Add a layer for this symbol type if it hasn't been added already.
-      if (!map.getLayer(layerID)) {
-        map.addLayer({
-          "id": layerID,
-          "type": 'circle',
-          "source": "water",
-          "paint": {
-            // 'circle-radius': 7,
-            'circle-color': color,
-            'circle-radius': [
-              'case',
-              ['boolean', ['feature-state', 'hover'], false],
-              22,
-              7
-            ],
-            'circle-stroke-color': 'white',
-            'circle-stroke-width': 1,
-            'circle-opacity': 0.5
-          },
-          "filter": ["==", "project", project]
-        });
+    let project = f.properties['project'];
+    let layerID = 'poi-' + project;
+
+    if (project === 'DFLO') {
+      color = '#ff11f3'
+    } else if (project === 'CMON') {
+      color = '#c19e00'
+    } else if (project === 'MAIN') {
+      color = '#bf1f2f'
+    } else if (project === 'TRIB') {
+      color = '#ff9933'
+    } else if (project === 'CBIB') {
+      color = '#20c6b6'
+    } else {
+      color = '#9c51b6'
+    }
+    // Add a layer for this symbol type if it hasn't been added already.
+    if (!map.getLayer(layerID)) {
+      map.addLayer({
+        "id": layerID,
+        "type": 'circle',
+        "source": "water",
+        "paint": {
+          // 'circle-radius': 7,
+          'circle-color': color,
+          'circle-radius': [
+            'case',
+            ['boolean', ['feature-state', 'hover'], false],
+            22,
+            7
+          ],
+          'circle-stroke-color': 'white',
+          'circle-stroke-width': 1,
+          'circle-opacity': 0.5
+        },
+        "filter": ["==", "project", project]
+      });
+
+      // using a dictionary to keep track of layers with click events already attached
+      if (!waterLayerIdsMap.has(layerID)) {
+        console.log("Should only add once for this layer: " + layerID);
+        waterLayerIdsMap.set(layerID, true)
 
         // setup on click event to show appropriate pop up
         map.on('click', layerID, (e) => {
+          console.log("1 Click on layer: " + layerID);
+
           const features = map.queryRenderedFeatures(e.point, {
             layers: [layerID] // replace with your layer name
           });
@@ -445,15 +552,8 @@ const updateMarkersOnMap = () => {
           // remove pop up before adding new one
           removePopUps();
 
-          // const popup = new mapboxgl.Popup({offset: [0, -15]})
-          //   .setLngLat(feature.geometry.coordinates)
-          //   .setHTML(
-          //     `<h3> Station </h3>
-          //    <p>${feature.properties.code} - ${feature.properties.name}</p>`
-          //   );
-
-          const popup = new mapboxgl.Popup({offset: [0, -15]})
-            .setLngLat(feature.geometry.coordinates)
+          const popup = new mapboxgl.Popup({offset: [0, -10]})
+            .setLngLat(e.lngLat)
             .setHTML(
               `<div>
                 <p>${feature.properties.code} - ${feature.properties.name}</p>
@@ -461,67 +561,63 @@ const updateMarkersOnMap = () => {
                </div>`
             );
           setTimeout(() => (
-            document.getElementById('button-id').addEventListener('click', testFoo)),
+              document.getElementById('button-id').addEventListener('click', testFoo)),
             50
           );
 
-          // check if i can creat a pop up component with 1-btn in it, is there a way to get components raw html.
-
-          // const popup = new mapboxgl.Popup({offset: [0, -15]})
-          //   .setLngLat(feature.geometry.coordinates)
-          //   .setHTML(
-          //     `<div>
-          //       <p>Some Text</p>
-          //       <q-btn  @click="alert('hello world')" >Button Title</q-btn>
-          //      </div>`
-          //   );
-
-
-
+          // todo: check if i can create a pop up component with 1-btn in it, is there a way to get components raw html.
           popup.addTo(map);
           setupMouseEventListeners(layerID);
         });
       }
+    }
+  });
+}
 
-    })
-  } else { // here show benthic foo static data from a station-richness-data json
-    console.log('updateMarkersOnMap for benthic');
-    map.addSource("benthic", {
-      "type": "geojson",
-      "data": locsBenthic
-    });
-    map.getSource("benthic").setData(locsBenthic);
+const setupBenthicData = () => {
+  console.log('updateMarkersOnMap for benthic');
+  map.addSource("benthic", {
+    "type": "geojson",
+    "data": locsBenthic
+  });
+  map.getSource("benthic").setData(locsBenthic);
 
-    let color = '#20c'
+  let color = '#20c'
 
-    locsBenthic.features.forEach((f, index) => {
-      let project = f.properties['project'];
-      let layerID = 'poi-' + project;
+  locsBenthic.features.forEach((f, index) => {
+    let project = f.properties['project'];
+    let layerID = 'poi-' + project;
 
-      // Add a layer for this symbol type if it hasn't been added already.
-      if (!map.getLayer(layerID)) {
-        map.addLayer({
-          "id": layerID,
-          "type": 'circle',
-          "source": "benthic",
-          "paint": {
-            // 'circle-radius': 7,
-            'circle-color': color,
-            'circle-radius': [
-              'case',
-              ['boolean', ['feature-state', 'hover'], false],
-              22,
-              7
-            ],
-            'circle-stroke-color': 'white',
-            'circle-stroke-width': 1,
-            'circle-opacity': 0.5
-          },
-          "filter": ["==", "project", project]
-        });
+    // Add a layer for this symbol type if it hasn't been added already.
+    if (!map.getLayer(layerID)) {
+      map.addLayer({
+        "id": layerID,
+        "type": 'circle',
+        "source": "benthic",
+        "paint": {
+          // 'circle-radius': 7,
+          'circle-color': color,
+          'circle-radius': [
+            'case',
+            ['boolean', ['feature-state', 'hover'], false],
+            22,
+            7
+          ],
+          'circle-stroke-color': 'white',
+          'circle-stroke-width': 1,
+          'circle-opacity': 0.5
+        },
+        "filter": ["==", "project", project]
+      });
+
+      // using a dictionary to keep track of layers with click events already attached
+      if (!benthicLayerIdsMap.has(layerID)) {
+        console.log("benthicLayerIdsMap should only add once for this layer: " + layerID);
+        benthicLayerIdsMap.set(layerID, true)
 
         // setup on click event to show appropriate pop up
         map.on('click', layerID, (e) => {
+          console.log("2 Click on layer : " + layerID);
           const features = map.queryRenderedFeatures(e.point, {
             layers: [layerID] // replace with your layer name
           });
@@ -542,12 +638,23 @@ const updateMarkersOnMap = () => {
           setupMouseEventListeners(layerID);
         });
       }
-    });
+    }
+  });
+}
+
+const updateMarkersOnMap = () => {
+  console.log('updateMarkersOnMap');
+  removeLayerAndSources();
+
+  if (stationTypeGroup.value === 'water') {
+    setupWaterData()
+  } else { // here show benthic foo static data from a station-richness-data json
+    setupBenthicData();
   }
 };
 
 const testFoo = () => {
-  console.log('it works!!! hahahaha')
+  console.log('testFoo clicked!')
 };
 
 const setupMouseEventListeners = (layerID) => {
@@ -560,8 +667,9 @@ const setupMouseEventListeners = (layerID) => {
 };
 
 const removePopUps = () => {
+  console.log('removePopUps');
+
   const popups = document.getElementsByClassName("mapboxgl-popup");
-  console.log('TODO: manage to keep polygons layer pop up on data type toggle, only data type pop ups should be removed on that toggle');
   if (popups.length) {
     popups[0].remove();
   }
