@@ -1,0 +1,170 @@
+Code,Name,Condition_Is_Categorical,Category
+DOO,Define Other Organism,false,NULL
+CT.1,Collection Time (Net 1),true,20
+CT.1,Collection Time (Net 1),true,21-89
+CT.1,Collection Time (Net 1),true,90
+CT.2,Collection Time (Net 2),true,20
+CT.2,Collection Time (Net 2),true,21-89
+CT.2,Collection Time (Net 2),true,90
+CT.3,Collection Time (Net 3),true,20
+CT.3,Collection Time (Net 3),true,21-89
+CT.3,Collection Time (Net 3),true,90
+CT.4,Collection Time (Net 4),true,20
+CT.4,Collection Time (Net 4),true,21-89
+CT.4,Collection Time (Net 4),true,90
+V,Vegetated,false,NULL
+SL,Snags/Logs,false,NULL
+AVDM,Aquatic Veg/Decaying Matter,false,NULL
+SSG,Silt/Sand/Gravel,false,NULL
+VJ,Vegetated Jabs,false,NULL
+SLJ,Snags/Logs Jabs,false,NULL
+AVDMJ,Aquatic Veg/Decaying Matter Jabs,false,NULL
+SSGJ,Silt/Sand/Gravel Jabs,false,NULL
+SF,Stream Flow,true,Negligible
+SF,Stream Flow,true,Low
+SF,Stream Flow,true,Normal
+SF,Stream Flow,true,High
+WC,Weather Conditions,true,Sunny
+WC,Weather Conditions,true,Partly Cloudy
+WC,Weather Conditions,true,Overcast
+WC,Weather Conditions,true,Fog/Haze
+W72,Weather Last 72 Hours,false,NULL
+FWQI,Fish Water Quality Indicators,true,No Fish
+FWQI,Fish Water Quality Indicators,true,Scattered Individuals
+FWQI,Fish Water Quality Indicators,true,Scattered Schools
+FWQI,Fish Water Quality Indicators,true,Trout
+FWQI,Fish Water Quality Indicators,true,Bass
+FWQI,Fish Water Quality Indicators,true,Catfish
+FWQI,Fish Water Quality Indicators,true,Carp
+BFM,Barriers To Fish Movement,true,No Barriers
+BFM,Barriers To Fish Movement,true,Beaver Dams
+BFM,Barriers To Fish Movement,true,Man-made Dams
+BFM,Barriers To Fish Movement,true,Waterfalls
+SWA,Surface Water Appearance,true,Clear
+SWA,Surface Water Appearance,true,Clear But Tea-Colored
+SWA,Surface Water Appearance,true,Colored Sheen
+SWA,Surface Water Appearance,true,Foamy
+SWA,Surface Water Appearance,true,Milky
+SWA,Surface Water Appearance,true,Muddy
+SWA,Surface Water Appearance,true,Black
+SWA,Surface Water Appearance,true,Gray
+SWA,Surface Water Appearance,true,Other
+SBD,Stream Bed Deposit,true,Gray
+SBD,Stream Bed Deposit,true,Orange Red
+SBD,Stream Bed Deposit,true,Yellow
+SBD,Stream Bed Deposit,true,Black
+SBD,Stream Bed Deposit,true,Brown
+SBD,Stream Bed Deposit,true,Silt
+SBD,Stream Bed Deposit,true,Sand
+SBD,Stream Bed Deposit,true,Other
+O,Odor,true,No Odor
+O,Odor,true,Musky
+O,Odor,true,Oil
+O,Odor,true,Sewage
+O,Odor,true,Other
+SOS,Stability of Stream,true,No Spots
+SOS,Stability of Stream,true,A Few Spots
+SOS,Stability of Stream,true,Many Spots
+AC,Algae Color,true,Light Green
+AC,Algae Color,true,Dark Green
+AC,Algae Color,true,Brown Coated
+AC,Algae Color,true,Matted on Streambed
+AC,Algae Color,true,Hairy
+AC,Algae Color,true,No Algae
+AL,Algae Located,true,No Algae
+AL,Algae Located,true,In Spots
+AL,Algae Located,true,Everywhere
+PA,Percent Algae,false,NULL
+SCS,Stream Channel Shade,true,Full
+SCS,Stream Channel Shade,true,High
+SCS,Stream Channel Shade,true,Moderate
+SCS,Stream Channel Shade,true,Slight
+SCS,Stream Channel Shade,true,None
+PT,Percent Trees,false,NULL
+PS,Percent Shrubs,false,NULL
+PG,Percent Grass,false,NULL
+PBS,Percent Bare Soil,false,NULL
+PR,Percent Rocks,false,NULL
+PO,Percent Other,false,NULL
+DOBC,Define Other Bank Composition,false,NULL
+PSLT,Percent Silt,false,NULL
+PSND,Percent Sand,false,NULL
+PGRVL,Percent Gravel,false,NULL
+PC,Percent Cobbles,false,NULL
+PB,Percent Boulders,false,NULL
+OGD,Oil and Gas Drilling,true,High
+OGD,Oil and Gas Drilling,true,Moderate
+OGD,Oil and Gas Drilling,true,Slight
+OGD,Oil and Gas Drilling,true,No Potential
+HD,Housing Development,true,No Potential
+HD,Housing Development,true,High
+HD,Housing Development,true,Moderate
+HD,Housing Development,true,Slight
+F,Forest,true,High
+F,Forest,true,Moderate
+F,Forest,true,Slight
+F,Forest,true,No Potential
+L,Logging,true,No Potential
+L,Logging,true,High
+L,Logging,true,Moderate
+L,Logging,true,Slight
+UU,Urban Uses,true,High
+UU,Urban Uses,true,Moderate
+UU,Urban Uses,true,Slight
+UU,Urban Uses,true,No Potential
+SLF,Sanitary Landfill,true,No Potential
+SLF,Sanitary Landfill,true,High
+SLF,Sanitary Landfill,true,Moderate
+SLF,Sanitary Landfill,true,Slight
+ACNSTR,Active Construction,true,No Potential
+ACNSTR,Active Construction,true,High
+ACNSTR,Active Construction,true,Moderate
+ACNSTR,Active Construction,true,Slight
+M,Mining,true,High
+M,Mining,true,Moderate
+M,Mining,true,Slight
+M,Mining,true,No Potential
+TM,Type of Mining,false,NULL
+C,Cropland,true,No Potential
+C,Cropland,true,High
+C,Cropland,true,Moderate
+C,Cropland,true,Slight
+TC,Type of Cropland,false,NULL
+TD,Trash Dump,true,High
+TD,Trash Dump,true,Moderate
+TD,Trash Dump,true,Slight
+TD,Trash Dump,true,No Potential
+FLDS,Fields,true,No Potential
+FLDS,Fields,true,High
+FLDS,Fields,true,Moderate
+FLDS,Fields,true,Slight
+LP,Livestock Pasture,true,High
+LP,Livestock Pasture,true,Moderate
+LP,Livestock Pasture,true,Slight
+LP,Livestock Pasture,true,No Potential
+OLU,Other Land Use,true,No Potential
+OLU,Other Land Use,true,High
+OLU,Other Land Use,true,Moderate
+OLU,Other Land Use,true,Slight
+DOLU,Define Other Land Use,false,NULL
+DATL,Describe the Amount and Type of Litter,false,NULL
+ICPT,Indicate Current and Potential Threats,false,NULL
+SCE,Stream Channel Erosion,true,Severe
+SCE,Stream Channel Erosion,true,High
+SCE,Stream Channel Erosion,true,Moderate
+SCE,Stream Channel Erosion,true,Slight
+SCE,Stream Channel Erosion,true,None
+CW,Channel Width,false,NULL
+AS.1,Area 1 Sampled,false,NULL
+AS.2,Area 2 Sampled,false,NULL
+AS.3,Area 3 Sampled,false,NULL
+AS.4,Area 4 Sampled,false,NULL
+NS,Number of Squirts,false,NULL
+DP,Discharge Pipes,false,NULL
+NDP,Number of Discharge Pipes,false,NULL
+TP,Type of Pipes,false,NULL
+P,Precipitation,true,None
+P,Precipitation,true,Drizzle
+P,Precipitation,true,Rain
+BT,Bottom Type,true,Muddy
+BT,Bottom Type,true,Rocky

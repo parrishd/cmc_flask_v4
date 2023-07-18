@@ -1,33 +1,25 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="q-pa-lg">
-
-    <q-card class="q-pa-lg" style="min-width: 600px; min-height: 600px;">
-      <MapBox/>
-    </q-card>
-
-        <q-page-container>
-          <router-view />
-        </q-page-container>
-
+    <q-page-container class="q-pt-none">
+      <router-view />
+    </q-page-container>
   </q-layout>
 </template>
 
 <script>
-import {defineComponent, ref} from 'vue'
+import { defineComponent, ref } from "vue";
 import MapBox from "components/MapBox.vue";
 
 export default defineComponent({
   name: "BaseLayout",
   components: {
-    MapBox,
+    // MapBox,
   },
 
   setup() {
-    return {}
-  }
-})
+    return {};
+  },
+});
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

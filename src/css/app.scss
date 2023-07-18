@@ -1,1 +1,17 @@
 // app global css in SCSS form
+
+$vims-dark-blue: #212433;
+$vims-medium-blue: #075C7A;
+$vims-light-blue: #A8CCDF;
+
+$vims-dark-green: #294738;
+$vims-medium-green: #73C69E;
+$vims-light-green: #ACDAC2;
+
+$vims-dark-gray: #555555;
+$vims-light-gray: #ABABAB;
+
+
+.text-dark-blue {
+  color: $vims-dark-blue;
+}

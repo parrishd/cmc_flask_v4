@@ -1,0 +1,98 @@
+Code,Name,Condition_Is_Categorical,Category
+WS,Water Surfaces,true,Calm
+WS,Water Surfaces,true,Ripple
+WS,Water Surfaces,true,Waves
+WS,Water Surfaces,true,White Caps
+SF,Stream Flow,true,Dry (Negligible)
+SF,Stream Flow,true,Low
+SF,Stream Flow,true,Normal
+SF,Stream Flow,true,High
+WC,Water Color,true,Normal
+WC,Water Color,true,Abnormal
+R,Rainfall,false,NULL
+WCD,Water Color Description,false,NULL
+TS,Tidal Stage,true,Incoming (Flood)
+TS,Tidal Stage,true,Low
+TS,Tidal Stage,true,Outgoing (Ebb)
+TS,Tidal Stage,true,High
+R48,Rainfall Within 48 Hours,false,NULL
+OC,Other Conditions,true,Sea Nettles
+OC,Other Conditions,true,Dead Fish
+OC,Other Conditions,true,Dead Crabs
+OC,Other Conditions,true,SAV
+OC,Other Conditions,true,Oil Slick
+OC,Other Conditions,true,Ice
+OC,Other Conditions,true,Debris
+OC,Other Conditions,true,Erosion
+OC,Other Conditions,true,Foam
+OC,Other Conditions,true,Bubbles
+OC,Other Conditions,true,Odor
+SS,Sea State,true,Calm
+SS,Sea State,true,<1 Foot
+SS,Sea State,true,<2 Feet
+SS,Sea State,true,<3 Feet
+SS,Sea State,true,<4 Feet
+SS,Sea State,true,>4 Feet
+WNDD,Wind Direction,true,E
+WNDD,Wind Direction,true,ENE
+WNDD,Wind Direction,true,ESE
+WNDD,Wind Direction,true,N
+WNDD,Wind Direction,true,NE
+WNDD,Wind Direction,true,NNE
+WNDD,Wind Direction,true,NNW
+WNDD,Wind Direction,true,NW
+WNDD,Wind Direction,true,S
+WNDD,Wind Direction,true,SE
+WNDD,Wind Direction,true,SSE
+WNDD,Wind Direction,true,SSW
+WNDD,Wind Direction,true,SW
+WNDD,Wind Direction,true,VAR
+WNDD,Wind Direction,true,W
+WNDD,Wind Direction,true,WNW
+WNDD,Wind Direction,true,WSW
+WNDS,Wind Speed,true,Calm
+WNDS,Wind Speed,true,1-10 knots
+WNDS,Wind Speed,true,10-20 knots
+WNDS,Wind Speed,true,20-30 knots
+WNDS,Wind Speed,true,30-40 knots
+WNDS,Wind Speed,true,>40 knots
+WTHRCT,Weather Conditions Today,true,Sunny
+WTHRCT,Weather Conditions Today,true,Partly cloudy
+WTHRCT,Weather Conditions Today,true,Overcast
+WTHRCT,Weather Conditions Today,true,Fog/haze
+WTHRCT,Weather Conditions Today,true,Drizzle
+WTHRCT,Weather Conditions Today,true,Intermittent rain
+WTHRCT,Weather Conditions Today,true,Rain
+WTHRCT,Weather Conditions Today,true,Snow
+WTHRCY,Weather Conditions Yesterday,true,Sunny
+WTHRCY,Weather Conditions Yesterday,true,Partly cloudy
+WTHRCY,Weather Conditions Yesterday,true,Overcast
+WTHRCY,Weather Conditions Yesterday,true,Fog/haze
+WTHRCY,Weather Conditions Yesterday,true,Drizzle
+WTHRCY,Weather Conditions Yesterday,true,Intermittent rain
+WTHRCY,Weather Conditions Yesterday,true,Rain
+WTHRCY,Weather Conditions Yesterday,true,Snow
+CC,Cloud Cover,true,Clear
+CC,Cloud Cover,true,Partially cloudy (10-50%)
+CC,Cloud Cover,true,Partially cloudy (50-90%)
+CC,Cloud Cover,true,Overcast (>90%)
+CC,Cloud Cover,true,Foggy
+CC,Cloud Cover,true,Hazy
+CC,Cloud Cover,true,Cloudy (no percentage)
+OCMNTS,Other Comments,false,NULL
+WTHRDBY,Weather Conditions Day Before Yesterday,true,Sunny
+WTHRDBY,Weather Conditions Day Before Yesterday,true,Partly cloudy
+WTHRDBY,Weather Conditions Day Before Yesterday,true,Overcast
+WTHRDBY,Weather Conditions Day Before Yesterday,true,Fog/haze
+WTHRDBY,Weather Conditions Day Before Yesterday,true,Drizzle
+WTHRDBY,Weather Conditions Day Before Yesterday,true,Intermittent rain
+WTHRDBY,Weather Conditions Day Before Yesterday,true,Rain
+WTHRDBY,Weather Conditions Day Before Yesterday,true,Snow
+WO,Water Odor,true,Sewage
+WO,Water Odor,true,Earthy
+WO,Water Odor,true,Fishy
+WO,Water Odor,true,Rotten Eggs
+WO,Water Odor,true,None
+WO,Water Odor,true,Other
+WOD,Water Odor Description,false,NULL
+R24,Rainfall Within 24 Hours,false,NULL

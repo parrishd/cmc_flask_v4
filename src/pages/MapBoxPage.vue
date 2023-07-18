@@ -1,19 +1,19 @@
 <template>
-  <q-page class="flex flex-center" />
+  <q-card class="q-pa-lg" style="min-width: 600px; min-height: 600px">
+    <MapBox />
+  </q-card>
 </template>
 
-
 <script>
-import { defineComponent, onMounted } from 'vue';
-
+import { defineComponent, onMounted } from "vue";
+import MapBox from "components/MapBox.vue";
 
 export default defineComponent({
-  components: {},
   name: "MapBoxPage",
+  components: {
+    MapBox,
+  },
 });
-
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
