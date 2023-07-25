@@ -115,6 +115,18 @@ const routes = [
     children: [{ path: "", component: () => import("pages/ProfilePage.vue") }],
   },
 
+  {
+    path: "/edit-profile",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "editProfile",
+        component: () => import("pages/ProfilePageEditor.vue")
+      }
+    ]
+  },
+
   // Always leave this as last one,
   // but you can also remove it
   {
