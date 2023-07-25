@@ -44,7 +44,7 @@
           </div>
           <div class="row q-my-md">
             <div class="col text-center">
-              <q-btn label="Edit Profile" color="primary" style="width: 200px" @click="editProfileButtonClick"/>
+              <q-btn label="Edit Profile" color="primary" style="width: 265px; height: 60px" @click="editProfileButtonClick"/>
             </div>
           </div>
       </div>
