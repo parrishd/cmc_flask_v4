@@ -15,6 +15,8 @@
             color="teal"
             text-color="white"
             icon="fa-solid fa-user"
+            @click="editProfileButtonClick"
+            class="clickable-avatar"
           />
           <div class="q-py-xl profile-table">
             <!--todo: should the table be made into a component?-->
@@ -39,6 +41,11 @@
                 </q-td>
               </template>
             </q-table>
+            <div class="row q-my-xl">
+              <div class="col text-center">
+                <q-btn label="Edit Profile" color="primary" style="width: 200px" @click="editProfileButtonClick"/>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -50,6 +57,7 @@
  * Imports
  ****************************/
 // all component imports here
+import { useRouter } from "vue-router";
 
 /*****************************
  * Lazy/Async components
@@ -125,6 +133,7 @@ const rows = [
  * Local/'Use' Variables
  ***************************/
 // local/use variables here
+const _router = useRouter();
 
 /****************************
  * Ref/UI Variables
@@ -150,6 +159,10 @@ const rows = [
  * UI Functions
  ***************************/
 // ui functions here
+function editProfileButtonClick() {
+  _router.push({ name: "editProfile" });
+}
+
 
 /****************************
  * View Lifecycle Methods
@@ -164,6 +177,10 @@ const rows = [
   color: $vims-medium-blue;
   font-size: 3.75em;
   font-weight: 900;
+}
+
+.clickable-avatar {
+  cursor: pointer;
 }
 
 .profile-table {
