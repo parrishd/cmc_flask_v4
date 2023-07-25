@@ -2,7 +2,7 @@
   <q-page class="q-px-xl q-mx-xl">
     <div class="row  justify-center">
       <div class="col-4 q-my-xl column q-gutter-md items-center">
-          <div class="user-name">
+          <div class="user-title">
             Derek Neely
           </div>
           <div class="column items-center profile-info">
@@ -41,13 +41,13 @@
                 </q-td>
               </template>
             </q-table>
-            <div class="row q-my-xl">
-              <div class="col text-center">
-                <q-btn label="Edit Profile" color="primary" style="width: 200px" @click="editProfileButtonClick"/>
-              </div>
+          </div>
+          <div class="row q-my-md">
+            <div class="col text-center">
+              <q-btn label="Edit Profile" color="primary" style="width: 200px" @click="editProfileButtonClick"/>
             </div>
           </div>
-        </div>
+      </div>
       </div>
   </q-page>
 </template>
@@ -173,7 +173,7 @@ function editProfileButtonClick() {
 <style lang="scss" scoped>
 @import "src/css/app.scss";
 
-.user-name {
+.user-title {
   color: $vims-medium-blue;
   font-size: 3.75em;
   font-weight: 900;
