@@ -1,295 +1,390 @@
 <template>
-  <q-page class="q-px-xl q-mx-xl">
-    <!-- stats bar -->
-    <div class="row q-mt-lg viewing-stats">
-      <div class="col-2">Currently Viewing:</div>
-      <div class="col">
-        <q-icon class="fa-solid fa-file-lines q-mr-sm" size="32px" />
-        673 Water Samples
-      </div>
-      <div class="col q-ml-md">
-        <q-icon class="fa-solid fa-building q-mr-sm" size="32px" />
-        43 Organizations
-      </div>
-      <div class="col q-ml-md">
-        <q-icon class="fa-solid fa-location-dot" size="32px" />
-        137 Stations
-      </div>
-      <div class="col text-right">
-        <q-icon class="fa-solid fa-circle-info" size="18px" />
-      </div>
-    </div>
-
-    <!-- map/form -->
-    <div class="row q-mt-lg">
-      <!-- map -->
-      <div class="col-8">
-        <MapBox />
-      </div>
-
-      <!-- form -->
-      <div class="col-4 q-px-md">
-        <div class="row">
-          <div class="col">
-            <q-icon class="fa-solid fa-arrow-right" size="24px" />
-          </div>
-          <div class="col text-right">
-            <q-icon class="fa-solid fa-circle-info" size="18px" />
-          </div>
+  <q-page class="q-px-none q-mx-none">
+    <div class="q-px-xl q-mx-xl">
+      <!-- stats bar -->
+      <div class="row q-mt-lg viewing-stats">
+        <div class="col-2">Currently Viewing:</div>
+        <div class="col">
+          <q-icon class="fa-solid fa-file-lines q-mr-sm" size="32px" />
+          673 Water Samples
         </div>
-
-        <div class="row q-mt-md">
-          <div class="col">
-            <q-select label="Data Type" outlined dense></q-select>
-          </div>
+        <div class="col q-ml-md">
+          <q-icon class="fa-solid fa-building q-mr-sm" size="32px" />
+          43 Organizations
         </div>
-        <div class="row q-mt-md">
-          <div class="col">
-            <q-select label="Geographical Type" outlined dense></q-select>
-          </div>
+        <div class="col q-ml-md">
+          <q-icon class="fa-solid fa-location-dot" size="32px" />
+          137 Stations
         </div>
-        <div class="row q-mt-md">
-          <div class="col">
-            <q-select
-              label="States (pick all that apply)"
-              outlined
-              dense
-            ></q-select>
-          </div>
-        </div>
-        <div class="row q-mt-md">
-          <div class="col">
-            <q-select
-              label="City/County (pick all that apply)"
-              outlined
-              dense
-            ></q-select>
-          </div>
-        </div>
-
-        <div class="row q-mt-md">
-          <div class="col">
-            <q-select
-              label="Groups (pick all that apply)"
-              outlined
-              dense
-            ></q-select>
-          </div>
-        </div>
-
-        <div class="row q-mt-md">
-          <div class="col">
-            <q-select
-              label="Stations (pick all that apply)"
-              outlined
-              dense
-            ></q-select>
-          </div>
-        </div>
-
-        <div class="row q-mt-md">
-          <div class="col">
-            <q-select
-              label="Parameters (pick all that apply)"
-              outlined
-              dense
-            ></q-select>
-          </div>
-        </div>
-
-        <div class="row q-mt-md">
-          <div class="col-6 q-pr-xs">
-            <q-select label="Start Date" outlined dense></q-select>
-          </div>
-          <div class="col-6 q-pl-xs">
-            <q-select label="End Date" outlined dense></q-select>
-          </div>
-        </div>
-
-        <div class="row q-mt-md">
-          <div class="col">
-            Choose optional metadata to include with download
-          </div>
-        </div>
-        <div class="row q-mt-md">
-          <div class="col-6">
-            <q-checkbox v-model="optionalMetaGroups" label="Groups" />
-          </div>
-          <div class="col-6">
-            <q-checkbox v-model="optionalMetaStations" label="Stations" />
-          </div>
-          <div class="col-6">
-            <q-checkbox v-model="optionalMetaParams" label="Parameters" />
-          </div>
-          <div class="col-6">
-            <q-checkbox
-              v-model="optionalMetaCalibration"
-              label="Calibration Samples"
-            />
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col">Please acknowledge data use prior to download:</div>
-        </div>
-
-        <div class="row">
-          <div class="col" style="max-width: 40px">
-            <q-checkbox v-model="dataUseAcknowledgment" />
-          </div>
-          <div class="col q-pt-xs text-caption">
-            I as the data user acknowledge that the data belong to the original
-            data provider and will properly credit the data provider(s) in any
-            product that uses their data.
-          </div>
-        </div>
-
-        <div class="row q-mt-md">
-          <div class="col text-center">
-            <q-btn label="Clear Filters" style="width: 90%" />
-          </div>
-          <div class="col text-center">
-            <q-btn label="Get Results" style="width: 90%" />
-          </div>
+        <div class="col text-right">
+          <q-icon class="fa-solid fa-circle-info" size="18px" />
         </div>
       </div>
-    </div>
 
-    <div class="row q-mt-lg">
-      <div class="col">
-        <q-separator />
-      </div>
-    </div>
+      <!-- map/form -->
+      <div class="row q-mt-lg">
+        <!-- map -->
+        <div class="col-8">
+          <MapBox />
+        </div>
 
-    <!-- results -->
-    <div class="row q-py-lg q-px-md results-title">
-      <div class="col title-font">Data Explorer Results</div>
-      <div class="col-4 q-px-lg text-right">
-        <q-input outlined dense>
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </div>
-      <div class="col text-center" style="max-width: 48px">
-        <q-icon class="fa-solid fa-sliders" size="24px" />
-      </div>
-      <div class="col text-center" style="max-width: 48px">
-        <q-icon class="fa-solid fa-circle-info" size="24px" />
-      </div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <q-table :rows="rows" :columns="columns" row-key="id" flat bordered />
-      </div>
-    </div>
-
-    <!-- selected data details -->
-    <div class="row q-mt-xl result-details-container">
-      <div class="col">
-        <!-- header -->
-        <div class="row q-py-md q-px-lg result-details-header">
-          <div class="col-1">
-            <q-icon class="fa-solid fa-location-dot" size="64px" />
-          </div>
-          <div class="col">
-            <div class="result-details-header-text-1">
-              WESBRABIGRUN1.89 - West Branch-Big Run
+        <!-- form -->
+        <div class="col-4 q-px-md">
+          <div class="row">
+            <div class="col">
+              <q-icon class="fa-solid fa-arrow-right" size="24px" />
             </div>
-            <div class="result-details-header-text-2">
-              Monitored by: Centre County Pennsylvania Senior Environmental
-              Corps
-            </div>
-          </div>
-          <div class="col-1 text-right">
-            <q-icon class="fa-solid fa-circle-info" size="24px" />
-          </div>
-        </div>
-
-        <!-- details -->
-        <div class="row q-mt-md">
-          <!-- details info -->
-          <div class="col-9 q-pr-xl">
-            <div class="row">
-              <div class="col">
-                Use the Water Quality or Benthic Macroinvertebrates buttons to
-                select the type of data you want to view for this station. Click
-                a Quick Plots option to choose commonly viewed water quality
-                data types. Click Export Plot to download the graph. Click
-                Download Data to be taken to a data query page for this station.
-              </div>
-            </div>
-
-            <div class="row q-mt-lg">
-              <div class="col">
-                <q-btn label="View All Results" />
-                <!--              <q-btn label="View All Results" />-->
-              </div>
-            </div>
-
-            <div class="row q-mt-lg">
-              <div class="col">
-                <div class="text-subtitle1 text-bold">Quick Plots</div>
-                <div class="text-subtitle1">
-                  pH SU | Dissolved oxygen mg/L | Water temperature deg C
-                </div>
-              </div>
-            </div>
-
-            <div class="row q-mt-lg">
-              <div class="col">
-                <div class="text-subtitle1 text-bold">
-                  Water Quality Parameters
-                </div>
-                <div class="q-mt-sm">
-                  <q-btn label="Export Plot" class="q-mr-lg" />
-                  <q-btn label="Download Data" />
-                </div>
-              </div>
-            </div>
-
-            <div class="row q-mt-lg">
-              <div class="col-6 q-pr-md">
-                <q-select label="Salinity Plots" outlined dense />
-              </div>
-              <div class="col-6 q-pl-md">
-                <q-select label="Depth" outlined dense />
-              </div>
+            <div class="col text-right">
+              <q-icon class="fa-solid fa-circle-info" size="18px" />
             </div>
           </div>
 
-          <!-- details card -->
-          <div class="col-3 q-py-md station-profile-container">
-            <div>
-              <q-avatar size="76px">
-                <img src="/images/station/station-profile-photo.png" />
-              </q-avatar>
+          <div class="row q-mt-md">
+            <div class="col">
+              <q-select label="Data Type" outlined dense></q-select>
             </div>
-            <div class="q-mt-sm" style="font-weight: bold; font-size: 20px">
-              Station Profile
+          </div>
+          <div class="row q-mt-md">
+            <div class="col">
+              <q-select label="Geographical Type" outlined dense></q-select>
             </div>
-            <div class="q-mt-sm"><b>Description:</b> Bowmans Creek</div>
-            <div class="q-mt-sm"><b>Location:</b> 41.42556, -76.030278</div>
-            <div class="q-mt-sm"><b>First Sampled:</b> May 4, 2011</div>
-            <div class="q-mt-sm">
-              <b>Most Recent Sample:</b> October 14, 2012
+          </div>
+          <div class="row q-mt-md">
+            <div class="col">
+              <q-select
+                label="States (pick all that apply)"
+                outlined
+                dense
+              ></q-select>
             </div>
-            <div class="q-mt-md">
-              <q-img
-                src="/images/station/station-map-temp.png"
-                style="height: 150px; max-width: 160px"
+          </div>
+          <div class="row q-mt-md">
+            <div class="col">
+              <q-select
+                label="City/County (pick all that apply)"
+                outlined
+                dense
+              ></q-select>
+            </div>
+          </div>
+
+          <div class="row q-mt-md">
+            <div class="col">
+              <q-select
+                label="Groups (pick all that apply)"
+                outlined
+                dense
+              ></q-select>
+            </div>
+          </div>
+
+          <div class="row q-mt-md">
+            <div class="col">
+              <q-select
+                label="Stations (pick all that apply)"
+                outlined
+                dense
+              ></q-select>
+            </div>
+          </div>
+
+          <div class="row q-mt-md">
+            <div class="col">
+              <q-select
+                label="Parameters (pick all that apply)"
+                outlined
+                dense
+              ></q-select>
+            </div>
+          </div>
+
+          <div class="row q-mt-md">
+            <div class="col-6 q-pr-xs">
+              <q-select label="Start Date" outlined dense></q-select>
+            </div>
+            <div class="col-6 q-pl-xs">
+              <q-select label="End Date" outlined dense></q-select>
+            </div>
+          </div>
+
+          <div class="row q-mt-md">
+            <div class="col">
+              Choose optional metadata to include with download
+            </div>
+          </div>
+          <div class="row q-mt-md">
+            <div class="col-6">
+              <q-checkbox v-model="optionalMetaGroups" label="Groups" />
+            </div>
+            <div class="col-6">
+              <q-checkbox v-model="optionalMetaStations" label="Stations" />
+            </div>
+            <div class="col-6">
+              <q-checkbox v-model="optionalMetaParams" label="Parameters" />
+            </div>
+            <div class="col-6">
+              <q-checkbox
+                v-model="optionalMetaCalibration"
+                label="Calibration Samples"
               />
             </div>
           </div>
-        </div>
 
-        <!-- graph -->
-        <div class="row q-mt-lg">
-          <div class="col">
-            Values displayed on graph are daily means of duplicate samples
+          <div class="row">
+            <div class="col">
+              Please acknowledge data use prior to download:
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col" style="max-width: 40px">
+              <q-checkbox v-model="dataUseAcknowledgment" />
+            </div>
+            <div class="col q-pt-xs text-caption">
+              I as the data user acknowledge that the data belong to the
+              original data provider and will properly credit the data
+              provider(s) in any product that uses their data.
+            </div>
+          </div>
+
+          <div class="row q-mt-md">
+            <div class="col text-center">
+              <q-btn label="Clear Filters" style="width: 90%" />
+            </div>
+            <div class="col text-center">
+              <q-btn label="Get Results" style="width: 90%" />
+            </div>
           </div>
         </div>
-        <div class="row">Chart Here</div>
+      </div>
+
+      <div class="row q-mt-lg">
+        <div class="col">
+          <q-separator />
+        </div>
+      </div>
+
+      <!-- results -->
+      <div class="row q-py-lg q-px-md results-title">
+        <div class="col title-font">Data Explorer Results</div>
+        <div class="col-4 q-px-lg text-right">
+          <q-input outlined dense>
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+        </div>
+        <div class="col text-center" style="max-width: 48px">
+          <q-icon class="fa-solid fa-sliders" size="24px" />
+        </div>
+        <div class="col text-center" style="max-width: 48px">
+          <q-icon class="fa-solid fa-circle-info" size="24px" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <q-table :rows="rows" :columns="columns" row-key="id" flat bordered />
+        </div>
+      </div>
+
+      <!-- selected data details -->
+      <div class="row q-mt-xl result-details-container">
+        <div class="col">
+          <!-- header -->
+          <div class="row q-py-md q-px-lg result-details-header">
+            <div class="col-1">
+              <q-icon class="fa-solid fa-location-dot" size="64px" />
+            </div>
+            <div class="col">
+              <div class="result-details-header-text-1">
+                WESBRABIGRUN1.89 - West Branch-Big Run
+              </div>
+              <div class="result-details-header-text-2">
+                Monitored by: Centre County Pennsylvania Senior Environmental
+                Corps
+              </div>
+            </div>
+            <div class="col-1 text-right">
+              <q-icon class="fa-solid fa-circle-info" size="24px" />
+            </div>
+          </div>
+
+          <!-- details -->
+          <div class="row q-mt-md">
+            <!-- details info -->
+            <div class="col-9 q-pr-xl">
+              <div class="row">
+                <div class="col">
+                  Use the Water Quality or Benthic Macroinvertebrates buttons to
+                  select the type of data you want to view for this station.
+                  Click a Quick Plots option to choose commonly viewed water
+                  quality data types. Click Export Plot to download the graph.
+                  Click Download Data to be taken to a data query page for this
+                  station.
+                </div>
+              </div>
+
+              <div class="row q-mt-lg">
+                <div class="col">
+                  <q-btn label="Water Quality" class="q-mr-md" />
+                  <q-btn label="Benthic Macroinvertebrates" class="q-ml-md" />
+                </div>
+              </div>
+
+              <div class="row q-mt-lg">
+                <div class="col">
+                  <div class="text-subtitle1 text-bold">Quick Plots</div>
+                  <div class="text-subtitle1">
+                    pH SU | Dissolved oxygen mg/L | Water temperature deg C
+                  </div>
+                </div>
+              </div>
+
+              <div class="row q-mt-lg">
+                <div class="col">
+                  <div class="text-subtitle1 text-bold">
+                    Water Quality Parameters
+                  </div>
+                  <div class="q-mt-sm">
+                    <q-btn label="Export Plot" class="q-mr-md" />
+                    <q-btn label="Download Data" class="q-ml-md" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="row q-mt-lg">
+                <div class="col-6 q-pr-md">
+                  <q-select label="Salinity Plots" outlined dense />
+                </div>
+                <div class="col-6 q-pl-md">
+                  <q-select label="Depth" outlined dense />
+                </div>
+              </div>
+            </div>
+
+            <!-- details card -->
+            <div class="col-3 q-py-md station-profile-container">
+              <div>
+                <q-avatar size="76px">
+                  <img src="/images/station/station-profile-photo.png" />
+                </q-avatar>
+              </div>
+              <div class="q-mt-sm" style="font-weight: bold; font-size: 20px">
+                Station Profile
+              </div>
+              <div class="q-mt-sm"><b>Description:</b> Bowmans Creek</div>
+              <div class="q-mt-sm"><b>Location:</b> 41.42556, -76.030278</div>
+              <div class="q-mt-sm"><b>First Sampled:</b> May 4, 2011</div>
+              <div class="q-mt-sm">
+                <b>Most Recent Sample:</b> October 14, 2012
+              </div>
+              <div class="q-mt-md">
+                <q-img
+                  src="/images/station/station-map-temp.png"
+                  style="height: 150px; max-width: 160px"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- graph -->
+          <div class="row q-mt-xl">
+            <div class="col">
+              Values displayed on graph are daily means of duplicate samples
+            </div>
+          </div>
+          <div class="row q-mt-md">
+            <div class="col" style="height: 280px">
+              <canvas ref="plotChartRef" />
+            </div>
+          </div>
+          <div class="row q-mt-lg">
+            <div class="col">
+              Please note that parameters are consolidated in the plot where
+              sampling methodologies may be different. Please click the "Show
+              Details" button for more information.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- database statistics -->
+    <div class="row q-mt-xl q-py-lg db-stats-container">
+      <div class="col">
+        <div class="row">
+          <div class="col text-center text-h4 text-bold">
+            Database Statistics
+          </div>
+        </div>
+
+        <div class="row q-mt-md">
+          <div class="col text-center">
+            The summary statistics below provide an overview of the current
+            scope of the Data Explorer.
+          </div>
+        </div>
+
+        <div class="row q-px-xl q-mt-xl text-center">
+          <div class="col">
+            <div>
+              <q-icon class="fa-solid fa-file-lines" size="64px" />
+            </div>
+            <div class="q-mt-xs db-stat-value">765,564</div>
+            <div class="db-stat-label">WATER QUALITY RECORDS</div>
+          </div>
+          <div class="col">
+            <div>
+              <q-icon class="fa-solid fa-memo-pad" size="64px" />
+            </div>
+            <div class="q-mt-xs db-stat-value">4,348</div>
+            <div class="db-stat-label">BENTHIC MACROINVERTEBRATE RECORDS</div>
+          </div>
+          <div class="col">
+            <div>
+              <q-icon class="fa-solid fa-water" size="64px" />
+            </div>
+            <div class="q-mt-xs db-stat-value">658</div>
+            <div class="db-stat-label">RIVERS/STREAMS</div>
+          </div>
+          <div class="col">
+            <div>
+              <q-icon class="fa-solid fa-location-dot" size="64px" />
+            </div>
+            <div class="q-mt-xs db-stat-value">2,286</div>
+            <div class="db-stat-label">STATIONS</div>
+          </div>
+        </div>
+        <div class="row q-px-xl q-pb-xl q-mt-xl text-center">
+          <div class="col">
+            <div>
+              <q-icon class="fa-solid fa-location-pin" size="64px" />
+            </div>
+            <div class="q-mt-xs db-stat-value">861</div>
+            <div class="db-stat-label">BENTHIC STATIONS</div>
+          </div>
+          <div class="col">
+            <div>
+              <q-icon class="fa-solid fa-user" size="64px" />
+            </div>
+            <div class="q-mt-xs db-stat-value">764</div>
+            <div class="db-stat-label">MONITORS</div>
+          </div>
+          <div class="col">
+            <div>
+              <q-icon class="fa-solid fa-clock" size="64px" />
+            </div>
+            <div class="q-mt-xs db-stat-value">43,452</div>
+            <div class="db-stat-label">MONITORING HOURS</div>
+          </div>
+          <div class="col">
+            <div>
+              <q-icon class="fa-solid fa-building" size="64px" />
+            </div>
+            <div class="q-mt-xs db-stat-value">137</div>
+            <div class="db-stat-label">ORGANIZATIONS</div>
+          </div>
+        </div>
       </div>
     </div>
   </q-page>
@@ -299,8 +394,9 @@
 /*****************************
  * Imports
  ****************************/
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import MapBox from "components/MapBox.vue";
+import Chart from "chart.js/auto";
 
 /*****************************
  * Lazy/Async components
@@ -411,9 +507,69 @@ const rows = [
   },
 ];
 
+let chartInstance = null;
+const chartConfig = {
+  type: "bar",
+  data: {
+    labels: ["40", "45", "50", "55", "60", "65", "70"],
+    datasets: [
+      {
+        label: "D",
+        data: [25, 36, 54, 65, 59, 56, 55, 25],
+        fill: true,
+        borderColor: "#075C7A",
+        backgroundColor: "rgb(7, 92, 122, 0.25)",
+        borderWidth: 2,
+        borderRadius: Number.MAX_VALUE,
+        borderSkipped: false,
+        barPercentage: 0.25,
+      },
+      {
+        label: "D",
+        data: [42, 56, 34, 35, 69, 36, 45, 8],
+        fill: true,
+        borderColor: "#075C7A",
+        backgroundColor: "rgb(7, 92, 122, 0.25)",
+        borderWidth: 2,
+        borderRadius: Number.MAX_VALUE,
+        borderSkipped: false,
+        barPercentage: 0.25,
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    // scaleShowVerticalLines: false,
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+      },
+    },
+    // scales: {
+    //   xAxes: [
+    //     {
+    //       gridLines: {
+    //         display: false,
+    //       },
+    //     },
+    //   ],
+    // },
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+  },
+};
+
 /****************************
  * Ref/UI Variables
  ***************************/
+const plotChartRef = ref(null);
+
 const optionalMetaGroups = ref(false);
 const optionalMetaStations = ref(false);
 const optionalMetaParams = ref(false);
@@ -438,12 +594,18 @@ const dataUseAcknowledgment = ref(false);
 /****************************
  * UI Functions
  ***************************/
-// ui functions here
+function createChart() {
+  if (plotChartRef.value) {
+    chartInstance = new Chart(plotChartRef.value, chartConfig);
+  }
+}
 
 /****************************
  * View Lifecycle Methods
  ***************************/
-// view lifecycle methods here
+onMounted(() => {
+  createChart();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -495,5 +657,19 @@ const dataUseAcknowledgment = ref(false);
     text-align: center;
     color: white;
   }
+}
+
+.db-stats-container {
+  background-color: $vims-light-blue;
+  color: $vims-medium-blue;
+}
+.db-stat-value {
+  font-size: 32px;
+  font-weight: 700;
+}
+.db-stat-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: $vims-dark-gray;
 }
 </style>
