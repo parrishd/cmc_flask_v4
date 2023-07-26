@@ -2,30 +2,40 @@
   <div class="footer-container q-py-lg">
     <div class="row">
       <div class="col sponsor-container">
-        <q-img
-          style="width: 180px"
-          src="images/sponsors/CBNERR_Logo_Blue.jpg"
-          fit="contain"
-        />
-        <q-img
-          style="width: 180px"
-          src="images/sponsors/VIMS-Full-color_logo.jpg"
-          fit="contain"
-        />
-        <q-img
-          style="width: 180px"
-          src="images/sponsors/GreenFin.png"
-          fit="contain"
-        />
+        <a href="https://www.vims.edu/cbnerr/" target="_blank">
+          <q-img
+            style="width: 180px"
+            src="images/sponsors/CBNERR_logo_white.png"
+            fit="contain"
+          />
+        </a>
+        <a href="https://www.vims.edu" target="_blank">
+          <q-img
+            style="width: 180px"
+            src="images/sponsors/vims_logo_white.png"
+            fit="contain"
+          />
+        </a>
+        <a href="https://www.chesapeakemonitoringcoop.org" target="_blank">
+          <q-img
+            style="width: 180px"
+            src="images/sponsors/cmc_logo_white.png"
+            fit="contain"
+          />
+        </a>
       </div>
     </div>
 
     <div class="row q-my-lg">
       <div class="col social-container">
-        <a href="#"><i class="fa-brands fa-facebook" /></a>
-        <a href="#"><i class="fa-brands fa-twitter"></i></a>
-        <a href="#"><i class="fa-brands fa-linkedin"></i></a>
-        <a href="#"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://www.facebook.com/fbvims" target="_blank"><i class="fa-brands fa-facebook" /></a>
+        <a href="https://twitter.com/VIMS_News" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+        <a href="https://www.linkedin.com/school/virginia-institute-of-marine-science/" target="_blank">
+          <i class="fa-brands fa-linkedin"></i>
+        </a>
+        <a href="https://www.youtube.com/@VAInstituteofMarineScience" target="_blank">
+          <i class="fa-brands fa-youtube"></i>
+        </a>
       </div>
     </div>
 
@@ -126,6 +136,10 @@
     border: 1px solid $vims-dark-blue;
     border-radius: 4px;
     padding: 10px;
+  }
+
+  i:hover {
+    opacity: 0.6;
   }
 }
 
