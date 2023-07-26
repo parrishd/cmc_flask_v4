@@ -110,6 +110,18 @@ const routes = [
   },
 
   {
+    path: "/data-explorer",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataExplorer",
+        component: () => import("pages/DataExplorerPage.vue"),
+      },
+    ],
+  },
+
+  {
     path: "/profile",
     component: () => import("layouts/SiteLayout.vue"),
     children: [{ path: "", component: () => import("pages/ProfilePage.vue") }],
