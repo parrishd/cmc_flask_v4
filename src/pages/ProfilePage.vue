@@ -3,21 +3,19 @@
     <div class="row  justify-center">
       <div class="col-4 q-my-xl column q-gutter-md items-center">
           <div class="user-title">
-            Derek Neely
+            Jennifer Eldridge
           </div>
           <div class="column items-center profile-info">
             <p class="q-mb-none">Last Login: 7.13.23</p>
             <p>Member Since: 12.23.20</p>
           </div>
-          <q-avatar
-            size="250px"
-            font-size="100px"
-            color="teal"
-            text-color="white"
-            icon="fa-solid fa-user"
-            @click="editProfileButtonClick"
-            class="clickable-avatar"
+
+          <q-img
+            style="width: 250px"
+            src="images/VIMSProfileHeadshot.png"
+            fit="contain"
           />
+
           <div class="q-py-xl profile-table">
             <!--todo: should the table be made into a component?-->
             <q-table
@@ -89,15 +87,15 @@ const columns = [
 const rows = [
   {
     propertyName: 'User Name',
-    propertyValue: 'derek@v4development.com'
+    propertyValue: 'jennifer@v4development.com'
   },
   {
     propertyName: 'First Name',
-    propertyValue: 'Derek'
+    propertyValue: 'Jennifer'
   },
   {
     propertyName: 'Last Name',
-    propertyValue: 'Neely'
+    propertyValue: 'Eldridge'
   },
   {
     propertyName: 'Role',
