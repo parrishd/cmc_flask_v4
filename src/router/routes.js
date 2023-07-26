@@ -149,6 +149,17 @@ const routes = [
       }
     ]
   },
+  {
+    path: "/manage-users",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "manageUsers",
+        component: () => import("pages/ManageUsersPage.vue")
+      }
+    ]
+  },
 
   // Always leave this as last one,
   // but you can also remove it
