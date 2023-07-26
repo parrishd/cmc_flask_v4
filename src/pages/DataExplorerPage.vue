@@ -259,14 +259,27 @@
           </div>
 
           <!-- details card -->
-          <div class="col-3 station-profile-container">
-            <div>Profile Image here</div>
-            <div>Station Profile</div>
-            <div>Description: Bowmans Creek</div>
-            <div>Location: 41.42556, -76.030278</div>
-            <div>First Sampled: May 4, 2011</div>
-            <div>Most Recent Sample: October 14, 2012</div>
-            <div>map here</div>
+          <div class="col-3 q-py-md station-profile-container">
+            <div>
+              <q-avatar size="76px">
+                <img src="/images/station/station-profile-photo.png" />
+              </q-avatar>
+            </div>
+            <div class="q-mt-sm" style="font-weight: bold; font-size: 20px">
+              Station Profile
+            </div>
+            <div class="q-mt-sm"><b>Description:</b> Bowmans Creek</div>
+            <div class="q-mt-sm"><b>Location:</b> 41.42556, -76.030278</div>
+            <div class="q-mt-sm"><b>First Sampled:</b> May 4, 2011</div>
+            <div class="q-mt-sm">
+              <b>Most Recent Sample:</b> October 14, 2012
+            </div>
+            <div class="q-mt-md">
+              <q-img
+                src="/images/station/station-map-temp.png"
+                style="height: 150px; max-width: 160px"
+              />
+            </div>
           </div>
         </div>
 
@@ -480,6 +493,7 @@ const dataUseAcknowledgment = ref(false);
 
   div {
     text-align: center;
+    color: white;
   }
 }
 </style>
