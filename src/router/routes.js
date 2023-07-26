@@ -127,6 +127,29 @@ const routes = [
     ]
   },
 
+  {
+    path: "/manage",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "manage",
+        component: () => import("pages/ManagePage.vue")
+      }
+    ]
+  },
+  {
+    path: "/manage-groups",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "manageGroups",
+        component: () => import("pages/ManageGroupsPage.vue")
+      }
+    ]
+  },
+
   // Always leave this as last one,
   // but you can also remove it
   {
