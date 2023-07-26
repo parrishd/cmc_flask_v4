@@ -41,18 +41,29 @@
 
           <div class="row q-mt-md">
             <div class="col">
-              <q-select label="Data Type" outlined dense></q-select>
+              <q-select
+                label="Data Type"
+                :options="dataTypes"
+                outlined
+                dense
+              ></q-select>
             </div>
           </div>
           <div class="row q-mt-md">
             <div class="col">
-              <q-select label="Geographical Type" outlined dense></q-select>
+              <q-select
+                label="Geographical Type"
+                :options="geoTypes"
+                outlined
+                dense
+              ></q-select>
             </div>
           </div>
           <div class="row q-mt-md">
             <div class="col">
               <q-select
                 label="States (pick all that apply)"
+                :options="states"
                 outlined
                 dense
               ></q-select>
@@ -62,6 +73,7 @@
             <div class="col">
               <q-select
                 label="City/County (pick all that apply)"
+                :options="counties"
                 outlined
                 dense
               ></q-select>
@@ -72,6 +84,7 @@
             <div class="col">
               <q-select
                 label="Groups (pick all that apply)"
+                :options="groups"
                 outlined
                 dense
               ></q-select>
@@ -82,6 +95,7 @@
             <div class="col">
               <q-select
                 label="Stations (pick all that apply)"
+                :options="stations"
                 outlined
                 dense
               ></q-select>
@@ -92,6 +106,7 @@
             <div class="col">
               <q-select
                 label="Parameters (pick all that apply)"
+                :options="parameters"
                 outlined
                 dense
               ></q-select>
@@ -100,10 +115,68 @@
 
           <div class="row q-mt-md">
             <div class="col-6 q-pr-xs">
-              <q-select label="Start Date" outlined dense></q-select>
+              <!--              <q-select label="Start Date" outlined dense></q-select>-->
+              <q-input
+                v-model="startDate"
+                label="Start Date"
+                mask="date"
+                :rules="['date']"
+                outlined
+                dense
+              >
+                <template v-slot:append>
+                  <q-icon name="event" class="cursor-pointer">
+                    <q-popup-proxy
+                      cover
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-date v-model="startDate" minimal>
+                        <div class="row items-center justify-end">
+                          <q-btn
+                            v-close-popup
+                            label="Close"
+                            color="primary"
+                            flat
+                          />
+                        </div>
+                      </q-date>
+                    </q-popup-proxy>
+                  </q-icon>
+                </template>
+              </q-input>
             </div>
             <div class="col-6 q-pl-xs">
-              <q-select label="End Date" outlined dense></q-select>
+              <!--              <q-select label="End Date" outlined dense></q-select>-->
+              <q-input
+                v-model="endDate"
+                label="End Date"
+                mask="date"
+                :rules="['date']"
+                outlined
+                dense
+              >
+                <template v-slot:append>
+                  <q-icon name="event" class="cursor-pointer">
+                    <q-popup-proxy
+                      cover
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-date v-model="endDate" minimal>
+                        <div class="row items-center justify-end">
+                          <q-btn
+                            v-close-popup
+                            label="Close"
+                            color="primary"
+                            flat
+                          />
+                        </div>
+                      </q-date>
+                    </q-popup-proxy>
+                  </q-icon>
+                </template>
+              </q-input>
             </div>
           </div>
 
@@ -149,10 +222,10 @@
 
           <div class="row q-mt-md">
             <div class="col text-center">
-              <q-btn label="Clear Filters" style="width: 90%" />
+              <q-btn label="Clear Filters" color="primary" style="width: 90%" />
             </div>
             <div class="col text-center">
-              <q-btn label="Get Results" style="width: 90%" />
+              <q-btn label="Get Results" color="primary" style="width: 90%" />
             </div>
           </div>
         </div>
@@ -226,8 +299,16 @@
 
               <div class="row q-mt-lg">
                 <div class="col">
-                  <q-btn label="Water Quality" class="q-mr-md" />
-                  <q-btn label="Benthic Macroinvertebrates" class="q-ml-md" />
+                  <q-btn
+                    label="Water Quality"
+                    color="primary"
+                    class="q-mr-md"
+                  />
+                  <q-btn
+                    label="Benthic Macroinvertebrates"
+                    color="primary"
+                    class="q-ml-md"
+                  />
                 </div>
               </div>
 
@@ -246,8 +327,16 @@
                     Water Quality Parameters
                   </div>
                   <div class="q-mt-sm">
-                    <q-btn label="Export Plot" class="q-mr-md" />
-                    <q-btn label="Download Data" class="q-ml-md" />
+                    <q-btn
+                      label="Export Plot"
+                      color="primary"
+                      class="q-mr-md"
+                    />
+                    <q-btn
+                      label="Download Data"
+                      color="primary"
+                      class="q-ml-md"
+                    />
                   </div>
                 </div>
               </div>
@@ -565,10 +654,43 @@ const chartConfig = {
   },
 };
 
+const dataTypes = ["Water Quality", "Benthic Macroinvertebrates"];
+const geoTypes = ["Watershed Boundary", "Political Boundary"];
+const states = [
+  "Delaware",
+  "District of Columbia",
+  "Maryland",
+  "New York",
+  "Pennsylvania",
+  "Virginia",
+  "West Virginia",
+];
+const counties = [
+  "Accomack County",
+  "Adams County",
+  "Albermarle County",
+  "Alexandria City",
+];
+const groups = [
+  "Alliance for the Chesapeake Bay",
+  "Anacostia Riverkeeper",
+  "Anne Arundel Community College",
+];
+const stations = ["0102003", "0102016", "0102017", "0102018"];
+const parameters = [
+  "Air temperature",
+  "Alkalinity",
+  "Ammonia-nitrogen",
+  "Bacteria (E. Coli)",
+];
+
 /****************************
  * Ref/UI Variables
  ***************************/
 const plotChartRef = ref(null);
+
+const startDate = ref("");
+const endDate = ref("");
 
 const optionalMetaGroups = ref(false);
 const optionalMetaStations = ref(false);
