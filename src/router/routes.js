@@ -134,9 +134,9 @@ const routes = [
       {
         path: "",
         name: "editProfile",
-        component: () => import("pages/ProfilePageEditor.vue")
-      }
-    ]
+        component: () => import("pages/ProfilePageEditor.vue"),
+      },
+    ],
   },
 
   {
@@ -146,9 +146,9 @@ const routes = [
       {
         path: "",
         name: "manage",
-        component: () => import("pages/ManagePage.vue")
-      }
-    ]
+        component: () => import("pages/ManagePage.vue"),
+      },
+    ],
   },
   {
     path: "/manage-groups",
@@ -157,9 +157,20 @@ const routes = [
       {
         path: "",
         name: "manageGroups",
-        component: () => import("pages/ManageGroupsPage.vue")
-      }
-    ]
+        component: () => import("pages/ManageGroupsPage.vue"),
+      },
+    ],
+  },
+  {
+    path: "/manage-users",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "manageGroups",
+        component: () => import("pages/ManageUsersPage.vue"),
+      },
+    ],
   },
 
   // Always leave this as last one,
