@@ -167,7 +167,7 @@ const routes = [
     children: [
       {
         path: "",
-        name: "manageGroups",
+        name: "manageUsers",
         component: () => import("pages/ManageUsersPage.vue"),
       },
     ],
