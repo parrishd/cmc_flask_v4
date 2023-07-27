@@ -61,6 +61,8 @@
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce pharetra, elit et volutpat elementum.
       </div>
     </div>
+
+    <EditGroupForm v-model="dialog" />
   </q-page>
 </template>
 
@@ -70,6 +72,7 @@
  ****************************/
 // all component imports here
 import { ref } from "vue";
+import EditGroupForm from "components/EditGroupForm.vue";
 
 /*****************************
  * Lazy/Async components
@@ -99,6 +102,7 @@ const name = ref("");
 const description = ref("");
 const email = ref("");
 const cmcMembers = ref("");
+const dialog = ref(false);
 
 /****************************
  * Computed Properties
@@ -126,8 +130,10 @@ function downloadButtonClick() {
   console.log("download all button click");
 };
 function viewDetailsButtonClick() {
-  console.log("view details / edit button click");
+  console.log("view details / edit button click.");
+  dialog.value = true
 };
+
 
 /****************************
  * View Lifecycle Methods
