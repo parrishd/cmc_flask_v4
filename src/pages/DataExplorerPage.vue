@@ -17,7 +17,26 @@
           137 Stations
         </div>
         <div class="col text-right">
-          <q-icon class="fa-solid fa-circle-info" size="18px" />
+          <q-icon class="fa-solid fa-circle-info" size="18px">
+            <q-tooltip
+              anchor="bottom left"
+              self="top left"
+              class="bg-grey-2"
+              :offset="[360, 10]"
+            >
+              <div class="q-pa-md" style="max-width: 360px">
+                <div class="tooltip-header">Data Explorer Information</div>
+                <div class="q-mt-sm tooltip-text">
+                  The Data Explorer is a tool for storing and sharing data
+                  collected by a network of water quality and benthic
+                  macroinvertebrate monitors working with the Chesapeake
+                  Monitoring Cooperative. These data are publicly accessible and
+                  are shared directly with the Chesapeake Bay Program and other
+                  data users.
+                </div>
+              </div>
+            </q-tooltip>
+          </q-icon>
         </div>
       </div>
 
@@ -35,7 +54,32 @@
               <q-icon class="fa-solid fa-arrow-right" size="24px" />
             </div>
             <div class="col text-right">
-              <q-icon class="fa-solid fa-circle-info" size="18px" />
+              <q-icon class="fa-solid fa-circle-info" size="18px">
+                <q-tooltip
+                  anchor="bottom left"
+                  self="top left"
+                  class="bg-grey-2"
+                  :offset="[360, 10]"
+                >
+                  <div class="q-pa-md" style="max-width: 360px">
+                    <div class="tooltip-header">Data Query Form</div>
+                    <div class="q-mt-sm tooltip-text">
+                      On this page you can download data from the CMC Data
+                      Explorer database. Use the form below to build a query
+                      that will identify the specific data you want to download.
+                      As you step through the form, each selection will narrow
+                      down the possible options in the other form items. At the
+                      bottom of the form, use the check boxes to select the
+                      associated metadata you would like to include with your
+                      download. When you are finished making your selection,
+                      click Get Results to request queried dataset. Selections
+                      made in this form will immediately update the stations
+                      shown on the map and stations table based on the
+                      selections in the form.
+                    </div>
+                  </div>
+                </q-tooltip>
+              </q-icon>
             </div>
           </div>
 
@@ -251,7 +295,27 @@
           <q-icon class="fa-solid fa-sliders" size="24px" />
         </div>
         <div class="col text-center" style="max-width: 48px">
-          <q-icon class="fa-solid fa-circle-info" size="24px" />
+          <q-icon class="fa-solid fa-circle-info" size="24px">
+            <q-tooltip
+              anchor="bottom left"
+              self="top left"
+              class="bg-grey-2"
+              :offset="[360, 10]"
+            >
+              <div class="q-pa-md" style="max-width: 360px">
+                <div class="tooltip-header">Stations Table</div>
+                <div class="q-mt-sm tooltip-text">
+                  The stations table shows the results from the information
+                  selected on the data query form above. The search box at the
+                  top right of the table allows the user to filter the displayed
+                  data based on attributes such as station name, organization,
+                  waterbody name, date or station status (ex. active or
+                  inactive). Using the search box will also update the map and
+                  query form.
+                </div>
+              </div>
+            </q-tooltip>
+          </q-icon>
         </div>
       </div>
       <div class="row">
@@ -278,7 +342,27 @@
               </div>
             </div>
             <div class="col-1 text-right">
-              <q-icon class="fa-solid fa-circle-info" size="24px" />
+              <q-icon class="fa-solid fa-circle-info" size="24px">
+                <q-tooltip
+                  anchor="bottom left"
+                  self="top left"
+                  class="bg-grey-2"
+                  :offset="[360, 10]"
+                >
+                  <div class="q-pa-md" style="max-width: 360px">
+                    <div class="tooltip-header">Station Details</div>
+                    <div class="q-mt-sm tooltip-text">
+                      The station details panel reflects the station selection
+                      on map or table above. In this panel, you can visualize or
+                      download water quality monitoring data for this station.
+                      When selecting a parameter or changing the date range, the
+                      interactive time series plot will update. Click on the
+                      Download button to download data for the time period shown
+                      in the plot.
+                    </div>
+                  </div>
+                </q-tooltip>
+              </q-icon>
             </div>
           </div>
 
@@ -792,6 +876,16 @@ onMounted(() => {
 .db-stat-label {
   font-size: 16px;
   font-weight: 500;
+  color: $vims-dark-gray;
+}
+
+.tooltip-header {
+  font-size: 24px;
+  font-weight: 500;
+  color: $vims-medium-blue;
+}
+.tooltip-text {
+  font-size: 16px;
   color: $vims-dark-gray;
 }
 </style>
