@@ -5,14 +5,14 @@
     </div>
 
     <div class="row">
-      <div class="col q-mt-lg text-center">
+      <div class="col q-mt-lg text-subtitle1">
         On this page you can manage the individuals that belong to the Virginia
         Institute of Marine Science monitoring group. You can search for a
         particular individual by using the "Filter" box at the top of the table.
         Click "View Details/Edit" to edith the information for an individual. If
         you need to Retire an individual, click "Retire User". Use the "Bulk
         File" button to upload a large number of users to your group. A template
-        for the file can be downloaded <a href="#">here</a>
+        for the file can be downloaded <a href="#">here</a>.
 
       </div>
     </div>
