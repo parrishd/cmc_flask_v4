@@ -20,12 +20,12 @@
             </template>
           </q-input>
 
-          <q-btn color="primary" @click="bulkFileUpload">
+          <q-btn color="primary" @click="bulkFileUpload" no-caps>
             <q-icon class="fa-regular fa-circle-arrow-up" size="14px"/>
             <span class="q-ml-sm">Bulk File</span>
           </q-btn>
 
-          <q-btn class="q-ml-sm" color="primary" @click="downloadTable">
+          <q-btn class="q-ml-sm" color="primary" @click="downloadTable" no-caps>
             <q-icon class="fa-solid fa-arrow-down-to-bracket" size="14px"/>
             <span class="q-ml-sm">Download Users</span>
           </q-btn>
@@ -34,83 +34,83 @@
 
       <template v-slot:body-cell-details="props">
         <q-td :props="props">
-          <q-btn color="primary" @click="goToDetails(props.row.id)">
+          <q-btn color="primary" @click="goToDetails(props.row.id)" no-caps>
             <q-icon class="fa-solid fa-list" size="14px"/>
             <span class="q-ml-sm">View Details / Edit</span>
           </q-btn>
         </q-td>
       </template>
 
-      <template v-slot:body-cell-registered="props">
+      <template v-slot:body-cell-isRegistered="props">
         <q-td :props="props">
-          <q-btn v-if="props.row.registered" color="green" @click="retireUser(props.row.id)">
+          <q-btn v-if="props.row.isRegistered" color="green" @click="retireUser(props.row.id)" no-caps>
             <q-icon class="fa-solid fa-ban" size="14px"/>
             <span class="q-ml-sm">Retire User</span>
           </q-btn>
 
-          <q-btn v-else style="background-color: #4B4545" text-color="white" @click="registerUser(props.row)">
+          <q-btn v-else style="background-color: #4B4545" text-color="white" @click="registerUser(props.row)" no-caps>
             <q-icon class="fa-solid fa-plus" size="14px"/>
             <span class="q-ml-sm">Register</span>
           </q-btn>
 
-          <q-dialog v-model="dialog" presistent>
-            <q-card>
-              <q-card-section class="row items-center q-pb-none">
-                <q-space />
-                <q-btn icon="close" flat round dense @click="closeDialog" />
-              </q-card-section>
-
-              <div class="q-pa-lg">
-                <q-card-section>
-                  <div class="text-h5 text-center text-bold q-mb-lg register-popup-header">
-                    Are you sure you want to register?
-                  </div>
-
-                  <div class="q-mb-md">
-                    <span class="text-bold">User:</span> {{selectedUser.firstName}} {{selectedUser.lastName}}
-                  </div>
-
-                  <div class="q-mb-lg no-wrap">
-                    Please enter an Email for this user. An email will be sent to begin their registration process
-                    and allow the user to reset the password for this account. After resetting the password,
-                    the user will be able to login.
-                  </div>
-
-                  <q-input v-model="registrationEmail" label="Email" outlined />
-
-<!--                  <div class="text-subtitle1 text-bold q-mt-lg q-mb-xs">Role</div>-->
-
-<!--                  <div class="row items-center q-pa-md">-->
-<!--                    <q-toggle v-model="registrationMonitorInput"/>-->
-<!--                    <div class="text-subtitle1 text-bold">Monitor</div>-->
-<!--                    <q-toggle v-model="registrationCoordinatorInput" class="q-ml-md"/>-->
-<!--                    <div class="text-subtitle1 text-bold">Coordinator</div>-->
-<!--                  </div>-->
-                </q-card-section>
-
-                <q-card-actions align="center">
-                  <q-btn
-                    style="width: 225px; height: 60px; background-color: #4B4545"
-                    class="q-mr-md"
-                    text-color="white"
-                    label="Cancel"
-                    v-close-popup
-                  />
-                  <q-btn
-                    label="Register"
-                    class="q-ml-md"
-                    style="width: 225px; height: 60px; background-color: #8AAAE5"
-                    text-color="white"
-                    @click="registerUserSubmit(selectedUser, registrationEmail)" />
-                </q-card-actions>
-              </div>
-            </q-card>
-          </q-dialog>
 
         </q-td>
       </template>
 
     </q-table>
+    <q-dialog v-model="dialog" presistent>
+      <q-card>
+        <q-card-section class="row items-center q-pb-none">
+          <q-space />
+          <q-btn icon="close" flat round dense @click="closeDialog" />
+        </q-card-section>
+
+        <div class="q-pa-lg">
+          <q-card-section>
+            <div class="text-h5 text-center text-bold q-mb-lg register-popup-header">
+              Are you sure you want to register?
+            </div>
+
+            <div class="q-mb-md">
+              <span class="text-bold">User:</span> {{selectedUser.firstName}} {{selectedUser.lastName}}
+            </div>
+
+            <div class="q-mb-lg no-wrap">
+              Please enter an Email for this user. An email will be sent to begin their registration process
+              and allow the user to reset the password for this account. After resetting the password,
+              the user will be able to login.
+            </div>
+
+            <q-input v-model="registrationEmail" label="Email" outlined />
+
+              <div class="text-subtitle1 text-bold q-mt-lg q-mb-xs">Role</div>
+
+              <div class="row items-center q-pa-md">
+                <q-toggle v-model="registrationMonitorInput"/>
+                <div class="text-subtitle1 text-bold">Monitor</div>
+                <q-toggle v-model="registrationCoordinatorInput" class="q-ml-md"/>
+                <div class="text-subtitle1 text-bold">Coordinator</div>
+              </div>
+          </q-card-section>
+
+          <q-card-actions align="center">
+            <q-btn
+              style="width: 225px; height: 60px; background-color: #4B4545"
+              class="q-mr-md"
+              text-color="white"
+              label="Cancel"
+              v-close-popup
+            />
+            <q-btn
+              label="Register"
+              class="q-ml-md"
+              style="width: 225px; height: 60px; background-color: #8AAAE5"
+              text-color="white"
+              @click="registerUserSubmit(selectedUser, registrationEmail)" />
+          </q-card-actions>
+        </div>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -143,7 +143,7 @@ const columns = [
   { name: 'state', label: 'State', field: 'state', align: 'left' },
   { name: 'group', label: 'Group', field: 'group', align: 'left' },
   { name: 'details', field: 'details', align: 'left' },
-  { name: 'registered', label: 'Status', field: 'registered', align: 'left' }
+  { name: 'isRegistered', label: 'Status', field: 'isRegistered', align: 'left' }
 ]
 
 const rows = [
@@ -154,8 +154,8 @@ const rows = [
     role: 'Monitor',
     state: 'VA',
     group: 'Virginia Institute of Marine Science',
-    details: 'View Details / Edit',
-    registered: true
+    details: '',
+    isRegistered: true
   },
   {
     id: 2,
@@ -164,8 +164,8 @@ const rows = [
     role: 'Monitor',
     state: 'VA',
     group: 'Virginia Institute of Marine Science',
-    details: 'View Details / Edit',
-    registered: true
+    details: '',
+    isRegistered: true
   },
   {
     id: 3,
@@ -174,8 +174,8 @@ const rows = [
     role: 'Monitor',
     state: 'VA',
     group: 'Virginia Institute of Marine Science',
-    details: 'View Details / Edit',
-    registered: true
+    details: '',
+    isRegistered: true
   },
   {
     id: 4,
@@ -184,8 +184,8 @@ const rows = [
     role: 'Monitor',
     state: 'VA',
     group: 'Virginia Institute of Marine Science',
-    details: 'View Details / Edit',
-    registered: true
+    details: '',
+    isRegistered: true
   },
   {
     id: 5,
@@ -194,8 +194,8 @@ const rows = [
     role: 'Monitor',
     state: 'VA',
     group: 'Virginia Institute of Marine Science',
-    details: 'View Details / Edit',
-    registered: true
+    details: '',
+    isRegistered: true
   },
   {
     id: 6,
@@ -204,8 +204,8 @@ const rows = [
     role: 'Monitor',
     state: 'VA',
     group: 'Virginia Institute of Marine Science',
-    details: 'View Details / Edit',
-    registered: true
+    details: '',
+    isRegistered: true
   },
   {
     id: 7,
@@ -214,8 +214,8 @@ const rows = [
     role: 'Monitor',
     state: 'VA',
     group: 'Virginia Institute of Marine Science',
-    details: 'View Details / Edit',
-    registered: true
+    details: '',
+    isRegistered: true
   },
   {
     id: 8,
@@ -224,8 +224,8 @@ const rows = [
     role: 'Monitor',
     state: 'VA',
     group: 'Virginia Institute of Marine Science',
-    details: 'View Details / Edit',
-    registered: true
+    details: '',
+    isRegistered: true
   },
   {
     id: 9,
@@ -234,8 +234,8 @@ const rows = [
     role: 'Monitor',
     state: 'VA',
     group: 'Virginia Institute of Marine Science',
-    details: 'View Details / Edit',
-    registered: true
+    details: '',
+    isRegistered: true
   },
   {
     id: 10,
@@ -244,8 +244,8 @@ const rows = [
     role: 'Monitor',
     state: 'VA',
     group: 'Virginia Institute of Marine Science',
-    details: 'View Details / Edit',
-    registered: false
+    details: '',
+    isRegistered: false
   },
 ]
 
@@ -364,5 +364,9 @@ const downloadTable = () => {
 </script>
 
 <style lang="scss" scoped>
+@import "src/css/app.scss";
 
+.register-popup-header {
+  color: $vims-medium-blue;
+}
 </style>
