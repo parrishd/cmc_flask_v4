@@ -41,6 +41,12 @@
         />
       </div>
     </div>
+    <input
+      ref="fileInputRef"
+      type="file"
+      style="display: none"
+      @change="handleFileChange"
+    />
   </q-page>
 </template>
 
@@ -49,6 +55,7 @@
  * Imports
  ****************************/
 import { useRouter } from "vue-router";
+import { ref } from "vue";
 
 /*****************************
  * Lazy/Async components
@@ -73,7 +80,7 @@ const _router = useRouter();
 /****************************
  * Ref/UI Variables
  ***************************/
-// ref/ui variables here
+const fileInputRef = ref(null);
 
 /****************************
  * Computed Properties
@@ -98,7 +105,14 @@ function formButtonClick() {
 }
 
 function bulkFileButtonClick() {
-  _router.push({ name: "dataUploadReview" });
+  // _router.push({ name: "dataUploadReview" });
+  fileInputRef.value.click();
+}
+
+function handleFileChange(event) {
+  const selectedFile = event.target.files[0];
+  console.log("Selected File:", selectedFile);
+  _router.push({ name: "dataUploadReviewWaterQuality" });
 }
 
 /****************************
