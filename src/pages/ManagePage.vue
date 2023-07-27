@@ -12,6 +12,33 @@
         in ullamcorper diam cursus. Suspendisse non lacinia urna, ac elementum sapien.
       </div>
     </div>
+
+    <div class="row q-mt-xl">
+      <div class="col text-center">
+        <q-btn
+          style="width: 265px; height: 60px; background-color: #8AAAE5"
+          class="q-mr-md cancel-image-btn"
+          label="Manage Users"
+          text-color="white"
+          @click="manageUsersButtonClick"
+        />
+        <q-btn
+          style="width: 265px; height: 60px; background-color: #8AAAE5"
+          class="q-ml-md save-image-btn"
+          label="Manage Groups"
+          text-color="white"
+          @click="manageGroupsButtonClick"
+        />
+        <q-btn
+          style="width: 265px; height: 60px; background-color: #8AAAE5"
+          class="q-ml-md save-image-btn"
+          label="Manage Stations"
+          text-color="white"
+          @click="manageStationsButtonClick"
+        />
+      </div>
+    </div>
+
   </q-page>
 </template>
 
@@ -20,6 +47,7 @@
  * Imports
  ****************************/
 // all component imports here
+import { useRouter } from "vue-router";
 
 /*****************************
  * Lazy/Async components
@@ -40,6 +68,7 @@
  * Local/'Use' Variables
  ***************************/
 // local/use variables here
+const _router = useRouter();
 
 /****************************
  * Ref/UI Variables
@@ -65,7 +94,17 @@
  * UI Functions
  ***************************/
 // ui functions here
+function manageUsersButtonClick() {
+  _router.push({ name: "manageUsers" });
+}
 
+function manageGroupsButtonClick() {
+  _router.push({ name: "manageGroups" })
+}
+
+function manageStationsButtonClick() {
+  _router.push({ name: "manageStations" })
+}
 /****************************
  * View Lifecycle Methods
  ***************************/
