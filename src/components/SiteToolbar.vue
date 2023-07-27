@@ -10,9 +10,10 @@
           <a href="/contact">CONTACT</a>
           <a href="/resources">RESOURCES</a>
 
-          <a v-if="loggedIn" href="/data">DATA</a>
+          <a v-if="loggedIn" href="/data-toolset">DATA</a>
           <a v-if="loggedIn" href="/profile">PROFILE</a>
           <a v-if="loggedIn" href="/manage">MANAGE</a>
+          <a v-if="loggedIn" href="/data">ADMIN</a>
         </div>
         <div v-if="!loggedIn" class="col-5 flex justify-end">
           <q-btn
