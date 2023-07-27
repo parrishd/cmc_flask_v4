@@ -48,10 +48,65 @@
             <span class="q-ml-sm">Retire User</span>
           </q-btn>
 
-          <q-btn v-else color="black" @click="registerUser(props.row.id)">
+          <q-btn v-else style="background-color: #4B4545" text-color="white" @click="registerUser(props.row)">
             <q-icon class="fa-solid fa-plus" size="14px"/>
             <span class="q-ml-sm">Register</span>
           </q-btn>
+
+          <q-dialog v-model="dialog" presistent>
+            <q-card>
+              <q-card-section class="row items-center q-pb-none">
+                <q-space />
+                <q-btn icon="close" flat round dense @click="closeDialog" />
+              </q-card-section>
+
+              <div class="q-pa-lg">
+                <q-card-section>
+                  <div class="text-h5 text-center text-bold q-mb-lg register-popup-header">
+                    Are you sure you want to register?
+                  </div>
+
+                  <div class="q-mb-md">
+                    <span class="text-bold">User:</span> {{selectedUser.firstName}} {{selectedUser.lastName}}
+                  </div>
+
+                  <div class="q-mb-lg no-wrap">
+                    Please enter an Email for this user. An email will be sent to begin their registration process
+                    and allow the user to reset the password for this account. After resetting the password,
+                    the user will be able to login.
+                  </div>
+
+                  <q-input v-model="registrationEmail" label="Email" outlined />
+
+<!--                  <div class="text-subtitle1 text-bold q-mt-lg q-mb-xs">Role</div>-->
+
+<!--                  <div class="row items-center q-pa-md">-->
+<!--                    <q-toggle v-model="registrationMonitorInput"/>-->
+<!--                    <div class="text-subtitle1 text-bold">Monitor</div>-->
+<!--                    <q-toggle v-model="registrationCoordinatorInput" class="q-ml-md"/>-->
+<!--                    <div class="text-subtitle1 text-bold">Coordinator</div>-->
+<!--                  </div>-->
+                </q-card-section>
+
+                <q-card-actions align="center">
+                  <q-btn
+                    style="width: 225px; height: 60px; background-color: #4B4545"
+                    class="q-mr-md"
+                    text-color="white"
+                    label="Cancel"
+                    v-close-popup
+                  />
+                  <q-btn
+                    label="Register"
+                    class="q-ml-md"
+                    style="width: 225px; height: 60px; background-color: #8AAAE5"
+                    text-color="white"
+                    @click="registerUserSubmit(selectedUser, registrationEmail)" />
+                </q-card-actions>
+              </div>
+            </q-card>
+          </q-dialog>
+
         </q-td>
       </template>
 
@@ -203,7 +258,12 @@ const rows = [
  * Ref/UI Variables
  ***************************/
 // ref/ui variables here
-const searchQuery = ref('');
+let searchQuery = ref('');
+let dialog = ref(false);
+let selectedUser = ref({});
+let registrationEmail = ref('');
+let registrationMonitorInput = ref(false);
+let registrationCoordinatorInput = ref(false);
 
 /****************************
  * Computed Properties
@@ -232,8 +292,19 @@ const retireUser = (id) => {
   console.log(`Retire user with id: ${id}`);
 }
 
-const registerUser = (id) => {
-  console.log(`Register user with id: ${id}`);
+const registerUser = (user) => {
+  console.log(`Register user with id: ${user.firstName}`);
+  selectedUser.value = user
+  dialog.value = true
+}
+
+function closeDialog() {
+  dialog.value = false
+}
+
+const registerUserSubmit = (selectedUser, registrationEmail) => {
+  console.log(`${selectedUser.firstName} has been registered and an email has been sent to ${registrationEmail}`);
+  dialog.value = false
 }
 
 const searchUsers = (searchQuery) => {
@@ -254,12 +325,6 @@ function wrapCsvValue (val, formatFn, row) {
     : String(formatted)
 
   formatted = formatted.split('"').join('""')
-  /**
-   * Excel accepts \n and \r in strings, but some other CSV parsers do not
-   * Uncomment the next two lines to escape new lines
-   */
-  // .split('\n').join('\\n')
-  // .split('\r').join('\\r')
 
   return `"${formatted}"`
 }
