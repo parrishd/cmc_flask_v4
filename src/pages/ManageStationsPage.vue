@@ -44,6 +44,9 @@
 
     <div class="row q-mt-xl q-mx-xl q-px-xl">
       <ManageStationsTable />
+
+      <div id="map" class="q-ml-auto q-mr-md"/>
+
     </div>
 
   </q-page>
@@ -55,6 +58,8 @@
  ****************************/
 // all component imports here
 import ManageStationsTable from "components/ManageStationsTable.vue";
+import {reactive, ref, onMounted} from "vue";
+import mapboxgl from "mapbox-gl";
 
 /*****************************
  * Lazy/Async components
@@ -80,6 +85,8 @@ import ManageStationsTable from "components/ManageStationsTable.vue";
  * Ref/UI Variables
  ***************************/
 // ref/ui variables here
+let searchQuery = ref('');
+let map = reactive({});
 
 /****************************
  * Computed Properties
@@ -110,10 +117,26 @@ function downloadButtonClick() {
   console.log("download stations button click");
 }
 
+const createMap = () => {
+  mapboxgl.accessToken =
+    "pk.eyJ1IjoibXlha2F2ZW5rYSIsImEiOiJjbDlxMDJrNmcwMmE2M3dxeDYyZWE0OWQ0In0.dKzXgJu-ZUH3epnFzxvllg";
+  map = new mapboxgl.Map({
+    container: "map",
+    style: "mapbox://styles/mapbox/outdoors-v11",
+    center: [-76.4, 37.8],
+    zoom: 6.55,
+  });
+  map.addControl(new mapboxgl.NavigationControl());
+};
+
 /****************************
  * View Lifecycle Methods
  ***************************/
 // view lifecycle methods here
+onMounted(() => {
+  createMap();
+});
+
 </script>
 
 <style lang="scss" scoped>
@@ -123,5 +146,10 @@ function downloadButtonClick() {
   color: $vims-medium-blue;
   font-size: 3.75em;
   font-weight: 900;
+}
+
+#map {
+  width: 40%;
+  height: 400px;
 }
 </style>
