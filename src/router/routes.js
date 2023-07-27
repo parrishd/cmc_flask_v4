@@ -160,6 +160,17 @@ const routes = [
       }
     ]
   },
+  {
+    path: "/manage-stations",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "manageStations",
+        component: () => import("pages/ManageStationsPage.vue")
+      }
+    ]
+  },
 
   // Always leave this as last one,
   // but you can also remove it
