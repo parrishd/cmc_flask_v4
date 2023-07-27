@@ -171,6 +171,39 @@ const routes = [
       }
     ]
   },
+  {
+    path: "/data-toolset",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataToolset",
+        component: () => import("pages/DataToolsetPage.vue")
+      }
+    ]
+  },
+  {
+    path: "/data-water-quality",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataWaterQaulity",
+        component: () => import("pages/UploadWaterQualityPage.vue")
+      }
+    ]
+  },
+  {
+    path: "/data-macroinvertebrates",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataMacroinvertebrates",
+        component: () => import("pages/UploadMacroinvertebratesPage.vue")
+      }
+    ]
+  },
 
   // Always leave this as last one,
   // but you can also remove it
