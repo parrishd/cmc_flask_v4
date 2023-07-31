@@ -1,58 +1,60 @@
 <template>
-  <!-- MapBox GL JS instance -->
-  <div id="map" />
-  <!-- Toggle between data type by loading different source and layers -->
-  <div class="data-type-widget">
-    <q-card class="my-card">
-      <q-card-section>
-        <p>Station Type</p>
+  <div class="map-container">
+    <!-- MapBox GL JS instance -->
+    <div id="map" />
+    <!-- Toggle between data type by loading different source and layers -->
+    <div class="data-type-widget">
+      <q-card class="my-card">
+        <q-card-section>
+          <p>Station Type</p>
 
-        <q-option-group
-          v-model="stationTypeGroup"
-          :options="stationTypeOptions"
-          color="primary"
-        ></q-option-group>
-      </q-card-section>
-    </q-card>
-  </div>
+          <q-option-group
+            v-model="stationTypeGroup"
+            :options="stationTypeOptions"
+            color="primary"
+          ></q-option-group>
+        </q-card-section>
+      </q-card>
+    </div>
 
-  <!-- Foo widget to show sampling events, not hooked up to reactive data -->
-  <div class="map-overlay">
-    <q-card class="my-card">
-      <q-card-section>
-        <q-list>
-          <p>Total Sampling Events</p>
+    <!-- Foo widget to show sampling events, not hooked up to reactive data -->
+    <div class="map-overlay">
+      <q-card class="my-card">
+        <q-card-section>
+          <q-list>
+            <p>Total Sampling Events</p>
 
-          <p>
-            <span class="dot-red"></span>
-            &#60; 10
-          </p>
-          <p>
-            <span class="dot-yellow"></span>
-            10 - 100
-          </p>
-          <p>
-            <span class="dot-green"> </span>
-            &#62; 100
-          </p>
-        </q-list>
-      </q-card-section>
-    </q-card>
-  </div>
+            <p>
+              <span class="dot-red"></span>
+              &#60; 10
+            </p>
+            <p>
+              <span class="dot-yellow"></span>
+              10 - 100
+            </p>
+            <p>
+              <span class="dot-green"> </span>
+              &#62; 100
+            </p>
+          </q-list>
+        </q-card-section>
+      </q-card>
+    </div>
 
-  <!-- toggle raster or vector map style. Check uncheck to show polygon data-->
-  <div class="map-style">
-    <q-card class="my-card">
-      <q-card-section>
-        <q-option-group
-          v-model="mapStyle"
-          :options="mapStyleOptions"
-          color="primary"
-        ></q-option-group>
+    <!-- toggle raster or vector map style. Check uncheck to show polygon data-->
+    <div class="map-style">
+      <q-card class="my-card">
+        <q-card-section>
+          <q-option-group
+            v-model="mapStyle"
+            :options="mapStyleOptions"
+            color="primary"
+          ></q-option-group>
 
-        <q-checkbox v-model="showWatersheds"> Watersheds</q-checkbox>
-      </q-card-section>
-    </q-card>
+          <q-checkbox v-model="showWatersheds"> Watersheds</q-checkbox>
+        </q-card-section>
+      </q-card>
+    </div>
   </div>
 </template>
 
@@ -679,35 +681,41 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.map-container {
+  position: relative;
+  //height: 100%;
+}
+
 .map-style {
   font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
   position: absolute;
-  width: 200px;
-  top: 196px;
-  left: 16px;
-  padding: 20px;
+  width: 180px;
+  top: 154px;
+  left: 0px;
+  padding: 4px;
 }
 
 .data-type-widget {
   font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
   position: absolute;
-  width: 200px;
-  top: 44px;
-  left: 16px;
-  padding: 20px;
+  width: 180px;
+  top: 0px;
+  left: 0px;
+  padding: 4px;
 }
 
 .map-overlay {
   font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
   position: absolute;
-  width: 200px;
-  bottom: 38px;
-  left: 16px;
-  padding: 20px;
+  width: 180px;
+  bottom: 0px;
+  left: 0px;
+  padding: 4px;
 }
 
 #map {
-  height: 70vh;
+  //height: 70vh;
+  height: 82vh;
 }
 
 .dot-green {

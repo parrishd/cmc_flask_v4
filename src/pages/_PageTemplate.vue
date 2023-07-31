@@ -1,5 +1,5 @@
 <template>
-  <q-page q-px-xl q-mx-xl> </q-page>
+  <q-page class="q-px-xl q-mx-xl"> </q-page>
 </template>
 
 <script setup>

@@ -74,13 +74,25 @@ const routes = [
   },
 
   {
-    path: "/data-upload",
+    path: "/data-upload-water-quality",
     component: () => import("layouts/SiteLayout.vue"),
     children: [
       {
         path: "",
-        name: "dataUpload",
-        component: () => import("pages/DataUploadPage.vue"),
+        name: "dataUploadWaterQuality",
+        component: () => import("pages/DataUploadWaterQualityPage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "/data-upload-macroinvertebrates",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataUploadMacroinvertebrate",
+        component: () => import("pages/DataUploadMacroinvertebratesPage.vue"),
       },
     ],
   },
@@ -98,13 +110,38 @@ const routes = [
   },
 
   {
-    path: "/data-upload-review",
+    path: "/data-upload-review-water-quality",
     component: () => import("layouts/SiteLayout.vue"),
     children: [
       {
         path: "",
-        name: "dataUploadReview",
-        component: () => import("pages/DataUploadReviewPage.vue"),
+        name: "dataUploadReviewWaterQuality",
+        component: () => import("pages/DataUploadReviewWaterQualityPage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "/data-upload-review-macroinvertebrates",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataUploadReviewMacroinvertebrates",
+        component: () =>
+          import("pages/DataUploadReviewMacroinvertebratesPage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "/data-explorer",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataExplorer",
+        component: () => import("pages/DataExplorerPage.vue"),
       },
     ],
   },
@@ -122,9 +159,9 @@ const routes = [
       {
         path: "",
         name: "editProfile",
-        component: () => import("pages/ProfilePageEditor.vue")
-      }
-    ]
+        component: () => import("pages/ProfilePageEditor.vue"),
+      },
+    ],
   },
 
   {
@@ -134,9 +171,9 @@ const routes = [
       {
         path: "",
         name: "manage",
-        component: () => import("pages/ManagePage.vue")
-      }
-    ]
+        component: () => import("pages/ManagePage.vue"),
+      },
+    ],
   },
   {
     path: "/manage-groups",
@@ -145,9 +182,9 @@ const routes = [
       {
         path: "",
         name: "manageGroups",
-        component: () => import("pages/ManageGroupsPage.vue")
-      }
-    ]
+        component: () => import("pages/ManageGroupsPage.vue"),
+      },
+    ],
   },
   {
     path: "/manage-users",
@@ -156,9 +193,9 @@ const routes = [
       {
         path: "",
         name: "manageUsers",
-        component: () => import("pages/ManageUsersPage.vue")
-      }
-    ]
+        component: () => import("pages/ManageUsersPage.vue"),
+      },
+    ],
   },
   {
     path: "/manage-stations",

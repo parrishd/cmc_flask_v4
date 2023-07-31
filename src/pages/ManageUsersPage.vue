@@ -18,7 +18,6 @@
     </div>
 
     <ManageUsersTable />
-
   </q-page>
 </template>
 

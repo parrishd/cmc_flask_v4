@@ -2,9 +2,7 @@
   <q-page class="q-px-xl q-mx-xl">
     <div class="row justify-center">
       <div class="col q-mt-xl column q-gutter-md items-center">
-        <div class="edit-profile-title">
-          Edit Profile
-        </div>
+        <div class="edit-profile-title">Edit Profile</div>
         <div class="column items-center profile-directions">
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
         </div>
@@ -17,21 +15,19 @@
 
         <div class="q-py-xl column items-center photo-upload">
           <p class="q-mb-lg photo-upload-text">Upload a different photo</p>
-          <q-uploader
-            color="primary"
-            style="max-width: 300px"
-          />
-          <div class="row q-mt-xl">
+          <!--          <q-uploader color="primary" style="max-width: 300px" />-->
+          <q-file style="width: 100%" outlined />
+          <div class="row q-mt-md">
             <div class="col text-center">
               <q-btn
-                style="width: 265px; height: 60px; background-color: #4B4545"
+                style="width: 265px; height: 60px; background-color: #4b4545"
                 class="q-mr-md cancel-image-btn"
                 label="Cancel"
                 text-color="white"
                 @click="cancelImageButtonClick"
               />
               <q-btn
-                style="width: 265px; height: 60px; background-color: #8AAAE5"
+                style="width: 265px; height: 60px; background-color: #8aaae5"
                 class="q-ml-md save-image-btn"
                 label="Save"
                 text-color="white"
@@ -45,9 +41,7 @@
     <!--Account Settings Section-->
     <div class="row justify-center account-setting-form">
       <div class="column items-center">
-        <div class="edit-profile-title">
-          Account Settings
-        </div>
+        <div class="edit-profile-title">Account Settings</div>
         <div class="column items-center profile-directions">
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
         </div>
@@ -109,19 +103,18 @@ import AccountSettingsForm from "components/AccountSettingsForm.vue";
  ***************************/
 // ui functions here
 function saveImageButtonClick() {
-  console.log('save image button click');
-};
+  console.log("save image button click");
+}
 
 function cancelImageButtonClick() {
-  console.log('cancel image button click');
-};
+  console.log("cancel image button click");
+}
 
 /****************************
  * View Lifecycle Methods
  ***************************/
 // view lifecycle methods here
 </script>
-
 
 <style lang="scss" scoped>
 @import "src/css/app.scss";

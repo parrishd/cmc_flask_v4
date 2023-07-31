@@ -2,64 +2,51 @@
   <q-page class="q-px-xl q-mx-xl">
     <div class="row q-mt-lg">
       <div class="col q-mt-lg text-center data-header">
-        Chesapeake Data Explorer
+        Upload Macroinvertebrates
       </div>
     </div>
 
     <div class="row q-mt-xl">
-      <div class="col text-center data-text">
-        Virginia Institute of Marine Science's Activity this month
+      <div class="col data-text">
+        There are two different methods for uploading data to the Data Explorer:
+        Single sample event data uploads through a data entry form OR multiple
+        sample event uploads by uploading a spreadsheet file. The file for the
+        latter methods needs to adhere to a very specific file format. A
+        template for which can be downloaded <a href="#">here</a>. Additional
+        details can be found in the Data Explorer User's Manual.
       </div>
     </div>
 
     <div class="row q-mt-xl">
-      <div class="col flex justify-end">
-        <div class="text-center">
-          <div>
-            <q-icon name="fa-solid fa-user" color="primary" size="4.4em" />
-          </div>
-          <div class="stat-count-text">14</div>
-          <div class="stat-desc-text">NEW USERS</div>
-        </div>
-      </div>
-      <div style="max-width: 160px" class="col"><!-- spacer --></div>
-      <div class="col flex justify-start">
-        <div class="text-center">
-          <div>
-            <q-icon
-              name="fa-solid fa-microscope"
-              color="primary"
-              size="4.4em"
-            />
-          </div>
-          <div class="stat-count-text">139</div>
-          <div class="stat-desc-text">NEW SAMPLES</div>
-        </div>
+      <div class="col data-text">
+        Choose the type of upload you would like to do today:
       </div>
     </div>
 
     <div class="row q-mt-xl">
-      <div class="col text-center data-text">Admin Quick Links</div>
-    </div>
-
-    <div class="row q-mt-lg">
       <div class="col text-center">
         <q-btn
           style="width: 220px; height: 60px"
           class="q-mr-md"
           color="primary"
-          label="UPLOAD DATA"
-          @click="uploadDataButtonClick"
+          label="FORM"
+          @click="formButtonClick"
         />
         <q-btn
           style="width: 220px; height: 60px"
           class="q-ml-md"
           color="primary"
-          label="CONTACT SERVICE"
-          @click="contactServiceButtonClick"
+          label="BULK FILE"
+          @click="bulkFileButtonClick"
         />
       </div>
     </div>
+    <input
+      ref="fileInputRef"
+      type="file"
+      style="display: none"
+      @change="handleFileChange"
+    />
   </q-page>
 </template>
 
@@ -67,6 +54,7 @@
 /*****************************
  * Imports
  ****************************/
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 /*****************************
@@ -92,7 +80,7 @@ const _router = useRouter();
 /****************************
  * Ref/UI Variables
  ***************************/
-// ref/ui variables here
+const fileInputRef = ref(null);
 
 /****************************
  * Computed Properties
@@ -112,14 +100,20 @@ const _router = useRouter();
 /****************************
  * UI Functions
  ***************************/
-function uploadDataButtonClick() {
-  _router.push({ name: "dataUploadWaterQuality" });
+function formButtonClick() {
+  _router.push({ name: "dataUploadForm" });
 }
 
-function contactServiceButtonClick() {
-  console.log("contact service button click");
+function bulkFileButtonClick() {
+  // _router.push({ name: "dataUploadReview" });
+  fileInputRef.value.click();
 }
 
+function handleFileChange(event) {
+  const selectedFile = event.target.files[0];
+  console.log("Selected File:", selectedFile);
+  _router.push({ name: "dataUploadReviewMacroinvertebrates" });
+}
 /****************************
  * View Lifecycle Methods
  ***************************/
@@ -137,8 +131,13 @@ function contactServiceButtonClick() {
 
 .data-text {
   color: $vims-medium-blue;
-  font-size: 1.7em;
-  font-weight: 600;
+  font-size: 1.25em;
+
+  a {
+    color: $vims-medium-blue;
+    text-decoration: none;
+    font-weight: bold;
+  }
 }
 
 .stat-count-text {
