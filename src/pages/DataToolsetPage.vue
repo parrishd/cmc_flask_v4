@@ -26,6 +26,7 @@
           class="q-ml-md save-image-btn"
           label="Edit & Review Water Quality"
           text-color="white"
+          @click="waterQualityReviewButtonClick"
         />
       </div>
     </div>
@@ -44,6 +45,7 @@
           class="q-ml-md save-image-btn"
           label="Edit & Review Macroinvertebrates"
           text-color="white"
+          @click="macroinvertebratesReviewButtonClick"
         />
       </div>
     </div>
@@ -106,8 +108,14 @@ const _router = useRouter();
 function waterQualityButtonClick() {
   _router.push({name: "dataWaterQaulity"})
 }
+function waterQualityReviewButtonClick() {
+  _router.push({name: "dataUploadReviewWaterQuality"})
+}
 function macroinvertebratesButtonClick() {
   _router.push({name: "dataMacroinvertebrates"})
+}
+function macroinvertebratesReviewButtonClick() {
+  _router.push({name: "dataUploadReviewMacroinvertebrates"})
 }
 
 /****************************
