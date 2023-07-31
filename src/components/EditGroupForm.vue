@@ -23,10 +23,11 @@
           <q-input v-model="addressFirst" label="Address - First Line" class="q-mb-md" outlined />
           <q-input v-model="addressSecond" label="Address - Second Line" class="q-mb-md" outlined />
           <q-input v-model="city" label="City" class="q-mb-md" outlined />
-          <q-input v-model="state" label="State" class="q-mb-md" outlined />
+          <q-select label="State" :options="states" class="q-mb-md" outlined />
           <q-input v-model="zipCode" label="Zip Code" class="q-mb-md" outlined />
           <q-input v-model="dataUseDate" label="Data Use Form Date" class="q-mb-md" outlined />
-          <q-input v-model="benthicMethod" label="Benthic Method" class="q-mb-md" outlined />
+          <q-select label="Benthic Method" :options="benthicOptions" outlined />
+
 
         </q-card-section>
 
@@ -96,6 +97,9 @@ const state = ref('');
 const zipCode = ref('');
 const dataUseDate = ref('');
 const benthicMethod = ref('');
+const states = ['Delware', 'Maryland', 'Pennsylvania', 'Virginia', 'West Virginia'];
+const benthicOptions = ['Izaac Walton League', 'AllARM', 'Tier 2'];
+
 
 /****************************
  * Computed Properties
