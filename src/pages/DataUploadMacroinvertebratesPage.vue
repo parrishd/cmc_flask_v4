@@ -26,16 +26,16 @@
     <div class="row q-mt-xl">
       <div class="col text-center">
         <q-btn
-          style="width: 220px; height: 60px"
+          style="width: 220px; height: 60px; background-color: #8AAAE5"
           class="q-mr-md"
-          color="primary"
+          text-color="white"
           label="FORM"
           @click="formButtonClick"
         />
         <q-btn
-          style="width: 220px; height: 60px"
+          style="width: 220px; height: 60px; background-color: #8AAAE5"
           class="q-ml-md"
-          color="primary"
+          text-color="white"
           label="BULK FILE"
           @click="bulkFileButtonClick"
         />
@@ -101,7 +101,7 @@ const fileInputRef = ref(null);
  * UI Functions
  ***************************/
 function formButtonClick() {
-  _router.push({ name: "dataUploadForm" });
+  _router.push({ name: "dataUploadMacroinvertebratesForm" });
 }
 
 function bulkFileButtonClick() {
