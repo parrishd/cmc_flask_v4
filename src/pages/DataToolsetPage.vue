@@ -106,13 +106,13 @@ const _router = useRouter();
  ***************************/
 // ui functions here
 function waterQualityButtonClick() {
-  _router.push({name: "dataWaterQaulity"})
+  _router.push({name: "dataUploadWaterQuality"})
 }
 function waterQualityReviewButtonClick() {
   _router.push({name: "dataUploadReviewWaterQuality"})
 }
 function macroinvertebratesButtonClick() {
-  _router.push({name: "dataMacroinvertebrates"})
+  _router.push({name: "dataUploadMacroinvertebrate"})
 }
 function macroinvertebratesReviewButtonClick() {
   _router.push({name: "dataUploadReviewMacroinvertebrates"})
