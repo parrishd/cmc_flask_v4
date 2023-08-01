@@ -960,6 +960,7 @@
  ****************************/
 // all component imports here
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
 /*****************************
  * Lazy/Async components
@@ -980,6 +981,7 @@ import { ref } from "vue";
  * Local/'Use' Variables
  ***************************/
 // local/use variables here
+const _router = useRouter();
 
 /****************************
  * Ref/UI Variables
@@ -1154,6 +1156,7 @@ const comments = ref('');
 // ui functions here
 function submitButtonClick() {
   console.log('Form data has been saved');
+  _router.push({ name: "dataUploadReviewWaterQuality" });
 }
 
 /****************************
