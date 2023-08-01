@@ -23,7 +23,7 @@
           <div class="row q-mb-md">
 
             <!--Date Selector-->
-            <div>
+            <div class="col">
               <q-input outlined v-model="sampleDate" label="Sample Date" mask="date" :rules="['date']">
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
@@ -40,8 +40,8 @@
             </div>
 
             <!--Time Selector-->
-            <div class="q-ml-md q-mb-xl">
-              <q-input outlined v-model="sampleTime" label="Sample Time" mask="time" :rules="['time']">
+            <div class="col q-ml-md q-mb-xl">
+              <q-input outlined v-model="sampleTime" label="Sample Time" mask="time" :rules="['time']" format24h="false">
                 <template v-slot:append>
                   <q-icon name="access_time" class="cursor-pointer">
                     <q-popup-proxy cover transition-show="scale" transition-hide="scale">
