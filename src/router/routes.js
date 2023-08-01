@@ -122,6 +122,18 @@ const routes = [
   },
 
   {
+    path: "/data-upload-water-quality-form",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataUploadWaterQualityForm",
+        component: () => import("pages/DataUploadWaterQualityFormPage.vue"),
+      },
+    ],
+  },
+
+  {
     path: "/data-upload-review-water-quality",
     component: () => import("layouts/SiteLayout.vue"),
     children: [
