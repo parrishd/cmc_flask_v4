@@ -110,6 +110,18 @@ const routes = [
   },
 
   {
+    path: "/data-upload-macroinvertebrates-form",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataUploadMacroinvertebratesForm",
+        component: () => import("pages/DataUploadMacroinvertebratesFormPage.vue"),
+      },
+    ],
+  },
+
+  {
     path: "/data-upload-review-water-quality",
     component: () => import("layouts/SiteLayout.vue"),
     children: [
