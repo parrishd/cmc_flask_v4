@@ -56,7 +56,7 @@
  * Imports
  ****************************/
 // all component imports here
-import { ref } from 'vue';
+import { ref, defineProps, defineEmits } from 'vue';
 
 /*****************************
  * Lazy/Async components
@@ -67,11 +67,19 @@ import { ref } from 'vue';
  * Emit Definitions
  ***************************/
 // emits defined here
+const emit = defineEmits(['update:visible'])
+
+const closeDialog = () => {
+  emit('update:visibile', false);
+}
 
 /****************************
  * Component Props
  ***************************/
 // props defined here
+const props = defineProps({
+  visibile: Boolean
+})
 
 /****************************
  * Local/'Use' Variables
@@ -121,11 +129,12 @@ const benthicOptions = ['Izaac Walton League', 'AllARM', 'Tier 2'];
  ***************************/
 // ui functions here
 function saveGroup() {
-  console.log('Group details submitted')
+  console.log('Group details submitted');
+  emit('update:visibile', false);
 }
-function closeDialog() {
-  console.log("close edit details button click");
-};
+// function closeDialog() {
+//   console.log("close edit details button click");
+// };
 
 /****************************
  * View Lifecycle Methods

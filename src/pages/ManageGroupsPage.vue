@@ -62,7 +62,7 @@
       </div>
     </div>
 
-    <EditGroupForm v-model="dialog" />
+    <EditGroupForm v-model="dialog" :visibile="dialog" @update:visibile="val => (dialog = val)" />
   </q-page>
 </template>
 
