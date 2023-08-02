@@ -60,9 +60,14 @@
       <div class="col q-mt-lg text-center groups-text">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce pharetra, elit et volutpat elementum.
       </div>
+
+    </div>
+    <div class="row q-mt-xl" v-if="showAllGroups">
+      <AllGroupsTable />
     </div>
 
     <EditGroupForm v-model="dialog" :visibile="dialog" @update:visibile="val => (dialog = val)" />
+
   </q-page>
 </template>
 
@@ -73,6 +78,7 @@
 // all component imports here
 import { ref } from "vue";
 import EditGroupForm from "components/EditGroupForm.vue";
+import AllGroupsTable from "components/AllGroupsTable.vue";
 
 /*****************************
  * Lazy/Async components
@@ -103,6 +109,7 @@ const description = ref("");
 const email = ref("");
 const cmcMembers = ref("");
 const dialog = ref(false);
+const showAllGroups = ref (false);
 
 /****************************
  * Computed Properties
@@ -124,7 +131,7 @@ const dialog = ref(false);
  ***************************/
 // ui functions here
 function showAllButtonClick() {
-  console.log("show all button click");
+  showAllGroups.value = !showAllGroups.value;
 };
 function downloadButtonClick() {
   console.log("download all button click");
