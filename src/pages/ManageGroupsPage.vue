@@ -63,7 +63,9 @@
 
     </div>
     <div class="row q-mt-xl" v-if="showAllGroups">
-      <AllGroupsTable />
+      <div class="col justify-center">
+        <AllGroupsTable />
+      </div>
     </div>
 
     <EditGroupForm v-model="dialog" :visibile="dialog" @update:visibile="val => (dialog = val)" />
