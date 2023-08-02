@@ -1,64 +1,57 @@
 <template>
   <q-page>
     <div class="q-px-xl q-mx-xl">
-
-      <div class="q-mx-xl q-px-xl">
-        <div class="q-mt-lg">
-          <div class="text-center water-quality-header">Upload Water Quality Data Form</div>
-        </div>
-
-        <div class="row q-mt-xl">
-          <div class="text-subtitle1">
-            Welcome to the data upload page! Using the fields below, you can enter data into the Chesapeake Data
-            Explorer for Sampling Sites belonging to Virginia Institute of Marine Science.
-          </div>
-        </div>
-      </div>
-
-      <div class="row q-mt-xl q-mx-xl q-px-xl">
+      <div class="row q-mx-xl q-px-xl">
         <div class="col">
-          <q-select v-model="site" label="Sampling Site" :options="siteOptions" class="q-mb-md" outlined/>
-
-          <!--Date & Time Row-->
-          <div class="row q-mb-md">
-
-            <!--Date Selector-->
-            <div class="col">
-              <q-input outlined v-model="sampleDate" label="Sample Date" mask="date" :rules="['date']">
-                <template v-slot:append>
-                  <q-icon name="event" class="cursor-pointer">
-                    <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                      <q-date v-model="sampleDate">
-                        <div class="row items-center justify-end">
-                          <q-btn v-close-popup label="Close" color="primary" flat />
-                        </div>
-                      </q-date>
-                    </q-popup-proxy>
-                  </q-icon>
-                </template>
-              </q-input>
+          <div class="q-mt-xl q-pa-xl even-container">
+            <div class="text-center water-quality-header">Upload Water Quality Data Form</div>
+            <div class="text-subtitle1">
+              Welcome to the data upload page! Using the fields below, you can enter data into the Chesapeake Data
+              Explorer for Sampling Sites belonging to Virginia Institute of Marine Science.
             </div>
+            <q-select v-model="site" label="Sampling Site" :options="siteOptions" class="q-mb-md" outlined/>
 
-            <!--Time Selector-->
-            <div class="col q-ml-md q-mb-xl">
-              <q-input outlined v-model="sampleTime" label="Sample Time" mask="time" :rules="['time']">
-                <template v-slot:append>
-                  <q-icon name="access_time" class="cursor-pointer">
-                    <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                      <q-time v-model="sampleTime">
-                        <div class="row items-center justify-end">
-                          <q-btn v-close-popup label="Close" color="primary" flat />
-                        </div>
-                      </q-time>
-                    </q-popup-proxy>
-                  </q-icon>
-                </template>
-              </q-input>
+            <!--Date & Time Row-->
+            <div class="row q-mb-md">
+
+              <!--Date Selector-->
+              <div class="col">
+                <q-input outlined v-model="sampleDate" label="Sample Date" mask="date" :rules="['date']">
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                        <q-date v-model="sampleDate">
+                          <div class="row items-center justify-end">
+                            <q-btn v-close-popup label="Close" color="primary" flat />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
+
+              <!--Time Selector-->
+              <div class="col q-ml-md q-mb-xl">
+                <q-input outlined v-model="sampleTime" label="Sample Time" mask="time" :rules="['time']">
+                  <template v-slot:append>
+                    <q-icon name="access_time" class="cursor-pointer">
+                      <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                        <q-time v-model="sampleTime">
+                          <div class="row items-center justify-end">
+                            <q-btn v-close-popup label="Close" color="primary" flat />
+                          </div>
+                        </q-time>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
             </div>
           </div>
 
-          <div class="q-mt-xl q-pt-xl odd-section-container">
-            <div class="q-mb-sm q-mt-xl text-center water-quality-header">Conditions During Sampling</div>
+          <div class="q-mt-xl q-pa-xl odd-section-container">
+            <div class="q-mb-sm text-center water-quality-header">Conditions During Sampling</div>
             <div class="q-my-xl text-subtitle1">
               First choose the set of conditions that you would like to include on the form.
               Next, use the added fields to describe conditions at the sampling location at the time sampling occurred.
@@ -68,8 +61,8 @@
             </div>
           </div>
 
-          <div class="q-mt-xl q-pt-xl odd-section-container">
-            <div class="q-mb-sm q-mt-xl text-center water-quality-header">Calibration</div>
+          <div class="q-mt-xl q-pa-xl even-container">
+            <div class="q-mb-sm text-center water-quality-header">Calibration</div>
             <div class="q-my-xl text-subtitle1">
               Use the fields in this section to input calibration information.
             </div>
@@ -173,8 +166,8 @@
             </div>
           </div>
 
-          <div class="q-mt-xl q-pt-xl odd-section-container">
-            <div class="q-mb-sm q-mt-xl text-center water-quality-header">Surface Sample</div>
+          <div class="q-mt-xl q-pa-xl odd-section-container">
+            <div class="q-mb-sm text-center water-quality-header">Surface Sample</div>
             <div class="q-mt-xl text-subtitle1">
               Use the fields in this section to input data that is taken at the surface (default is 0.3m).
             </div>
@@ -905,8 +898,8 @@
             </div>
           </div>
 
-          <div class="q-mt-xl q-pt-xl odd-section-container">
-            <div class="q-mb-sm q-my-xl text-center water-quality-header">Volunteer Hours</div>
+          <div class="q-mt-xl q-pa-xl even-container">
+            <div class="q-mb-sm text-center water-quality-header">Volunteer Hours</div>
             <div class="q-mt-xl text-subtitle1">
               Use the fields in this section to enter volunteer hours spent monitoring. Be sure to select yourself,
               as well as, any additional monitors participating in this sampling event.
@@ -927,8 +920,8 @@
             </div>
           </div>
 
-          <div class="q-mt-xl q-pt-xl odd-section-container">
-            <div class="q-mb-sm q-my-xl text-center water-quality-header">Comments</div>
+          <div class="q-mt-xl q-pa-xl odd-section-container">
+            <div class="q-mb-sm text-center water-quality-header">Comments</div>
             <div class="row q-gutter-x-md q-my-md">
               <q-input
                 outlined
@@ -939,7 +932,7 @@
               />
             </div>
           </div>
-          <div class="flex justify-center q-my-xl">
+          <div class="flex justify-center q-my-xl q-pb-xl">
             <q-btn
               label="Save"
               style="width: 265px; height: 60px; background-color: #8AAAE5"
@@ -1172,5 +1165,19 @@ function submitButtonClick() {
   color: $vims-medium-blue;
   font-size: 3.75em;
   font-weight: 900;
+}
+
+.odd-section-container {
+  background-color: #8AAAE542;
+
+  .q-field, .q-select,
+  .q-input {
+    background-color: white !important;
+  }
+}
+
+.odd-section-container, .even-container {
+  padding-left: 125px;
+  padding-right: 125px;
 }
 </style>
