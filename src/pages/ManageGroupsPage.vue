@@ -81,6 +81,7 @@
 import { ref } from "vue";
 import EditGroupForm from "components/EditGroupForm.vue";
 import AllGroupsTable from "components/AllGroupsTable.vue";
+import {exportFile} from "quasar";
 
 /*****************************
  * Lazy/Async components
@@ -135,15 +136,58 @@ const showAllGroups = ref (false);
 function showAllButtonClick() {
   showAllGroups.value = !showAllGroups.value;
 };
-function downloadButtonClick() {
-  console.log("download all button click");
-};
 function viewDetailsButtonClick() {
   console.log("view details / edit button click.");
   dialog.value = true
 };
 
+const columns = [
+    { name: "name", label: "All Groups Table Data" },
+];
+const rows = [
+  { name: "group one" },
+];
 
+function wrapCsvValue (val, formatFn, row) {
+  let formatted = formatFn !== void 0
+    ? formatFn(val, row)
+    : val
+
+  formatted = formatted === void 0 || formatted === null
+    ? ''
+    : String(formatted)
+
+  formatted = formatted.split('"').join('""')
+
+  return `"${formatted}"`
+}
+
+const downloadButtonClick = () => {
+  // naive encoding to csv format
+  const content = [columns.map(col => wrapCsvValue(col.label))].concat(
+    rows.map(row => columns.map(col => wrapCsvValue(
+      typeof col.field === 'function'
+        ? col.field(row)
+        : row[ col.field === void 0 ? col.name : col.field ],
+      col.format,
+      row
+    )).join(','))
+  ).join('\r\n')
+
+  const status = exportFile(
+    'table-export.csv',
+    content,
+    'text/csv'
+  )
+
+  if (status !== true) {
+    $q.notify({
+      message: 'Browser denied file download...',
+      color: 'negative',
+      icon: 'warning'
+    })
+  }
+}
 /****************************
  * View Lifecycle Methods
  ***************************/
