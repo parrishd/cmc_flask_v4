@@ -41,7 +41,7 @@
             class="q-ml-md"
             style="width: 225px; height: 60px; background-color: #8AAAE5"
             text-color="white"
-            @click="saveGroup" />
+            @click="saveStation" />
         </q-card-actions>
       </div>
     </q-card>
@@ -126,13 +126,11 @@ const comments = ref('');
  * UI Functions
  ***************************/
 // ui functions here
-function saveGroup() {
-  console.log('Group details submitted');
+function saveStation() {
+  console.log('Station details submitted');
   emit('update:visibile', false);
 }
-// function closeDialog() {
-//   console.log("close edit details button click");
-// };
+
 
 /****************************
  * View Lifecycle Methods
