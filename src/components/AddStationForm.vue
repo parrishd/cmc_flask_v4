@@ -9,20 +9,24 @@
       <div class="q-pa-md">
         <q-card-section>
           <div class="text-h4 text-center text-bold q-mb-lg edit-header">
-            Edit Station: {{ station.stationName }}
+            Add Station
+          </div>
+          <div class="text-subtitle1">
+            Hi, on this page you can add a monitoring location. If you do not know the coordinates of the
+            monitoring location you are suggesting, click the check-box below the form to choose your sampling
+            location using a map.
+          </div><div class="q-my-md text-subtitle1">
+          <strong>Note:</strong> All Latitude and Longitude submissions must be geographic coordinates (decimal degrees)
+          on the North America Datum of 1983 (NAD83).
           </div>
 
           <q-input v-model="stationName" label="Station Name" class="q-mb-md" outlined />
-          <q-input v-model="stationCode" label="Code" class="q-mb-md" outlined />
+<!--          <q-input v-model="stationCode" label="Code" class="q-mb-md" outlined />-->
           <q-input v-model="stationLongName" label="Station Long Name" class="q-mb-md" outlined />
           <q-input v-model="stationDescription" label="Description" type="textarea" class="q-mb-md" outlined />
           <q-select v-model="samplingMethod" :options="samplingMethodOptions" label="Sampling Methods" class="q-mb-md" outlined />
           <q-input v-model="latitude" label="Latitude" class="q-mb-md" outlined />
           <q-input v-model="longitude" label="Longitude" class="q-mb-md" outlined />
-          <q-input v-model="huc" label="HUC 12" class="q-mb-md" outlined />
-          <q-input v-model="waterbody" label="Waterbody" class="q-mb-md" outlined />
-          <q-input v-model="fipsCode" label="FIPS Code" class="q-mb-md" outlined />
-          <q-select v-model="tidal" label="Tidal" :options="tidalOptions" class="q-mb-md" outlined />
           <q-input v-model="comments" type="textarea" label="Comments" class="q-mb-md" outlined />
 
 
@@ -41,7 +45,7 @@
             class="q-ml-md"
             style="width: 225px; height: 60px; background-color: #8AAAE5"
             text-color="white"
-            @click="saveGroup" />
+            @click="saveStation" />
         </q-card-actions>
       </div>
     </q-card>
@@ -76,7 +80,6 @@ const closeDialog = () => {
 // props defined here
 const props = defineProps({
   visibile: Boolean,
-  station: Object,
 })
 
 /****************************
@@ -89,7 +92,7 @@ const props = defineProps({
  ***************************/
 // ref/ui variables here
 const stationName = ref('');
-const stationCode = ref('');
+// const stationCode = ref('');
 const stationLongName = ref('');
 const stationDescription = ref('');
 const samplingMethod = ref('');
@@ -97,13 +100,6 @@ const samplingMethodOptions = ['Shoreline', 'Wade in mid-channel', 'Bridge/Dock 
 const groupDescription = ref('');
 const latitude = ref('');
 const longitude = ref('');
-const city = ref('');
-const state = ref('');
-const huc = ref('');
-const waterbody = ref('');
-const fipsCode = ref('');
-const tidal = ref('');
-const tidalOptions = ['Nontidal', 'Tidal'];
 const comments = ref('');
 
 
@@ -126,8 +122,8 @@ const comments = ref('');
  * UI Functions
  ***************************/
 // ui functions here
-function saveGroup() {
-  console.log('Group details submitted');
+function saveStation() {
+  console.log('New station details submitted');
   emit('update:visibile', false);
 }
 // function closeDialog() {
