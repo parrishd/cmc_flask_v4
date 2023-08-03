@@ -15,7 +15,6 @@
           <q-input v-model="email" label="Email" class="q-mb-md" outlined />
           <q-input v-model="firstName" label="First Name" class="q-mb-md" outlined />
           <q-input v-model="lastName" label="Last Name" class="q-mb-md" outlined />
-          //roles radio buttons
           <div class="row items-center q-mb-md">
             <q-checkbox v-model="monitor" label="Monitor" />
             <q-checkbox v-model="coordinator" label="Coordinator" />
