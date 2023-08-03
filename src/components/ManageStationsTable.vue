@@ -9,7 +9,7 @@
     >
       <template v-slot:body-cell-editAction="props">
         <q-td :props="props">
-          <q-btn color="primary" @click="editDetails(props.row.id)">
+          <q-btn color="primary" @click="editDetails(props.row)">
             <q-icon class="fa-solid fa-pen-to-square" size="14px"/>
           </q-btn>
         </q-td>
@@ -17,18 +17,17 @@
 
       <template v-slot:body-cell-isActive="props">
         <q-td :props="props">
-          <q-btn v-if="props.row.isActive" color="red" @click="deActivateUser(props.row.stationName)" no-caps>
+          <q-btn v-if="props.row.isActive" color="red" @click="deActivateStation(props.row.stationName)" no-caps>
             <q-icon class="fa-solid fa-ban" size="14px"/>
-            <span class="q-ml-sm">De-Activate User</span>
+            <span class="q-ml-sm">De-Activate Station</span>
           </q-btn>
 
-          <q-btn v-else color="primary" text-color="white" @click="activateUser(props.row.stationName)" no-caps>
+          <q-btn v-else color="primary" text-color="white" @click="activateStation(props.row.stationName)" no-caps>
             <q-icon class="fa-solid fa-plus" size="14px"/>
-            <span class="q-ml-sm">Activate User</span>
+            <span class="q-ml-sm">Activate Station</span>
           </q-btn>
         </q-td>
       </template>
-
     </q-table>
   </div>
 </template>
@@ -38,6 +37,7 @@
  * Imports
  ****************************/
 // all component imports here
+import { defineEmits } from 'vue';
 
 /*****************************
  * Lazy/Async components
@@ -48,6 +48,7 @@
  * Emit Definitions
  ***************************/
 // emits defined here
+const emits = defineEmits(['edit-row']);
 
 /****************************
  * Component Props
@@ -72,7 +73,7 @@ const rows = [
     isActive: false
   },
   {
-    stationName: '35',
+    stationName: 'A2',
     groupNames: 'Virginia Institute of Marine Science',
     latitude: '37.52',
     longitude: '-77.47',
@@ -80,7 +81,7 @@ const rows = [
     isActive: true
   },
   {
-    stationName: '35',
+    stationName: 'GI',
     groupNames: 'Virginia Institute of Marine Science',
     latitude: '37.52',
     longitude: '-77.47',
@@ -88,7 +89,7 @@ const rows = [
     isActive: true
   },
   {
-    stationName: '35',
+    stationName: 'R2',
     groupNames: 'Virginia Institute of Marine Science',
     latitude: '37.52',
     longitude: '-77.47',
@@ -126,13 +127,14 @@ const rows = [
  * UI Functions
  ***************************/
 // ui functions here
-const editDetails = (stationName) => {
-  console.log(`edit details for station: ${stationName}`);
+const editDetails = (row) => {
+  console.log(`edit details for station: ${row.stationName}`);
+  emits('edit-row', row);
 }
-const deActivateUser = (id) => {
+const deActivateStation = (id) => {
   console.log(`De-Activate station: ${stationName}`);
 }
-const activateUser = (id) => {
+const activateStation = (id) => {
   console.log(`Activate station: ${stationName}`);
 }
 
