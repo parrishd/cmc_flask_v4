@@ -34,7 +34,7 @@
 
       <template v-slot:body-cell-details="props">
         <q-td :props="props">
-          <q-btn color="primary" @click="goToDetails(props.row.id)" no-caps>
+          <q-btn color="primary" @click="goToDetails(props.row)" no-caps>
             <q-icon class="fa-solid fa-list" size="14px"/>
             <span class="q-ml-sm">View Details / Edit</span>
           </q-btn>
@@ -111,6 +111,7 @@
         </div>
       </q-card>
     </q-dialog>
+    <EditUserForm v-model="editUserDialog" :user="selectedUser" :visibile="editUserDialog" @update:visibile="val => (editUserDialog = val)" />
   </div>
   <input
     ref="fileInputRef"
@@ -127,6 +128,7 @@
 // all component imports here
 import { ref } from "vue";
 import { exportFile } from 'quasar';
+import EditUserForm from "components/EditUserForm.vue";
 
 /*****************************
  * Lazy/Async components
@@ -266,11 +268,13 @@ const rows = [
 // ref/ui variables here
 let searchQuery = ref('');
 let dialog = ref(false);
+let editUserDialog = ref(false);
 let selectedUser = ref({});
 let registrationEmail = ref('');
 let registrationMonitorInput = ref(false);
 let registrationCoordinatorInput = ref(false);
 const fileInputRef = ref(null);
+
 /****************************
  * Computed Properties
  ***************************/
@@ -295,8 +299,10 @@ function handleFileChange() {
   const selectedFile = event.target.files[0];
   console.log("Selected File:", selectedFile);
 }
-const goToDetails = (id) => {
-  console.log(`Navigate to details of user with id: ${id}`);
+const goToDetails = (user) => {
+  console.log(`Navigate to details of: ${user.firstName} ${user.lastName}`);
+  selectedUser.value = user;
+  editUserDialog.value = true;
 }
 
 const retireUser = (id) => {
