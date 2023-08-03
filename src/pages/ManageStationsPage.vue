@@ -35,6 +35,12 @@
         />
       </div>
     </div>
+    <input
+      ref="fileInputRef"
+      type="file"
+      style="display: none"
+      @change="handleFileChange"
+    />
 
     <div class="row q-mt-xl q-mx-xl q-px-xl">
       <div class="col q-pr-md">
@@ -43,11 +49,12 @@
     </div>
 
     <div class="row q-mt-xl q-mx-xl q-px-xl">
-      <ManageStationsTable />
+      <ManageStationsTable @edit-row="onEditRow" />
 
       <div id="map" class="q-ml-auto q-mr-md"/>
-
     </div>
+
+    <EditStationForm v-model="dialog" :station="selectedStation" :visibile="dialog" @update:visibile="val => (dialog = val)" />
 
   </q-page>
 </template>
@@ -60,6 +67,8 @@
 import ManageStationsTable from "components/ManageStationsTable.vue";
 import {reactive, ref, onMounted} from "vue";
 import mapboxgl from "mapbox-gl";
+import {exportFile} from "quasar";
+import EditStationForm from "components/EditStationForm.vue";
 
 /*****************************
  * Lazy/Async components
@@ -87,6 +96,9 @@ import mapboxgl from "mapbox-gl";
 // ref/ui variables here
 let searchQuery = ref('');
 let map = reactive({});
+const dialog = ref(false);
+const selectedStation = ref(null);
+const fileInputRef = ref(null);
 
 /****************************
  * Computed Properties
@@ -112,9 +124,65 @@ function newStationButtonClick() {
 }
 function uploadBulkButtonClick() {
   console.log("upload bulk stations button click");
+  fileInputRef.value.click();
 }
-function downloadButtonClick() {
-  console.log("download stations button click");
+
+function handleFileChange() {
+  const selectedFile = event.target.files[0];
+  console.log("Selected File:", selectedFile);
+}
+
+const onEditRow = (row) => {
+  selectedStation.value = row;
+  dialog.value = true;
+}
+
+const columns = [
+  { name: "name", label: "Stations Table Data" },
+];
+const rows = [
+  { name: "Station One" },
+];
+
+function wrapCsvValue (val, formatFn, row) {
+  let formatted = formatFn !== void 0
+    ? formatFn(val, row)
+    : val
+
+  formatted = formatted === void 0 || formatted === null
+    ? ''
+    : String(formatted)
+
+  formatted = formatted.split('"').join('""')
+
+  return `"${formatted}"`
+}
+
+const downloadButtonClick = () => {
+  // naive encoding to csv format
+  const content = [columns.map(col => wrapCsvValue(col.label))].concat(
+    rows.map(row => columns.map(col => wrapCsvValue(
+      typeof col.field === 'function'
+        ? col.field(row)
+        : row[ col.field === void 0 ? col.name : col.field ],
+      col.format,
+      row
+    )).join(','))
+  ).join('\r\n')
+
+  const status = exportFile(
+    'table-export.csv',
+    content,
+    'text/csv'
+  )
+
+  if (status !== true) {
+    $q.notify({
+      message: 'Browser denied file download...',
+      color: 'negative',
+      icon: 'warning'
+    })
+  }
 }
 
 const createMap = () => {
