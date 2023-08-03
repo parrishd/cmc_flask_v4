@@ -1,15 +1,16 @@
 <template>
   <q-page class="q-px-xl q-mx-xl">
     <div class="row q-mt-lg">
-      <div class="col q-mt-lg text-center manage-header">Manage</div>
+      <div class="col q-mt-lg text-center manage-header">Manage Toolset</div>
     </div>
 
     <div class="row">
       <div class="col q-mt-lg manage-text">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce pharetra, elit et volutpat elementum,
-        quam ex lacinia augue, ut fermentum ligula turpis id sem. Morbi ac diam et sem varius fringilla.
-        Donec ultricies gravida mi, et scelerisque urna placerat at. Vivamus tincidunt sem in augue euismod,
-        in ullamcorper diam cursus. Suspendisse non lacinia urna, ac elementum sapien.
+        The manage toolset equips users with the tools to manage the supporting information for their monitoring
+        programs. The manage toolset includes a tool to manage group information, including the parameters each group
+        collects. Here, users can also manage their group members' information, including activation of new users.
+        Users can also create and manage information about the stations where their group collects water quality
+        information.
       </div>
     </div>
 
