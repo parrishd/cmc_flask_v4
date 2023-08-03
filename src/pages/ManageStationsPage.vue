@@ -54,6 +54,7 @@
       <div id="map" class="q-ml-auto q-mr-md"/>
     </div>
 
+    <AddStationForm v-model="addNewDialog" :visibile="addNewDialog" @update:visibile="val => (addNewDialog = val)" />
     <EditStationForm v-model="dialog" :station="selectedStation" :visibile="dialog" @update:visibile="val => (dialog = val)" />
 
   </q-page>
@@ -69,6 +70,7 @@ import {reactive, ref, onMounted} from "vue";
 import mapboxgl from "mapbox-gl";
 import {exportFile} from "quasar";
 import EditStationForm from "components/EditStationForm.vue";
+import AddStationForm from "components/AddStationForm.vue";
 
 /*****************************
  * Lazy/Async components
@@ -97,6 +99,7 @@ import EditStationForm from "components/EditStationForm.vue";
 let searchQuery = ref('');
 let map = reactive({});
 const dialog = ref(false);
+const addNewDialog = ref(false);
 const selectedStation = ref(null);
 const fileInputRef = ref(null);
 
@@ -121,6 +124,7 @@ const fileInputRef = ref(null);
 // ui functions here
 function newStationButtonClick() {
   console.log("new station button click");
+  addNewDialog.value = true;
 }
 function uploadBulkButtonClick() {
   console.log("upload bulk stations button click");
