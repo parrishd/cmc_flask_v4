@@ -112,6 +112,12 @@
       </q-card>
     </q-dialog>
   </div>
+  <input
+    ref="fileInputRef"
+    type="file"
+    style="display: none"
+    @change="handleFileChange"
+  />
 </template>
 
 <script setup>
@@ -264,7 +270,7 @@ let selectedUser = ref({});
 let registrationEmail = ref('');
 let registrationMonitorInput = ref(false);
 let registrationCoordinatorInput = ref(false);
-
+const fileInputRef = ref(null);
 /****************************
  * Computed Properties
  ***************************/
@@ -284,6 +290,11 @@ let registrationCoordinatorInput = ref(false);
  * UI Functions
  ***************************/
 // ui functions here
+
+function handleFileChange() {
+  const selectedFile = event.target.files[0];
+  console.log("Selected File:", selectedFile);
+}
 const goToDetails = (id) => {
   console.log(`Navigate to details of user with id: ${id}`);
 }
@@ -313,6 +324,7 @@ const searchUsers = (searchQuery) => {
 
 function bulkFileUpload() {
   console.log('Bulk file button click');
+  fileInputRef.value.click();
 }
 
 function wrapCsvValue (val, formatFn, row) {
