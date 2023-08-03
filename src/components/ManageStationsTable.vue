@@ -131,10 +131,10 @@ const editDetails = (row) => {
   console.log(`edit details for station: ${row.stationName}`);
   emits('edit-row', row);
 }
-const deActivateStation = (id) => {
+const deActivateStation = (stationName) => {
   console.log(`De-Activate station: ${stationName}`);
 }
-const activateStation = (id) => {
+const activateStation = (stationName) => {
   console.log(`Activate station: ${stationName}`);
 }
 
