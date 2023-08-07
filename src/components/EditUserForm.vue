@@ -115,7 +115,7 @@ const zip = ref('');
 const group = ref('');
 const groupOptions = ['Virginia Institute of Marine Science', 'Virginia Save Our Streams', 'ShoreRivers', 'James River Association'];
 const certificationDate = ref(null);
-const status = ref('');
+const status = ref(false);
 
 
 /****************************
