@@ -113,11 +113,11 @@ const _router = useRouter();
  * UI Functions
  ***************************/
 function uploadDataButtonClick() {
-  _router.push({ name: "dataUploadWaterQuality" });
+  _router.push({ name: "dataToolset" });
 }
-
 function contactServiceButtonClick() {
   console.log("contact service button click");
+  _router.push({ name: "contact" });
 }
 
 /****************************
