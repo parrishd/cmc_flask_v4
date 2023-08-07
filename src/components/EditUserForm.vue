@@ -29,7 +29,9 @@
           <q-select v-model="state" label="State" :options="stateOptions" class="q-mb-md" outlined />
           <q-input v-model="zip" label="Zip" class="q-mb-md" outlined />
           <q-select v-model="group" label="Group" :options="groupOptions" class="q-mb-md" outlined />
-          <q-date v-model="certificationDate" label="Certification Date" class="q-mb-md" outlined />
+          <div class="row items-center q-mb-md">
+            <q-date v-model="certificationDate" title="Certification Date" class="q-mb-md" outlined />
+          </div>
           <q-checkbox v-model="status" label="Status" class="q-mb-md" />
 
 
