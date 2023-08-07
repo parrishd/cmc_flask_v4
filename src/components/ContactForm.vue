@@ -30,8 +30,8 @@
     </div>
 
     <div class="row q-my-lg">
-      <div class="col text-right">
-        <q-btn label="Submit" color="primary" style="width: 160px" />
+      <div class="col text-center">
+        <q-btn label="Submit" color="primary" style="width: 265px; height: 60px" />
       </div>
     </div>
   </div>
