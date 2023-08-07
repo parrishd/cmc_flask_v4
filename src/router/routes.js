@@ -56,7 +56,7 @@ const routes = [
   {
     path: "/contact",
     component: () => import("layouts/SiteLayout.vue"),
-    children: [{ path: "", component: () => import("pages/ContactPage.vue") }],
+    children: [{ path: "", name: "contact",  component: () => import("pages/ContactPage.vue") }],
   },
 
   {
@@ -68,7 +68,7 @@ const routes = [
   },
 
   {
-    path: "/data",
+    path: "/admin",
     component: () => import("layouts/SiteLayout.vue"),
     children: [{ path: "", component: () => import("pages/DataPage.vue") }],
   },
