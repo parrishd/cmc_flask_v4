@@ -18,8 +18,8 @@
       <div class="col-4">
         <div class="flex justify-center resource-image-container">
           <q-img
-            src="/images/resources/resources-manual.png"
-            style="width: 220px"
+            src="/images/resources/manual-resources.svg"
+            style="width: 175px; height: 175px"
           />
         </div>
         <div class="text-center resource-header">Manual</div>
@@ -45,8 +45,8 @@
       <div class="col-4">
         <div class="flex justify-center resource-image-container">
           <q-img
-            src="/images/resources/resources-homepage-tutorials.png"
-            style="width: 220px"
+            src="/images/resources/homepage-tutorials-resources.svg"
+            style="width: 175px; height: 175px"
           />
         </div>
         <div class="text-center resource-header">Homepage Tutorials</div>
@@ -70,8 +70,8 @@
       <div class="col-4">
         <div class="flex justify-center resource-image-container">
           <q-img
-            src="/images/resources/resources-data-upload-tutorials.png"
-            style="width: 220px"
+            src="/images/resources/data-upload-resources.svg"
+            style="width: 185px; height: 185px"
           />
         </div>
         <div class="text-center resource-header">Data Upload Tutorials</div>
@@ -94,8 +94,8 @@
       <div class="col-4">
         <div class="flex justify-center resource-image-container">
           <q-img
-            src="/images/resources/resources-coordinator-tutorials.png"
-            style="height: 200px"
+            src="/images/resources/coordinated-tutorials-resources.svg"
+            style="width: 185px; height: 185px"
             fit="contain"
           />
         </div>
@@ -114,8 +114,8 @@
       <div class="col-4">
         <div class="flex justify-center resource-image-container">
           <q-img
-            src="/images/resources/resources-data-translation-macro.png"
-            style="width: 220px"
+            src="/images/resources/data-translation-resources.svg"
+            style="width: 185px; height: 185px"
           />
         </div>
         <div class="text-center resource-header">Data Translation Macro</div>
