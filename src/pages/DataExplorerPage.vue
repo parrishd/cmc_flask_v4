@@ -830,6 +830,10 @@ function createChart() {
  ***************************/
 onMounted(() => {
   createChart();
+
+  setTimeout(() => {
+    collapsed.value = false;
+  }, 500);
 });
 </script>
 
