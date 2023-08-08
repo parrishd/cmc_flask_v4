@@ -43,15 +43,32 @@
       <!-- map/form -->
       <div class="row q-mt-lg">
         <!-- map -->
-        <div class="col-8">
+        <div class="col">
           <MapBox />
         </div>
 
         <!-- form -->
-        <div class="col-4 q-px-md">
+        <div v-if="collapsed">
+          <div class="col-1 q-px-md">
+            <!--            <q-icon class="fa-solid fa-arrow-left" size="24px" />-->
+            <q-btn
+              icon="fa-solid fa-arrow-left"
+              @click="collapsed = !collapsed"
+              round
+              flat
+            />
+          </div>
+        </div>
+        <div v-else class="col-4 q-px-md">
           <div class="row">
             <div class="col">
-              <q-icon class="fa-solid fa-arrow-right" size="24px" />
+              <!--              <q-icon class="fa-solid fa-arrow-right" size="24px" />-->
+              <q-btn
+                icon="fa-solid fa-arrow-right"
+                @click="collapsed = !collapsed"
+                round
+                flat
+              />
             </div>
             <div class="col text-right">
               <q-icon class="fa-solid fa-circle-info" size="18px">
@@ -772,6 +789,8 @@ const parameters = [
  * Ref/UI Variables
  ***************************/
 const plotChartRef = ref(null);
+
+const collapsed = ref(true);
 
 const startDate = ref("");
 const endDate = ref("");

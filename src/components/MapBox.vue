@@ -629,9 +629,34 @@ const setupBenthicData = () => {
           // remove pop up before adding new one
           removePopUps();
 
-          const popup = new mapboxgl.Popup({ offset: [0, -15] })
+          const popupContent = `
+              <div style="padding: 10px 20px 10px 20px">
+                <div style="color: #075C7A; font-size: 1.95em; font-weight: 700;">
+                  Station
+                </div>
+                <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
+                  WESBRABIGRUN1.89 - West Branch-Big Run
+                </div>
+                <div style="margin-top:10px; color: #075C7A; font-size: 1.95em; font-weight: 700;">
+                  Monitored By
+                </div>
+                <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
+                  Centre County Pennsylvania Senior Environmental Corps
+                </div>
+                <div style="margin-top: 10px">
+                  <button style="background-color: #075C7A; color: white; padding: 8px; border: none; border-radius: 5px;">
+                    View Station Details
+                  </button>
+                </div>
+              </div>
+            `;
+
+          const popup = new mapboxgl.Popup({
+            offset: [0, 0],
+            maxWidth: "400px",
+          })
             .setLngLat(feature.geometry.coordinates)
-            .setHTML(`<h3> Station </h3><p> test it out </p>`);
+            .setHTML(popupContent);
 
           popup.addTo(map);
           setupMouseEventListeners(layerID);
