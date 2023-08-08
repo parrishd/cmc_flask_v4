@@ -644,7 +644,7 @@ const setupBenthicData = () => {
                   Centre County Pennsylvania Senior Environmental Corps
                 </div>
                 <div style="margin-top: 10px">
-                  <button style="background-color: #075C7A; color: white; padding: 8px; border: none; border-radius: 5px;">
+                  <button style="background-color: #075C7A; color: white; padding: 8px 10px 8px 10px; border: none; border-radius: 5px;">
                     View Station Details
                   </button>
                 </div>
