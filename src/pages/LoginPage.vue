@@ -14,7 +14,12 @@
           <q-input v-model="password" label="Password" />
         </div>
         <div class="q-px-xl q-mt-xl">
-          <q-btn label="Login" style="width: 100%" color="primary" />
+          <q-btn
+            label="Login"
+            style="width: 100%"
+            color="primary"
+            @click="authenticate"
+          />
         </div>
         <div class="q-px-xl q-mt-lg text-center">
           <a href="/forgot-password" class="forgot-password-text">
@@ -37,6 +42,8 @@
  * Imports
  ****************************/
 import { ref } from "vue";
+import { useUserStore } from "stores/user";
+import { useRouter } from "vue-router";
 
 /*****************************
  * Lazy/Async components
@@ -56,7 +63,8 @@ import { ref } from "vue";
 /****************************
  * Local/'Use' Variables
  ***************************/
-// local/use variables here
+const _router = useRouter();
+const _userStore = useUserStore();
 
 /****************************
  * Ref/UI Variables
@@ -82,7 +90,10 @@ const password = ref("");
 /****************************
  * UI Functions
  ***************************/
-// ui functions here
+function authenticate() {
+  _userStore.authenticate();
+  _router.push("data-explorer");
+}
 
 /****************************
  * View Lifecycle Methods
