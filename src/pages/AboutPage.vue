@@ -6,12 +6,14 @@
       </div>
     </div>
 
-    <div class="row q-my-lg justify-center">
-      <q-img
-        src="images/about-vims-image.png"
-        style="max-width: 800px; height: 400px"
-        :ratio="16 / 9"
-      />
+    <div class="row q-my-lg q-pa-md justify-center">
+      <iframe width="800" height="400"
+              src="https://www.youtube.com/embed/7oWA6sWWnAM"
+              title="YouTube video player"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen>
+      </iframe>
     </div>
 
     <div class="row">
@@ -192,3 +194,4 @@ const slide = ref(1);
   max-width: 240px !important;
 }
 </style>
+
