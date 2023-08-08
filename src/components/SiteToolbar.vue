@@ -60,6 +60,7 @@
  ****************************/
 import { useRouter } from "vue-router";
 import { computed } from "vue";
+import { useUserStore } from "stores/user";
 
 /*****************************
  * Lazy/Async components
@@ -80,6 +81,7 @@ import { computed } from "vue";
  * Local/'Use' Variables
  ***************************/
 const _router = useRouter();
+const _userStore = useUserStore();
 
 /****************************
  * Ref/UI Variables
@@ -90,7 +92,8 @@ const _router = useRouter();
  * Computed Properties
  ***************************/
 const loggedIn = computed(() => {
-  return true;
+  return _userStore.authenticated;
+  // return true;
 });
 
 /***************************
@@ -116,6 +119,7 @@ function registerButtonClick() {
 
 function logoutButtonClick() {
   console.log("logout button click");
+  _userStore.deAuthenticate();
 }
 
 /****************************

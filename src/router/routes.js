@@ -1,7 +1,7 @@
 const routes = [
   {
     path: "/",
-    redirect: "/about",
+    redirect: "/data-explorer",
     // component: () => import("layouts/MainLayout.vue"),
     // #children: [{ path: "", component: () => import("pages/IndexPage.vue") }],
   },
@@ -56,7 +56,13 @@ const routes = [
   {
     path: "/contact",
     component: () => import("layouts/SiteLayout.vue"),
-    children: [{ path: "", name: "contact",  component: () => import("pages/ContactPage.vue") }],
+    children: [
+      {
+        path: "",
+        name: "contact",
+        component: () => import("pages/ContactPage.vue"),
+      },
+    ],
   },
 
   {
@@ -116,7 +122,8 @@ const routes = [
       {
         path: "",
         name: "dataUploadMacroinvertebratesForm",
-        component: () => import("pages/DataUploadMacroinvertebratesFormPage.vue"),
+        component: () =>
+          import("pages/DataUploadMacroinvertebratesFormPage.vue"),
       },
     ],
   },
@@ -228,9 +235,9 @@ const routes = [
       {
         path: "",
         name: "manageStations",
-        component: () => import("pages/ManageStationsPage.vue")
-      }
-    ]
+        component: () => import("pages/ManageStationsPage.vue"),
+      },
+    ],
   },
   {
     path: "/data-toolset",
@@ -239,9 +246,9 @@ const routes = [
       {
         path: "",
         name: "dataToolset",
-        component: () => import("pages/DataToolsetPage.vue")
-      }
-    ]
+        component: () => import("pages/DataToolsetPage.vue"),
+      },
+    ],
   },
   {
     path: "/data-water-quality",
@@ -250,9 +257,9 @@ const routes = [
       {
         path: "",
         name: "dataWaterQaulity",
-        component: () => import("pages/UploadWaterQualityPage.vue")
-      }
-    ]
+        component: () => import("pages/UploadWaterQualityPage.vue"),
+      },
+    ],
   },
   {
     path: "/data-macroinvertebrates",
@@ -261,9 +268,9 @@ const routes = [
       {
         path: "",
         name: "dataMacroinvertebrates",
-        component: () => import("pages/UploadMacroinvertebratesPage.vue")
-      }
-    ]
+        component: () => import("pages/UploadMacroinvertebratesPage.vue"),
+      },
+    ],
   },
 
   // Always leave this as last one,
