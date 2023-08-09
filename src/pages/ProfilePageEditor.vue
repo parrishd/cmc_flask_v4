@@ -6,13 +6,13 @@
         <div class="column items-center profile-directions">
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
         </div>
-        <q-avatar
-          size="250px"
-          font-size="100px"
-          color="teal"
-          text-color="white"
-          icon="fa-solid fa-user"
+
+        <q-img
+          style="width: 250px"
+          src="images/VIMSProfileHeadshot.png"
+          fit="contain"
         />
+
         <div class="q-py-xl column items-center photo-upload">
           <p class="q-mb-lg photo-upload-text">Upload a different photo</p>
           <!--          <q-uploader color="primary" style="max-width: 300px" />-->

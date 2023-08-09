@@ -10,9 +10,10 @@
           <a href="/contact">CONTACT</a>
           <a href="/resources">RESOURCES</a>
 
-          <a v-if="loggedIn" href="/data">DATA</a>
+          <a v-if="loggedIn" href="/data-toolset">DATA</a>
           <a v-if="loggedIn" href="/profile">PROFILE</a>
           <a v-if="loggedIn" href="/manage">MANAGE</a>
+          <a v-if="loggedIn" href="/admin">ADMIN</a>
         </div>
         <div v-if="!loggedIn" class="col-5 flex justify-end">
           <q-btn
@@ -59,6 +60,7 @@
  ****************************/
 import { useRouter } from "vue-router";
 import { computed } from "vue";
+import { useUserStore } from "stores/user";
 
 /*****************************
  * Lazy/Async components
@@ -79,6 +81,7 @@ import { computed } from "vue";
  * Local/'Use' Variables
  ***************************/
 const _router = useRouter();
+const _userStore = useUserStore();
 
 /****************************
  * Ref/UI Variables
@@ -89,7 +92,8 @@ const _router = useRouter();
  * Computed Properties
  ***************************/
 const loggedIn = computed(() => {
-  return true;
+  return _userStore.authenticated;
+  // return true;
 });
 
 /***************************
@@ -115,6 +119,7 @@ function registerButtonClick() {
 
 function logoutButtonClick() {
   console.log("logout button click");
+  _userStore.deAuthenticate();
 }
 
 /****************************

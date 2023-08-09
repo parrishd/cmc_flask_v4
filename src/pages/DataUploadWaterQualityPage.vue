@@ -26,21 +26,27 @@
     <div class="row q-mt-xl">
       <div class="col text-center">
         <q-btn
-          style="width: 220px; height: 60px"
+          style="width: 220px; height: 60px; background-color: #8AAAE5"
           class="q-mr-md"
-          color="primary"
+          text-color="white"
           label="FORM"
           @click="formButtonClick"
         />
         <q-btn
-          style="width: 220px; height: 60px"
+          style="width: 220px; height: 60px; background-color: #8AAAE5"
           class="q-ml-md"
-          color="primary"
+          text-color="white"
           label="BULK FILE"
           @click="bulkFileButtonClick"
         />
       </div>
     </div>
+    <input
+      ref="fileInputRef"
+      type="file"
+      style="display: none"
+      @change="handleFileChange"
+    />
   </q-page>
 </template>
 
@@ -49,6 +55,7 @@
  * Imports
  ****************************/
 import { useRouter } from "vue-router";
+import { ref } from "vue";
 
 /*****************************
  * Lazy/Async components
@@ -73,7 +80,7 @@ const _router = useRouter();
 /****************************
  * Ref/UI Variables
  ***************************/
-// ref/ui variables here
+const fileInputRef = ref(null);
 
 /****************************
  * Computed Properties
@@ -94,11 +101,18 @@ const _router = useRouter();
  * UI Functions
  ***************************/
 function formButtonClick() {
-  _router.push({ name: "dataUploadForm" });
+  _router.push({ name: "dataUploadWaterQualityForm" });
 }
 
 function bulkFileButtonClick() {
-  _router.push({ name: "dataUploadReview" });
+  // _router.push({ name: "dataUploadReview" });
+  fileInputRef.value.click();
+}
+
+function handleFileChange(event) {
+  const selectedFile = event.target.files[0];
+  console.log("Selected File:", selectedFile);
+  _router.push({ name: "dataUploadReviewWaterQuality" });
 }
 
 /****************************

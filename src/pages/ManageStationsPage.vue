@@ -1,11 +1,11 @@
 <template>
   <q-page class="q-px-xl q-mx-xl">
     <div class="row q-mt-lg">
-      <div class="col q-mt-lg text-center groups-header">Manage Groups</div>
+      <div class="col q-mt-lg text-center stations-header">Manage Stations</div>
     </div>
 
     <div class="row">
-      <div class="col q-mt-lg text-center groups-text">
+      <div class="col q-mt-lg text-center stations-text">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce pharetra, elit et volutpat elementum.
       </div>
     </div>
@@ -15,60 +15,47 @@
         <q-btn
           style="width: 265px; height: 60px; background-color: #8AAAE5"
           class="q-mr-md cancel-image-btn"
-          label="Show All Groups"
+          label="Add New Station"
           text-color="white"
-          @click="showAllButtonClick"
+          @click="newStationButtonClick"
         />
         <q-btn
           style="width: 265px; height: 60px; background-color: #8AAAE5"
           class="q-ml-md save-image-btn"
-          label="Download All Groups"
+          label="Upload Bulk Stations"
+          text-color="white"
+          @click="uploadBulkButtonClick"
+        />
+        <q-btn
+          style="width: 265px; height: 60px; background-color: #8AAAE5"
+          class="q-ml-md save-image-btn"
+          label="Download Stations"
           text-color="white"
           @click="downloadButtonClick"
         />
       </div>
     </div>
+    <input
+      ref="fileInputRef"
+      type="file"
+      style="display: none"
+      @change="handleFileChange"
+    />
 
-    <div class="row q-mt-xl">
+    <div class="row q-mt-xl q-mx-xl q-px-xl">
       <div class="col q-pr-md">
-        <q-input v-model="name" label="Name" outlined />
-      </div>
-      <div class="col q-px-md">
-        <q-input v-model="description" label="Description" outlined />
-      </div>
-      <div class="col q-px-md">
-        <q-input v-model="email" label="Email" outlined />
-      </div>
-      <div class="col q-pl-md">
-        <q-input v-model="cmcMembers" label="CMC Members" outlined />
+        <q-input v-model="searchQuery" placeholder="Search Stations in Table" outlined />
       </div>
     </div>
 
-    <div class="row q-mt-xl">
-      <div class="col text-center">
-        <q-btn
-          style="width: 265px; height: 60px; background-color: #8AAAE5"
-          class="q-mr-md cancel-image-btn"
-          label="View Details / Edit"
-          text-color="white"
-          @click="viewDetailsButtonClick"
-        />
-      </div>
+    <div class="row q-mt-xl q-mx-xl q-px-xl">
+      <ManageStationsTable @edit-row="onEditRow" />
+
+      <div id="map" class="q-ml-auto q-mr-md"/>
     </div>
 
-    <div class="row q-mt-xl">
-      <div class="col q-mt-lg text-center groups-text">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce pharetra, elit et volutpat elementum.
-      </div>
-
-    </div>
-    <div class="row q-mt-xl" v-if="showAllGroups">
-      <div class="col justify-center">
-        <AllGroupsTable />
-      </div>
-    </div>
-
-    <EditGroupForm v-model="dialog" :visibile="dialog" @update:visibile="val => (dialog = val)" />
+    <AddStationForm v-model="addNewDialog" :visibile="addNewDialog" @update:visibile="val => (addNewDialog = val)" />
+    <EditStationForm v-model="dialog" :station="selectedStation" :visibile="dialog" @update:visibile="val => (dialog = val)" />
 
   </q-page>
 </template>
@@ -78,10 +65,12 @@
  * Imports
  ****************************/
 // all component imports here
-import { ref } from "vue";
-import EditGroupForm from "components/EditGroupForm.vue";
-import AllGroupsTable from "components/AllGroupsTable.vue";
+import ManageStationsTable from "components/ManageStationsTable.vue";
+import {reactive, ref, onMounted} from "vue";
+import mapboxgl from "mapbox-gl";
 import {exportFile} from "quasar";
+import EditStationForm from "components/EditStationForm.vue";
+import AddStationForm from "components/AddStationForm.vue";
 
 /*****************************
  * Lazy/Async components
@@ -107,12 +96,12 @@ import {exportFile} from "quasar";
  * Ref/UI Variables
  ***************************/
 // ref/ui variables here
-const name = ref("");
-const description = ref("");
-const email = ref("");
-const cmcMembers = ref("");
+let searchQuery = ref('');
+let map = reactive({});
 const dialog = ref(false);
-const showAllGroups = ref (false);
+const addNewDialog = ref(false);
+const selectedStation = ref(null);
+const fileInputRef = ref(null);
 
 /****************************
  * Computed Properties
@@ -133,19 +122,30 @@ const showAllGroups = ref (false);
  * UI Functions
  ***************************/
 // ui functions here
-function showAllButtonClick() {
-  showAllGroups.value = !showAllGroups.value;
-};
-function viewDetailsButtonClick() {
-  console.log("view details / edit button click.");
-  dialog.value = true
-};
+function newStationButtonClick() {
+  console.log("new station button click");
+  addNewDialog.value = true;
+}
+function uploadBulkButtonClick() {
+  console.log("upload bulk stations button click");
+  fileInputRef.value.click();
+}
+
+function handleFileChange() {
+  const selectedFile = event.target.files[0];
+  console.log("Selected File:", selectedFile);
+}
+
+const onEditRow = (row) => {
+  selectedStation.value = row;
+  dialog.value = true;
+}
 
 const columns = [
-    { name: "name", label: "All Groups Table Data" },
+  { name: "name", label: "Stations Table Data" },
 ];
 const rows = [
-  { name: "group one" },
+  { name: "Station One" },
 ];
 
 function wrapCsvValue (val, formatFn, row) {
@@ -188,19 +188,40 @@ const downloadButtonClick = () => {
     })
   }
 }
+
+const createMap = () => {
+  mapboxgl.accessToken =
+    "pk.eyJ1IjoibXlha2F2ZW5rYSIsImEiOiJjbDlxMDJrNmcwMmE2M3dxeDYyZWE0OWQ0In0.dKzXgJu-ZUH3epnFzxvllg";
+  map = new mapboxgl.Map({
+    container: "map",
+    style: "mapbox://styles/mapbox/outdoors-v11",
+    center: [-76.4, 37.8],
+    zoom: 6.55,
+  });
+  map.addControl(new mapboxgl.NavigationControl());
+};
+
 /****************************
  * View Lifecycle Methods
  ***************************/
 // view lifecycle methods here
+onMounted(() => {
+  createMap();
+});
+
 </script>
 
 <style lang="scss" scoped>
 @import "src/css/app.scss";
 
-.groups-header {
+.stations-header {
   color: $vims-medium-blue;
   font-size: 3.75em;
   font-weight: 900;
 }
 
+#map {
+  width: 40%;
+  height: 400px;
+}
 </style>

@@ -1,41 +1,36 @@
 <template>
   <q-page class="q-px-xl q-mx-xl">
     <div class="row q-mt-lg">
-      <div class="col q-mt-lg text-center manage-header">Manage Toolset</div>
+      <div class="col q-mt-lg text-center macroinvertebrates-header">Upload Macroinvertebrates</div>
     </div>
 
-    <div class="row">
-      <div class="col q-mt-lg manage-text">
-        The manage toolset equips users with the tools to manage the supporting information for their monitoring
-        programs. The manage toolset includes a tool to manage group information, including the parameters each group
-        collects. Here, users can also manage their group members' information, including activation of new users.
-        Users can also create and manage information about the stations where their group collects water quality
-        information.
+    <div>
+      <div class="col q-mt-lg">
+        There are two different methods for uploading data to the Data Explorer: Single sample event uploads through
+        a data entry form OR multiple sample event uploads by uploading a spreadsheet file. The file for the latter
+        method needs to adhere to a very specific file format, a template for which can be downloaded here.
+        Additional details can be found in the Data Explorer User's Manual.
+      </div>
+      <div class="col q-mt-xl">
+        Choose the type of upload you would like to do today:
       </div>
     </div>
 
     <div class="row q-mt-xl">
       <div class="col text-center">
         <q-btn
-          style="width: 265px; height: 60px; background-color: #8AAAE5"
+          style="width: 300px; height: 60px; background-color: #8AAAE5"
           class="q-mr-md cancel-image-btn"
-          label="Manage Users"
+          label="Form"
           text-color="white"
-          @click="manageUsersButtonClick"
+          @click="macroinvertebratesFormClick"
         />
         <q-btn
-          style="width: 265px; height: 60px; background-color: #8AAAE5"
+          style="width: 300px; height: 60px; background-color: #8AAAE5"
           class="q-ml-md save-image-btn"
-          label="Manage Groups"
+          label="Bulk File"
           text-color="white"
-          @click="manageGroupsButtonClick"
-        />
-        <q-btn
-          style="width: 265px; height: 60px; background-color: #8AAAE5"
-          class="q-ml-md save-image-btn"
-          label="Manage Stations"
-          text-color="white"
-          @click="manageStationsButtonClick"
+          @click="macroinvertebratesBulkClick"
         />
       </div>
     </div>
@@ -48,7 +43,6 @@
  * Imports
  ****************************/
 // all component imports here
-import { useRouter } from "vue-router";
 
 /*****************************
  * Lazy/Async components
@@ -65,11 +59,13 @@ import { useRouter } from "vue-router";
  ***************************/
 // props defined here
 
+
+
 /****************************
  * Local/'Use' Variables
  ***************************/
 // local/use variables here
-const _router = useRouter();
+
 
 /****************************
  * Ref/UI Variables
@@ -95,35 +91,25 @@ const _router = useRouter();
  * UI Functions
  ***************************/
 // ui functions here
-function manageUsersButtonClick() {
-  _router.push({ name: "manageUsers" });
+function macroinvertebratesFormClick() {
+  console.log('macroinvertebrates form button click');
+}
+function macroinvertebratesBulkClick() {
+  console.log('macroinvertebrates bulk upload button click');
 }
 
-function manageGroupsButtonClick() {
-  _router.push({ name: "manageGroups" })
-}
-
-function manageStationsButtonClick() {
-  _router.push({ name: "manageStations" })
-}
 /****************************
  * View Lifecycle Methods
  ***************************/
 // view lifecycle methods here
-import ContactForm from "components/ContactForm.vue";
 </script>
 
 <style lang="scss" scoped>
 @import "src/css/app.scss";
 
-.manage-header {
+.macroinvertebrates-header {
   color: $vims-medium-blue;
   font-size: 3.75em;
   font-weight: 900;
-}
-
-.manage-text {
-  color: $vims-medium-blue;
-  font-size: 1.25em;
 }
 </style>

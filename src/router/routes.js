@@ -1,7 +1,7 @@
 const routes = [
   {
     path: "/",
-    redirect: "/about",
+    redirect: "/data-explorer",
     // component: () => import("layouts/MainLayout.vue"),
     // #children: [{ path: "", component: () => import("pages/IndexPage.vue") }],
   },
@@ -56,7 +56,13 @@ const routes = [
   {
     path: "/contact",
     component: () => import("layouts/SiteLayout.vue"),
-    children: [{ path: "", component: () => import("pages/ContactPage.vue") }],
+    children: [
+      {
+        path: "",
+        name: "contact",
+        component: () => import("pages/ContactPage.vue"),
+      },
+    ],
   },
 
   {
@@ -68,19 +74,31 @@ const routes = [
   },
 
   {
-    path: "/data",
+    path: "/admin",
     component: () => import("layouts/SiteLayout.vue"),
     children: [{ path: "", component: () => import("pages/DataPage.vue") }],
   },
 
   {
-    path: "/data-upload",
+    path: "/data-upload-water-quality",
     component: () => import("layouts/SiteLayout.vue"),
     children: [
       {
         path: "",
-        name: "dataUpload",
-        component: () => import("pages/DataUploadPage.vue"),
+        name: "dataUploadWaterQuality",
+        component: () => import("pages/DataUploadWaterQualityPage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "/data-upload-macroinvertebrates",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataUploadMacroinvertebrate",
+        component: () => import("pages/DataUploadMacroinvertebratesPage.vue"),
       },
     ],
   },
@@ -98,13 +116,51 @@ const routes = [
   },
 
   {
-    path: "/data-upload-review",
+    path: "/data-upload-macroinvertebrates-form",
     component: () => import("layouts/SiteLayout.vue"),
     children: [
       {
         path: "",
-        name: "dataUploadReview",
-        component: () => import("pages/DataUploadReviewPage.vue"),
+        name: "dataUploadMacroinvertebratesForm",
+        component: () =>
+          import("pages/DataUploadMacroinvertebratesFormPage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "/data-upload-water-quality-form",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataUploadWaterQualityForm",
+        component: () => import("pages/DataUploadWaterQualityFormPage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "/data-upload-review-water-quality",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataUploadReviewWaterQuality",
+        component: () => import("pages/DataUploadReviewWaterQualityPage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "/data-upload-review-macroinvertebrates",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataUploadReviewMacroinvertebrates",
+        component: () =>
+          import("pages/DataUploadReviewMacroinvertebratesPage.vue"),
       },
     ],
   },
@@ -167,8 +223,52 @@ const routes = [
     children: [
       {
         path: "",
-        name: "manageGroups",
+        name: "manageUsers",
         component: () => import("pages/ManageUsersPage.vue"),
+      },
+    ],
+  },
+  {
+    path: "/manage-stations",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "manageStations",
+        component: () => import("pages/ManageStationsPage.vue"),
+      },
+    ],
+  },
+  {
+    path: "/data-toolset",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataToolset",
+        component: () => import("pages/DataToolsetPage.vue"),
+      },
+    ],
+  },
+  {
+    path: "/data-water-quality",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataWaterQaulity",
+        component: () => import("pages/UploadWaterQualityPage.vue"),
+      },
+    ],
+  },
+  {
+    path: "/data-macroinvertebrates",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      {
+        path: "",
+        name: "dataMacroinvertebrates",
+        component: () => import("pages/UploadMacroinvertebratesPage.vue"),
       },
     ],
   },
