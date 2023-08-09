@@ -7,11 +7,16 @@
     </div>
 
     <div class="row q-my-lg justify-center">
-      <q-img
-        src="images/about-vims-image.png"
-        style="max-width: 800px; height: 400px"
-        :ratio="16 / 9"
-      />
+<!--      <q-img-->
+<!--        src="images/about-vims-image.png"-->
+<!--        style="max-width: 800px; height: 400px"-->
+<!--        :ratio="16 / 9"-->
+<!--      />-->
+<!--      <q-video-->
+<!--          :ratio="16/9"-->
+<!--          src="https://www.youtube.com/embed/7oWA6sWWnAM?si=MHc75uqRS4r8G_fz"-->
+<!--      />-->
+      <iframe width="800" height="400" src="https://www.youtube.com/embed/7oWA6sWWnAM?si=MHc75uqRS4r8G_fz&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
     </div>
 
     <div class="row">
