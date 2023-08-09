@@ -19,7 +19,7 @@
           <a href="/about">ABOUT</a>
           <a href="/resources">RESOURCES</a>
           <a href="/contact">CONTACT</a>
-          <q-space />
+          
           <q-btn-dropdown  v-if="loggedIn" stretch flat label="ADMIN" color="primary" style="font-weight: normal; font-size: medium;">
             <div class="q-pa-md" style="width: 350px">
               <q-list separator>
