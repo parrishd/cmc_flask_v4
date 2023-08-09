@@ -23,7 +23,8 @@
     <div class="row">
       <div class="col q-mt-lg about-text">
         <p>
-          The Chesapeake Monitoring Cooperative (CMC) is a group of leading
+          The <a href="https://www.chesapeakemonitoringcoop.org" target="_blank">Chesapeake Monitoring Cooperative</a>
+          (CMC) is a group of leading
           organizations that provide technical, programmatic, and outreach
           support in order to integrate volunteer-based and non-traditional
           water quality and benthic macroinvertebrate monitoring data monitoring
