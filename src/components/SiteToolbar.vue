@@ -17,13 +17,75 @@
           </div>
         <div class="col q-px-md nav-links">
           <a href="/about">ABOUT</a>
-          <a href="/contact">CONTACT</a>
           <a href="/resources">RESOURCES</a>
+          <a href="/contact">CONTACT</a>
+          <q-space />
+          <q-btn-dropdown  v-if="loggedIn" stretch flat label="ADMIN" color="primary" style="font-weight: normal; font-size: medium;">
+            <div class="q-pa-md" style="width: 350px">
+              <q-list separator>
+                <q-expansion-item
+                    expand-separator
+                    label="Data"
+                    href="/data-toolset"
+                >
+                  <q-list separator>
+                    <q-item clickable href="/data-upload-water-quality">
+                      <q-item-section>Upload Water Quality</q-item-section>
+                    </q-item>
 
-          <a v-if="loggedIn" href="/data-toolset">DATA</a>
-          <a v-if="loggedIn" href="/profile">PROFILE</a>
-          <a v-if="loggedIn" href="/manage">MANAGE</a>
-          <a v-if="loggedIn" href="/admin">ADMIN</a>
+                    <q-item clickable href="/data-upload-review-water-quality">
+                      <q-item-section>Edit & Review Water Quality</q-item-section>
+                    </q-item>
+
+                    <q-item clickable href="/data-upload-macroinvertebrates">
+                      <q-item-section>Upload Macroinvertebrates</q-item-section>
+                    </q-item>
+                    <q-item clickable href="/data-upload-review-macroinvertebrates">
+                      <q-item-section>Edit & Review Macroinvertebrates</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-expansion-item>
+
+                <q-expansion-item
+                    expand-separator
+                    label="Manage"
+                    href="/manage"
+                >
+                  <q-list separator>
+                    <q-item clickable href="/manage-users">
+                      <q-item-section>Manage Users</q-item-section>
+                    </q-item>
+
+                    <q-item clickable href="/manage-groups">
+                      <q-item-section>Manage Groups</q-item-section>
+                    </q-item>
+
+                    <q-item clickable href="/manage-stations">
+                      <q-item-section>Manage Stations</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-expansion-item>
+
+                <q-expansion-item
+                    expand-separator
+                    label="Resources"
+                >
+                  <q-card>
+                    <q-card-section>
+                      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem, eius reprehenderit eos corrupti
+                      commodi magni quaerat ex numquam, dolorum officiis modi facere maiores architecto suscipit iste
+                      eveniet doloribus ullam aliquid.
+                    </q-card-section>
+                  </q-card>
+                </q-expansion-item>
+
+              </q-list>
+            </div>
+          </q-btn-dropdown>
+<!--          <a v-if="loggedIn" href="/data-toolset">DATA</a>-->
+<!--          <a v-if="loggedIn" href="/profile">PROFILE</a>-->
+<!--          <a v-if="loggedIn" href="/manage">MANAGE</a>-->
+<!--          <a v-if="loggedIn" href="/admin">ADMIN</a>-->
         </div>
         <div v-if="!loggedIn" class="col-5 flex justify-end">
           <q-btn
@@ -52,6 +114,9 @@
           >
             <q-menu>
               <q-list style="min-width: 100px">
+                <q-item href="/profile" clickable v-close-popup>
+                  <q-item-section>Profile</q-item-section>
+                </q-item>
                 <q-item @click="logoutButtonClick" clickable v-close-popup>
                   <q-item-section>Logout</q-item-section>
                 </q-item>
