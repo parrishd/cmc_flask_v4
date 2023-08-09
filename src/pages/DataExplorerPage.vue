@@ -43,18 +43,37 @@
       <!-- map/form -->
       <div class="row q-mt-lg">
         <!-- map -->
-        <div class="col-8">
+        <div class="col">
           <MapBox />
         </div>
 
         <!-- form -->
-        <div class="col-4 q-px-md">
+        <div v-if="collapsed">
+          <div class="col-1 q-px-md">
+            <!--            <q-icon class="fa-solid fa-arrow-left" size="24px" />-->
+            <q-btn
+              icon="fa-solid fa-arrow-left"
+              @click="collapsed = !collapsed"
+              round
+              flat
+              color="primary"
+            />
+          </div>
+        </div>
+        <div v-else class="col-4 q-px-md">
           <div class="row">
             <div class="col">
-              <q-icon class="fa-solid fa-arrow-right" size="24px" />
+              <!--              <q-icon class="fa-solid fa-arrow-right" size="24px" />-->
+              <q-btn
+                icon="fa-solid fa-arrow-right"
+                @click="collapsed = !collapsed"
+                round
+                flat
+                color="primary"
+              />
             </div>
             <div class="col text-right">
-              <q-icon class="fa-solid fa-circle-info" size="18px">
+              <q-icon class="fa-solid fa-circle-info" size="18px" color="primary">
                 <q-tooltip
                   anchor="bottom left"
                   self="top left"
@@ -292,10 +311,10 @@
           </q-input>
         </div>
         <div class="col text-center" style="max-width: 48px">
-          <q-icon class="fa-solid fa-sliders" size="24px" />
+          <q-icon class="fa-solid fa-sliders" size="24px" color="primary"/>
         </div>
         <div class="col text-center" style="max-width: 48px">
-          <q-icon class="fa-solid fa-circle-info" size="24px">
+          <q-icon class="fa-solid fa-circle-info" size="24px" color="primary">
             <q-tooltip
               anchor="bottom left"
               self="top left"
@@ -329,11 +348,13 @@
         <div class="col">
           <!-- header -->
           <div class="row q-py-md q-px-lg result-details-header">
-            <div class="col-1">
-              <q-icon class="fa-solid fa-location-dot" size="64px" />
-            </div>
+<!--            <div class="col-1">-->
+<!--              <q-icon class="fa-solid fa-location-dot" size="64px" />-->
+<!--            </div>-->
             <div class="col">
+              <q-icon class="fa-solid fa-location-dot float-left q-mr-lg" size="64px" />
               <div class="result-details-header-text-1">
+
                 WESBRABIGRUN1.89 - West Branch-Big Run
               </div>
               <div class="result-details-header-text-2">
@@ -773,6 +794,8 @@ const parameters = [
  ***************************/
 const plotChartRef = ref(null);
 
+const collapsed = ref(true);
+
 const startDate = ref("");
 const endDate = ref("");
 
@@ -811,6 +834,10 @@ function createChart() {
  ***************************/
 onMounted(() => {
   createChart();
+
+  setTimeout(() => {
+    collapsed.value = false;
+  }, 500);
 });
 </script>
 

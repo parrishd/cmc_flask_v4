@@ -1,11 +1,12 @@
 <template>
   <q-page class="q-px-xl q-mx-xl">
-    <div class="row q-mt-lg">
-      <div class="col q-mt-lg text-center data-header">Data Toolset</div>
+
+    <div class="row q-mt-lg justify-evenly">
+      <div class="col-12 col-sm-10 q-mt-lg text-center data-header">Data Toolset</div>
     </div>
 
-    <div class="row">
-      <div class="col q-mt-lg manage-text">
+    <div class="row justify-evenly q-ma-lg">
+      <div class="col-12 col-sm-10 q-mt-lg manage-text">
         The Data Toolset enables users to upload water quality and benthic macroinvertebrate sampling data.
         Once data are uploaded to the system users can review, edit, and publish water quality and benthic
         macroinvertebrate data.
