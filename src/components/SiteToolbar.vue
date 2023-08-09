@@ -2,14 +2,15 @@
   <q-toolbar class="header-height bg-white text-dark-blue">
     <q-toolbar-title>
       <div class="row q-px-xl q-mx-xl full-height">
-          <div class="col-1 q-my-auto">
+          <div class="col-2 q-my-auto">
             <a href="http://vims-ui.v4dev.com/data-explorer">
             <q-img
                 src="/logo.png"
                 loading="lazy"
                 spinner-color="primary"
-                height="auto"
-                style="max-width: 120px"
+                height="45px"
+                style="max-width: 250px"
+                fit="contain"
             />
             </a>
 
@@ -19,7 +20,7 @@
           <a href="/about">ABOUT</a>
           <a href="/resources">RESOURCES</a>
           <a href="/contact">CONTACT</a>
-          
+
           <q-btn-dropdown  v-if="loggedIn" stretch flat label="ADMIN" color="primary" style="font-weight: normal; font-size: medium;">
             <div class="q-pa-md" style="width: 350px">
               <q-list separator>
