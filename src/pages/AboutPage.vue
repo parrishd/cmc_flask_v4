@@ -66,37 +66,37 @@
         >
           <q-carousel-slide :name="1" class="column no-wrap">
             <div
-              class="row fit justify-start items-center q-gutter-xs q-col-gutter no-wrap"
+              class="row fit justify-evenly items-center q-gutter-xs q-col-gutter no-wrap"
             >
               <q-img
                 style="max-width: 240px"
-                class="rounded-borders col-6"
+                class="rounded-borders col-3"
                 src="images/sponsors/alliance.png"
               />
               <q-img
                 style="max-width: 160px"
-                class="rounded-borders col-6 q-mx-md"
+                class="rounded-borders col-3 q-mx-md"
                 src="images/sponsors/iwl.png"
               />
               <q-img
                 style="max-width: 160px"
-                class="rounded-borders col-6 q-mx-md"
+                class="rounded-borders col-3 q-mx-md"
                 src="images/sponsors/allarm.png"
               />
               <q-img
                 style="max-width: 240px"
-                class="rounded-borders col-6"
+                class="rounded-borders col-3"
                 src="images/sponsors/umces.png"
               />
             </div>
           </q-carousel-slide>
           <q-carousel-slide :name="2" class="column no-wrap">
             <div
-              class="row fit justify-start items-center q-gutter-xs q-col-gutter no-wrap"
+              class="row fit justify-evenly items-center q-gutter-xs q-col-gutter no-wrap"
             >
               <q-img
                 style="max-width: 280px"
-                class="rounded-borders col-6"
+                class="rounded-borders col-4"
                 src="images/sponsors/CBNERR_Logo_Blue.jpg"
               />
               <q-img
