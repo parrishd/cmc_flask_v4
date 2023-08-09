@@ -2,9 +2,19 @@
   <q-toolbar class="header-height bg-white text-dark-blue">
     <q-toolbar-title>
       <div class="row q-px-xl q-mx-xl full-height">
-        <div style="max-width: 120px" class="col q-my-auto">
-          <img src="/logo.png" class="header-logo" alt="CMC Logo" />
-        </div>
+          <div class="col-1 q-my-auto">
+            <a href="http://vims-ui.v4dev.com/data-explorer">
+            <q-img
+                src="/logo.png"
+                loading="lazy"
+                spinner-color="primary"
+                height="auto"
+                style="max-width: 120px"
+            />
+            </a>
+
+            <!--          <img src="/logo.png" class="header-logo" alt="CMC Logo" />-->
+          </div>
         <div class="col q-px-md nav-links">
           <a href="/about">ABOUT</a>
           <a href="/contact">CONTACT</a>

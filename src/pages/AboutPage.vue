@@ -77,21 +77,25 @@
                 style="max-width: 240px"
                 class="rounded-borders col-3"
                 src="images/sponsors/alliance.png"
+                loading="lazy"
               />
               <q-img
                 style="max-width: 160px"
                 class="rounded-borders col-3 q-mx-md"
                 src="images/sponsors/iwl.png"
+                loading="lazy"
               />
               <q-img
                 style="max-width: 160px"
                 class="rounded-borders col-3 q-mx-md"
                 src="images/sponsors/allarm.png"
+                loading="lazy"
               />
               <q-img
                 style="max-width: 240px"
                 class="rounded-borders col-3"
                 src="images/sponsors/umces.png"
+                loading="lazy"
               />
             </div>
           </q-carousel-slide>
@@ -103,16 +107,19 @@
                 style="max-width: 280px"
                 class="rounded-borders col-4"
                 src="images/sponsors/CBNERR_Logo_Blue.jpg"
+                loading="lazy"
               />
               <q-img
                 style="max-width: 280px"
                 class="rounded-borders col-6 q-mx-md"
                 src="images/sponsors/GreenFin.png"
+                loading="lazy"
               />
               <q-img
                 style="max-width: 280px"
                 class="rounded-borders col-6"
                 src="images/sponsors/VIMS-Full-color_logo.jpg"
+                loading="lazy"
               />
             </div>
           </q-carousel-slide>
