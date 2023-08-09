@@ -473,10 +473,19 @@
                 <b>Most Recent Sample:</b> October 14, 2012
               </div>
               <div class="q-mt-md">
-                <q-img
-                  src="/images/station/station-map-temp.png"
-                  style="height: 150px; max-width: 160px"
-                />
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d47822.29913316174!2d-75.98405185!3d41.4849043!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c53bd22acb2935%3A0x3ac68806abf8bd8e!2sBowman%20Creek!5e0!3m2!1sen!2sus!4v1691578563483!5m2!1sen!2sus"
+                  width="300"
+                  height="225"
+                  style="border:0;"
+                  allowfullscreen=""
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+<!--                <q-img-->
+<!--                  src="/images/station/station-map-temp.png"-->
+<!--                  style="height: 150px; max-width: 160px"-->
+<!--                />-->
               </div>
             </div>
           </div>
@@ -694,9 +703,9 @@ const rows = [
     id: 5,
     station: "AO1",
     organization: "James River Association",
-    water_body: "Appamattox River",
+    water_body: "Appomattox River",
     first_sampled: "June 1st, 2018",
-    most_recent_sample: "June 31st 2023",
+    most_recent_sample: "June 31st, 2023",
     status: "Inactive",
   },
 ];
