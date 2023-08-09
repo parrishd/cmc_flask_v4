@@ -56,6 +56,7 @@
               @click="collapsed = !collapsed"
               round
               flat
+              color="primary"
             />
           </div>
         </div>
@@ -68,10 +69,11 @@
                 @click="collapsed = !collapsed"
                 round
                 flat
+                color="primary"
               />
             </div>
             <div class="col text-right">
-              <q-icon class="fa-solid fa-circle-info" size="18px">
+              <q-icon class="fa-solid fa-circle-info" size="18px" color="primary">
                 <q-tooltip
                   anchor="bottom left"
                   self="top left"
@@ -309,10 +311,10 @@
           </q-input>
         </div>
         <div class="col text-center" style="max-width: 48px">
-          <q-icon class="fa-solid fa-sliders" size="24px" />
+          <q-icon class="fa-solid fa-sliders" size="24px" color="primary"/>
         </div>
         <div class="col text-center" style="max-width: 48px">
-          <q-icon class="fa-solid fa-circle-info" size="24px">
+          <q-icon class="fa-solid fa-circle-info" size="24px" color="primary">
             <q-tooltip
               anchor="bottom left"
               self="top left"
