@@ -2,32 +2,39 @@
   <q-toolbar class="header-height bg-white text-dark-blue">
     <q-toolbar-title>
       <div class="row q-px-xl q-mx-xl full-height">
-          <div class="col-2 q-my-auto">
-            <a href="http://vims-ui.v4dev.com/data-explorer">
+        <div class="col-2 q-my-auto">
+          <a href="http://vims-ui.v4dev.com/data-explorer">
             <q-img
-                src="/logo.png"
-                loading="lazy"
-                spinner-color="primary"
-                height="45px"
-                style="max-width: 250px"
-                fit="contain"
+              src="/logo.png"
+              loading="lazy"
+              spinner-color="primary"
+              height="45px"
+              style="max-width: 250px"
+              fit="contain"
             />
-            </a>
+          </a>
 
-            <!--          <img src="/logo.png" class="header-logo" alt="CMC Logo" />-->
-          </div>
+          <!--          <img src="/logo.png" class="header-logo" alt="CMC Logo" />-->
+        </div>
         <div class="col q-px-md nav-links">
           <a href="/about">ABOUT</a>
           <a href="/resources">RESOURCES</a>
           <a href="/contact">CONTACT</a>
 
-          <q-btn-dropdown  v-if="loggedIn" stretch flat label="ADMIN" color="primary" style="font-weight: normal; font-size: medium;">
+          <q-btn-dropdown
+            v-if="loggedIn"
+            stretch
+            flat
+            label="ADMIN"
+            color="primary"
+            style="font-weight: normal; font-size: medium"
+          >
             <div class="q-pa-md" style="width: 350px">
               <q-list separator>
                 <q-expansion-item
-                    expand-separator
-                    label="Data"
-                    href="/data-toolset"
+                  expand-separator
+                  label="Data"
+                  href="/data-toolset"
                 >
                   <q-list separator>
                     <q-item clickable href="/data-upload-water-quality">
@@ -35,22 +42,29 @@
                     </q-item>
 
                     <q-item clickable href="/data-upload-review-water-quality">
-                      <q-item-section>Edit & Review Water Quality</q-item-section>
+                      <q-item-section
+                        >Edit & Review Water Quality</q-item-section
+                      >
                     </q-item>
 
                     <q-item clickable href="/data-upload-macroinvertebrates">
                       <q-item-section>Upload Macroinvertebrates</q-item-section>
                     </q-item>
-                    <q-item clickable href="/data-upload-review-macroinvertebrates">
-                      <q-item-section>Edit & Review Macroinvertebrates</q-item-section>
+                    <q-item
+                      clickable
+                      href="/data-upload-review-macroinvertebrates"
+                    >
+                      <q-item-section
+                        >Edit & Review Macroinvertebrates</q-item-section
+                      >
                     </q-item>
                   </q-list>
                 </q-expansion-item>
 
                 <q-expansion-item
-                    expand-separator
-                    label="Manage"
-                    href="/manage"
+                  expand-separator
+                  label="Manage"
+                  href="/manage"
                 >
                   <q-list separator>
                     <q-item clickable href="/manage-users">
@@ -67,26 +81,25 @@
                   </q-list>
                 </q-expansion-item>
 
-                <q-expansion-item
-                    expand-separator
-                    label="Resources"
-                >
-                  <q-card>
-                    <q-card-section>
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem, eius reprehenderit eos corrupti
-                      commodi magni quaerat ex numquam, dolorum officiis modi facere maiores architecto suscipit iste
-                      eveniet doloribus ullam aliquid.
-                    </q-card-section>
-                  </q-card>
-                </q-expansion-item>
-
+                <!--                <q-expansion-item-->
+                <!--                    expand-separator-->
+                <!--                    label="Resources"-->
+                <!--                >-->
+                <!--                  <q-card>-->
+                <!--                    <q-card-section>-->
+                <!--                      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem, eius reprehenderit eos corrupti-->
+                <!--                      commodi magni quaerat ex numquam, dolorum officiis modi facere maiores architecto suscipit iste-->
+                <!--                      eveniet doloribus ullam aliquid.-->
+                <!--                    </q-card-section>-->
+                <!--                  </q-card>-->
+                <!--                </q-expansion-item>-->
               </q-list>
             </div>
           </q-btn-dropdown>
-<!--          <a v-if="loggedIn" href="/data-toolset">DATA</a>-->
-<!--          <a v-if="loggedIn" href="/profile">PROFILE</a>-->
-<!--          <a v-if="loggedIn" href="/manage">MANAGE</a>-->
-<!--          <a v-if="loggedIn" href="/admin">ADMIN</a>-->
+          <!--          <a v-if="loggedIn" href="/data-toolset">DATA</a>-->
+          <!--          <a v-if="loggedIn" href="/profile">PROFILE</a>-->
+          <!--          <a v-if="loggedIn" href="/manage">MANAGE</a>-->
+          <!--          <a v-if="loggedIn" href="/admin">ADMIN</a>-->
         </div>
         <div v-if="!loggedIn" class="col-5 flex justify-end">
           <q-btn
