@@ -617,6 +617,7 @@ const setupBenthicData = () => {
         // setup on click event to show appropriate pop up
         map.on("click", layerID, (e) => {
           console.log("2 Click on layer : " + layerID);
+          console.log(e);
           const features = map.queryRenderedFeatures(e.point, {
             layers: [layerID], // replace with your layer name
           });
