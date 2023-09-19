@@ -60,9 +60,14 @@
 
 <script setup>
 import mapboxgl from "mapbox-gl";
-import { onMounted, reactive, ref, watch } from "vue";
+import { onMounted, reactive, ref, watch, toRefs } from "vue";
 import stations from "/src/assets/stations.json";
 import stationsSecondSet from "/src/assets/station-richness-data.json";
+
+// *** Component Props ***
+const props = defineProps(['mapData']);
+const { mapData } = toRefs(props);
+
 
 // *** Variables and constants ***
 
@@ -118,6 +123,23 @@ let locsBenthic = reactive({
 });
 
 // *** Watch properties ***
+watch(mapData, () => {
+  removePopUps();
+  getStations();
+  // console.log('######################')
+  // console.log(mapData);
+  // structureBenthicData();
+  // console.log(locsBenthic);
+  // console.log('######################')
+  // console.log(mapData);
+  // console.log(locsBenthic);
+  // removePopUps();
+  // updateMarkersOnMap();
+});
+
+
+
+
 watch(showWatersheds, () => {
   console.log("showWatersheds: " + showWatersheds.value);
   togglePolygons();
@@ -156,10 +178,48 @@ watch(stationTypeGroup, () => {
 
 //  *** Functions ***
 
+const structureBenthicData = ()  => {
+  let locationsBenthic = {
+    type: "FeatureCollection",
+    features: [],
+  };
+
+  mapData.value.forEach((s) => {
+    let station = {
+      type: "Feature",
+      properties: {
+        // project: s.State,
+        project: s.StationId,
+        selected: false,
+        code: s.Code,
+        name: s.Name,
+        nameLong: s.NameLong,
+        groupNames: s.GroupNames,
+        id: s.StationId,
+        latitude: s.Lat,
+        longitude: s.Long,
+        huc6Name: s.Watershed,
+      },
+      geometry: {
+        type: "Point",
+        coordinates: [s.Long, s.Lat],
+      },
+      id: s.id,
+    };
+    locationsBenthic.features.push(station);
+
+    // console.log(s.project, s.id);
+  });
+
+  locsBenthic = locationsBenthic;
+};
+
+
 // used to populate static data from foo json files
 const getStations = () => {
   console.log(map);
   console.log("stations data!");
+  console.log(locsBenthic);
   // let's create two data sets for toggling between data types widget
 
   // call first one for water locations == locs
@@ -196,36 +256,40 @@ const getStations = () => {
   });
 
   // we will call second one for benthic as locationsBenthic ==  locsBenthic
-  let locationsBenthic = {
-    type: "FeatureCollection",
-    features: [],
-  };
-
-  stationsSecondSet.forEach((s) => {
-    let station = {
-      type: "Feature",
-      properties: {
-        project: s.State,
-        selected: false,
-        code: s.StationId,
-        name: s.Name,
-        id: s.StationId,
-        latitude: s.Lat,
-        longitude: s.Long,
-        huc6Name: s.Huc6Name,
-      },
-      geometry: {
-        type: "Point",
-        coordinates: [s.Long, s.Lat],
-      },
-      id: s.id,
-    };
-    locationsBenthic.features.push(station);
-
-    // console.log(s.project, s.id);
-  });
-
-  locsBenthic = locationsBenthic;
+  // let locationsBenthic = {
+  //   type: "FeatureCollection",
+  //   features: [],
+  // };
+  //
+  // mapData.value.forEach((s) => {
+  //   let station = {
+  //     type: "Feature",
+  //     properties: {
+  //       // project: s.State,
+  //       project: s.StationId,
+  //       selected: false,
+  //       code: s.Code,
+  //       name: s.Name,
+  //       nameLong: s.NameLong,
+  //       groupNames: s.GroupNames,
+  //       id: s.StationId,
+  //       latitude: s.Lat,
+  //       longitude: s.Long,
+  //       huc6Name: s.Watershed,
+  //     },
+  //     geometry: {
+  //       type: "Point",
+  //       coordinates: [s.Long, s.Lat],
+  //     },
+  //     id: s.id,
+  //   };
+  //   locationsBenthic.features.push(station);
+  //
+  //   // console.log(s.project, s.id);
+  // });
+  //
+  // locsBenthic = locationsBenthic;
+  structureBenthicData();
   locs = locations;
   createMap();
 };
@@ -571,6 +635,72 @@ const setupWaterData = (e) => {
   });
 };
 
+function popupClickHandler(layerID, e) {
+
+  console.log('hello there');
+  console.log(e.point);
+  console.log("2 Click on layer : " + layerID);
+  const features = map.queryRenderedFeatures(e.point, {
+    layers: [layerID], // replace with your layer name
+  });
+  console.log("features");
+  console.log(features);
+  if (!features.length) {
+    return;
+  }
+
+  const feature = features[0];
+  // remove pop up before adding new one
+  removePopUps();
+  const popupContent = `
+    <div style="padding: 10px 20px 10px 20px">
+      <div style="color: #075C7A; font-size: 1.95em; font-weight: 700;">
+        Station
+      </div>
+      <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
+        ${feature.properties.name}${feature.properties.nameLong ? ' - ' + feature.properties.nameLong : ''}
+      </div>
+      <div style="margin-top:10px; color: #075C7A; font-size: 1.95em; font-weight: 700;">
+        Monitored By
+      </div>
+      <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
+        ${feature.properties.groupNames}
+      </div>
+      <div style="margin-top: 10px">
+        <button style="background-color: #075C7A; color: white; padding: 8px 10px 8px 10px; border: none; border-radius: 5px;">
+          View Station Details
+        </button>
+      </div>
+    </div>
+  `;
+
+  const popup = new mapboxgl.Popup({
+    offset: [0, 0],
+    maxWidth: "400px",
+  })
+    .setLngLat(feature.geometry.coordinates)
+    .setHTML(popupContent);
+
+  popup.addTo(map);
+  setupMouseEventListeners(layerID);
+};
+
+function setupLayerClickEvent(layerID) {
+  if (!benthicLayerIdsMap.has(layerID)) {
+    const boundClickHandler = (e) => popupClickHandler(layerID, e);
+    benthicLayerIdsMap.set(layerID, boundClickHandler);
+
+    map.on("click", layerID, boundClickHandler);
+  }
+};
+
+function removeLayerClickEvent(layerID) {
+  if (benthicLayerIdsMap.has(layerID)) {
+    map.off("click", layerID, benthicLayerIdsMap.get(layerID));
+    benthicLayerIdsMap.delete(layerID);
+  }
+}
+
 const setupBenthicData = () => {
   console.log("updateMarkersOnMap for benthic");
   map.addSource("benthic", {
@@ -585,6 +715,7 @@ const setupBenthicData = () => {
     let project = f.properties["project"];
     let layerID = "poi-" + project;
 
+    removeLayerClickEvent(layerID);
     // Add a layer for this symbol type if it hasn't been added already.
     if (!map.getLayer(layerID)) {
       map.addLayer({
@@ -606,62 +737,7 @@ const setupBenthicData = () => {
         },
         filter: ["==", "project", project],
       });
-
-      // using a dictionary to keep track of layers with click events already attached
-      if (!benthicLayerIdsMap.has(layerID)) {
-        console.log(
-          "benthicLayerIdsMap should only add once for this layer: " + layerID
-        );
-        benthicLayerIdsMap.set(layerID, true);
-
-        // setup on click event to show appropriate pop up
-        map.on("click", layerID, (e) => {
-          console.log("2 Click on layer : " + layerID);
-          const features = map.queryRenderedFeatures(e.point, {
-            layers: [layerID], // replace with your layer name
-          });
-
-          if (!features.length) {
-            return;
-          }
-
-          const feature = features[0];
-          // remove pop up before adding new one
-          removePopUps();
-
-          const popupContent = `
-              <div style="padding: 10px 20px 10px 20px">
-                <div style="color: #075C7A; font-size: 1.95em; font-weight: 700;">
-                  Station
-                </div>
-                <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
-                  WESBRABIGRUN1.89 - West Branch-Big Run
-                </div>
-                <div style="margin-top:10px; color: #075C7A; font-size: 1.95em; font-weight: 700;">
-                  Monitored By
-                </div>
-                <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
-                  Centre County Pennsylvania Senior Environmental Corps
-                </div>
-                <div style="margin-top: 10px">
-                  <button style="background-color: #075C7A; color: white; padding: 8px 10px 8px 10px; border: none; border-radius: 5px;">
-                    View Station Details
-                  </button>
-                </div>
-              </div>
-            `;
-
-          const popup = new mapboxgl.Popup({
-            offset: [0, 0],
-            maxWidth: "400px",
-          })
-            .setLngLat(feature.geometry.coordinates)
-            .setHTML(popupContent);
-
-          popup.addTo(map);
-          setupMouseEventListeners(layerID);
-        });
-      }
+      setupLayerClickEvent(layerID);
     }
   });
 };
@@ -674,6 +750,7 @@ const updateMarkersOnMap = () => {
     setupWaterData();
   } else {
     // here show benthic foo static data from a station-richness-data json
+    console.log('***benthic data setup after update***');
     setupBenthicData();
   }
 };
@@ -695,9 +772,12 @@ const removePopUps = () => {
   console.log("removePopUps");
 
   const popups = document.getElementsByClassName("mapboxgl-popup");
+  console.log(popups[0]);
   if (popups.length) {
     popups[0].remove();
   }
+
+
 };
 
 onMounted(() => {
