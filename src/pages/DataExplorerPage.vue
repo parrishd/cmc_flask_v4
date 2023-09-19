@@ -6,15 +6,15 @@
         <div class="col-2">Currently Viewing:</div>
         <div class="col">
           <q-icon class="fa-solid fa-file-lines q-mr-sm" size="32px" />
-          673 Water Samples
+          {{ sampleCount }} Water Samples
         </div>
         <div class="col q-ml-md">
           <q-icon class="fa-solid fa-building q-mr-sm" size="32px" />
-          43 Organizations
+          {{ organizationsCount }} Organizations
         </div>
         <div class="col q-ml-md">
           <q-icon class="fa-solid fa-location-dot" size="32px" />
-          137 Stations
+          {{ stationsCount }} Stations
         </div>
         <div class="col text-right">
           <q-icon class="fa-solid fa-circle-info" size="18px">
@@ -44,7 +44,7 @@
       <div class="row q-mt-lg">
         <!-- map -->
         <div class="col">
-          <MapBox />
+          <MapBox :mapData="filteredStations" />
         </div>
 
         <!-- form -->
@@ -115,28 +115,57 @@
           <div class="row q-mt-md">
             <div class="col">
               <q-select
-                label="Geographical Type"
-                :options="geoTypes"
+                label="Boundary Type"
+                v-model="geoTypes"
+                :options="geoTypesOptions"
                 outlined
                 dense
               ></q-select>
             </div>
           </div>
-          <div class="row q-mt-md">
+          <div v-if="showCityState" class="row q-mt-md">
             <div class="col">
               <q-select
                 label="States (pick all that apply)"
-                :options="states"
+                v-model="selectedStates"
+                :options="stateOptions"
+                multiple
                 outlined
                 dense
               ></q-select>
             </div>
           </div>
-          <div class="row q-mt-md">
+          <div v-if="showCityState" class="row q-mt-md">
             <div class="col">
               <q-select
                 label="City/County (pick all that apply)"
-                :options="counties"
+                v-model="selectedCounties"
+                :options="countyOptions"
+                multiple
+                outlined
+                dense
+              ></q-select>
+            </div>
+          </div>
+          <div v-if="showWatersheds" class="row q-mt-md">
+            <div class="col">
+              <q-select
+                label="Watersheds (pick all that apply)"
+                v-model="selectedWatershed"
+                :options="watershedOptions"
+                multiple
+                outlined
+                dense
+              ></q-select>
+            </div>
+          </div>
+          <div v-if="showWatersheds" class="row q-mt-md">
+            <div class="col">
+              <q-select
+                label="Subwatersheds (pick all that apply)"
+                v-model="selectedSubwatershed"
+                :options="subwatershedOptions"
+                multiple
                 outlined
                 dense
               ></q-select>
@@ -147,7 +176,9 @@
             <div class="col">
               <q-select
                 label="Groups (pick all that apply)"
-                :options="groups"
+                v-model="selectedGroups"
+                :options="groupOptions"
+                multiple
                 outlined
                 dense
               ></q-select>
@@ -158,7 +189,9 @@
             <div class="col">
               <q-select
                 label="Stations (pick all that apply)"
-                :options="stations"
+                v-model="selectedStations"
+                :options="stationIdOptions"
+                multiple
                 outlined
                 dense
               ></q-select>
@@ -169,7 +202,9 @@
             <div class="col">
               <q-select
                 label="Parameters (pick all that apply)"
-                :options="parameters"
+                v-model="selectedParams"
+                :options="paramOptions"
+                multiple
                 outlined
                 dense
               ></q-select>
@@ -183,7 +218,7 @@
                 v-model="startDate"
                 label="Start Date"
                 mask="date"
-                :rules="['date']"
+                :rules="dateRule"
                 outlined
                 dense
               >
@@ -215,7 +250,7 @@
                 v-model="endDate"
                 label="End Date"
                 mask="date"
-                :rules="['date']"
+                :rules="dateRule"
                 outlined
                 dense
               >
@@ -285,10 +320,10 @@
 
           <div class="row q-mt-md">
             <div class="col text-center">
-              <q-btn label="Clear Filters" color="primary" style="width: 90%" />
+              <q-btn label="Clear Filters" @click="clearFilters" color="primary" style="width: 90%" />
             </div>
             <div class="col text-center">
-              <q-btn label="Get Results" color="primary" style="width: 90%" />
+              <q-btn label="Get Results" @click="applyFilters" color="primary" style="width: 90%" />
             </div>
           </div>
         </div>
@@ -597,9 +632,11 @@
 /*****************************
  * Imports
  ****************************/
-import { onMounted, ref } from "vue";
+import {computed, onMounted, ref, watch} from "vue";
+// import MapBox from "components/MapBoxOriginal.vue";
 import MapBox from "components/MapBox.vue";
 import Chart from "chart.js/auto";
+import stations from "/src/assets/cmcV3_stations.json";
 
 /*****************************
  * Lazy/Async components
@@ -619,6 +656,8 @@ import Chart from "chart.js/auto";
 /****************************
  * Local/'Use' Variables
  ***************************/
+const filteredStations = ref([...stations]);
+
 const columns = [
   {
     name: "station",
@@ -769,34 +808,52 @@ const chartConfig = {
 };
 
 const dataTypes = ["Water Quality", "Benthic Macroinvertebrates"];
-const geoTypes = ["Watershed Boundary", "Political Boundary"];
-const states = [
-  "Delaware",
-  "District of Columbia",
-  "Maryland",
-  "New York",
-  "Pennsylvania",
-  "Virginia",
-  "West Virginia",
-];
-const counties = [
-  "Accomack County",
-  "Adams County",
-  "Albermarle County",
-  "Alexandria City",
-];
-const groups = [
-  "Alliance for the Chesapeake Bay",
-  "Anacostia Riverkeeper",
-  "Anne Arundel Community College",
-];
-const stations = ["0102003", "0102016", "0102017", "0102018"];
-const parameters = [
-  "Air temperature",
-  "Alkalinity",
-  "Ammonia-nitrogen",
-  "Bacteria (E. Coli)",
-];
+const geoTypesOptions = ["Watershed Boundary", "Political Boundary"];
+const stateOptions = computed(() => {
+  return [...new Set(filteredStations.value.map(s => s.State))].sort();
+});
+const countyOptions = computed(() => {
+  return [...new Set(filteredStations.value.map(s => s.CityCounty))].sort();
+});
+const watershedOptions = computed(() => {
+  return [...new Set(filteredStations.value.map(s => s.Watershed))].sort();
+});
+const subwatershedOptions = computed(() => {
+  return [...new Set(filteredStations.value.map(s => s.Subwatershed))].sort();
+});
+
+const groupOptions = computed(() => {
+  const allGroups =  filteredStations.value.map(s => s.GroupNames.split(',').map(group => group.trim()));
+  const flattenedGroups = allGroups.flat();
+
+  return [...new Set(flattenedGroups)].sort();
+});
+
+const stationIdOptions = computed(() => {
+  return [...new Set(filteredStations.value.map(s => s.StationId))].sort((a, b) => a - b);
+});
+
+const paramOptions = computed(() => {
+  const allParameters = filteredStations.value.map(s => s.ParameterCodes.split(',').map(param => param.trim()));
+  const flattenedParamCodes = allParameters.flat();
+
+  return [...new Set(flattenedParamCodes)].sort();
+});
+
+const sampleCount = computed(() => {
+  const sampleSum = filteredStations.value.reduce((sum, s) => {
+    return sum + (s.SamplesCount || 0);
+  }, 0);
+  return new Intl.NumberFormat().format(sampleSum);
+})
+
+const organizationsCount = computed(() => {
+  return new Intl.NumberFormat().format(groupOptions.value.length);
+});
+
+const stationsCount = computed(() => {
+  return new Intl.NumberFormat().format(stationIdOptions.value.length);
+});
 
 /****************************
  * Ref/UI Variables
@@ -804,15 +861,27 @@ const parameters = [
 const plotChartRef = ref(null);
 
 const collapsed = ref(true);
+const showCityState = ref(false);
+const showWatersheds = ref(false);
 
-const startDate = ref("");
-const endDate = ref("");
+const startDate = ref(null);
+const startDateInput = ref(null);
+const endDate = ref(null);
 
 const optionalMetaGroups = ref(false);
 const optionalMetaStations = ref(false);
 const optionalMetaParams = ref(false);
 const optionalMetaCalibration = ref(false);
 const dataUseAcknowledgment = ref(false);
+const geoTypes = ref("");
+const selectedStates = ref([]);
+const selectedStations = ref([]);
+const selectedCounties = ref([]);
+const selectedWatershed = ref([]);
+const selectedSubwatershed = ref([]);
+const selectedGroups = ref([]);
+const selectedParams = ref([]);
+
 
 /****************************
  * Computed Properties
@@ -823,7 +892,18 @@ const dataUseAcknowledgment = ref(false);
  * Watched properties
  **************************/
 // watched properties here
-
+watch(geoTypes, () => {
+  if (geoTypes.value === 'Watershed Boundary') {
+    showCityState.value = false;
+    showWatersheds.value = true;
+  } else if (geoTypes.value === 'Political Boundary') {
+    showWatersheds.value = false;
+    showCityState.value = true;
+  } else {
+    showWatersheds.value = false;
+    showCityState.value = false;
+  }
+});
 /****************************
  * Exposed/Interface Functions
  ***************************/
@@ -836,6 +916,76 @@ function createChart() {
   if (plotChartRef.value) {
     chartInstance = new Chart(plotChartRef.value, chartConfig);
   }
+}
+
+function clearFilters() {
+  geoTypes.value = "";
+  selectedStates.value = [];
+  selectedStations.value = [];
+  selectedCounties.value = [];
+  selectedWatershed.value = [];
+  selectedSubwatershed.value = [];
+  selectedGroups.value = [];
+  selectedParams.value = [];
+
+  startDate.value = null;
+  endDate.value = null;
+
+  filteredStations.value = [...stations];
+}
+
+const matchState = (s) => selectedStates.value.length === 0 || selectedStates.value.includes(s.State);
+const matchCounty = (s) => selectedCounties.value.length === 0 || selectedCounties.value.includes(s.CityCounty);
+const matchGroup = (s) => selectedGroups.value.length === 0 || selectedGroups.value.includes(s.GroupNames);
+const matchStation = (s) => selectedStations.value.length === 0 || selectedStations.value.includes(s.StationId);
+const matchParams = (s) => selectedParams.value.length === 0 || selectedParams.value.includes(s.ParameterCodes);
+const matchStartDate = (s) => {
+  if (!startDate.value) return true;
+
+  const [year, month, day] = startDate.value.split('/').map(Number);
+  const selectedStartDate = new Date(year, month - 1, day);
+
+  const stationStartDate = new Date(s.StartDate.split('T')[0]);
+
+  return stationStartDate >= selectedStartDate;
+};
+const matchEndDate = (s) => {
+  if (!endDate.value) return true;
+
+  const [year, month, day] = endDate.value.split('/').map(Number);
+  const selectedEndDate = new Date(year, month - 1, day);
+
+  const stationEndDate = new Date(s.EndDate.split('T')[0]);
+
+  return stationEndDate <= selectedEndDate;
+};
+
+function applyFilters() {
+
+  const filterFunctions = [
+    matchState,
+    matchCounty,
+    matchGroup,
+    matchStation,
+    matchParams,
+    matchStartDate,
+    matchEndDate
+  ];
+  const noFilterApplied = filterFunctions.every(filter => filter.length === 0);
+
+  if (noFilterApplied) {
+    filteredStations.value = [...stations];
+    return;
+  }
+
+  filteredStations.value = stations.filter(s => filterFunctions.every(filter => filter(s)));
+}
+
+const dateRule = (v) => (v === null || isValidDate(v) ? true : 'Invalid Date');
+
+function isValidDate(value) {
+  const dateRegEx = /^\d{4}-\d{2}-\d{2}$/;
+  return dateRegEx.test(value);
 }
 
 /****************************
