@@ -106,6 +106,7 @@
             <div class="col">
               <q-select
                 label="Data Type"
+                v-model="selectedDataType"
                 :options="dataTypes"
                 outlined
                 dense
@@ -874,6 +875,7 @@ const optionalMetaParams = ref(false);
 const optionalMetaCalibration = ref(false);
 const dataUseAcknowledgment = ref(false);
 const geoTypes = ref("");
+const selectedDataType = ref([]);
 const selectedStates = ref([]);
 const selectedStations = ref([]);
 const selectedCounties = ref([]);
@@ -934,6 +936,8 @@ function clearFilters() {
   filteredStations.value = [...stations];
 }
 
+const matchWatershed = (s) => selectedWatershed.value.length === 0 || selectedWatershed.value.includes(s.Watershed);
+const matchSubwatershed = (s) => selectedSubwatershed.value.length === 0 || selectedSubwatershed.value.includes(s.Subwatershed);
 const matchState = (s) => selectedStates.value.length === 0 || selectedStates.value.includes(s.State);
 const matchCounty = (s) => selectedCounties.value.length === 0 || selectedCounties.value.includes(s.CityCounty);
 const matchGroup = (s) => selectedGroups.value.length === 0 || selectedGroups.value.includes(s.GroupNames);
@@ -963,6 +967,8 @@ const matchEndDate = (s) => {
 function applyFilters() {
 
   const filterFunctions = [
+    matchWatershed,
+    matchSubwatershed,
     matchState,
     matchCounty,
     matchGroup,
@@ -981,7 +987,7 @@ function applyFilters() {
   filteredStations.value = stations.filter(s => filterFunctions.every(filter => filter(s)));
 }
 
-const dateRule = (v) => (v === null || isValidDate(v) ? true : 'Invalid Date');
+const dateRule = [(v) => (v === null || isValidDate(v) ? true : 'Invalid Date')];
 
 function isValidDate(value) {
   const dateRegEx = /^\d{4}-\d{2}-\d{2}$/;
