@@ -937,12 +937,31 @@ function clearFilters() {
 }
 
 const matchWatershed = (s) => selectedWatershed.value.length === 0 || selectedWatershed.value.includes(s.Watershed);
-const matchSubwatershed = (s) => selectedSubwatershed.value.length === 0 || selectedSubwatershed.value.includes(s.Subwatershed);
+const matchSubwatershed = (s) => selectedSubwatershed.value.length === 0 ||
+  selectedSubwatershed.value.includes(s.Subwatershed);
 const matchState = (s) => selectedStates.value.length === 0 || selectedStates.value.includes(s.State);
 const matchCounty = (s) => selectedCounties.value.length === 0 || selectedCounties.value.includes(s.CityCounty);
-const matchGroup = (s) => selectedGroups.value.length === 0 || selectedGroups.value.includes(s.GroupNames);
+const matchGroup = (s) => {
+  if (selectedGroups.value.length === 0) {
+    return true;
+  }
+  const groupsArray = s.GroupNames.split(',').map(str => str.trim());
+
+  return selectedGroups.value.some(group => groupsArray.includes(group));
+}
 const matchStation = (s) => selectedStations.value.length === 0 || selectedStations.value.includes(s.StationId);
-const matchParams = (s) => selectedParams.value.length === 0 || selectedParams.value.includes(s.ParameterCodes);
+const matchParams = (s) => {
+  if (selectedParams.value.length === 0) {
+    return true;
+  }
+  const paramsArray = s.ParameterCodes.split(',').map(str => str.trim());
+  console.log('selected params:vvvvvvv');
+  console.log(selectedParams);
+  console.log('params array:vvvvvvv');
+  console.log(paramsArray);
+
+  return selectedParams.value.some(param => paramsArray.includes(param));
+}
 const matchStartDate = (s) => {
   if (!startDate.value) return true;
 
