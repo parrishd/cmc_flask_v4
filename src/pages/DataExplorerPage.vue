@@ -955,10 +955,6 @@ const matchParams = (s) => {
     return true;
   }
   const paramsArray = s.ParameterCodes.split(',').map(str => str.trim());
-  console.log('selected params:vvvvvvv');
-  console.log(selectedParams);
-  console.log('params array:vvvvvvv');
-  console.log(paramsArray);
 
   return selectedParams.value.some(param => paramsArray.includes(param));
 }
