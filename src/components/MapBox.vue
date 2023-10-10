@@ -22,6 +22,20 @@
       <q-card class="my-card">
         <q-card-section>
           <q-list>
+            <p>Sampling Status</p>
+
+            <p>
+              <span class="dot-purple"></span>
+              &nbsp;Current
+            </p>
+
+            <p>
+              <span class="dot-gray"></span>
+              &nbsp;Historic
+            </p>
+
+            <hr>
+
             <p>Total Sampling Events</p>
 
             <p>
@@ -199,6 +213,7 @@ const structureBenthicData = ()  => {
         latitude: s.Lat,
         longitude: s.Long,
         huc6Name: s.Watershed,
+        status: s.status
       },
       geometry: {
         type: "Point",
@@ -715,6 +730,12 @@ const setupBenthicData = () => {
     let project = f.properties["project"];
     let layerID = "poi-" + project;
 
+    if (f.properties.status === "Historic") {
+      color = "#5A5A5A";
+    } else if (f.properties.status === "Current") {
+      color = "#20c";
+    }
+
     removeLayerClickEvent(layerID);
     // Add a layer for this symbol type if it hasn't been added already.
     if (!map.getLayer(layerID)) {
@@ -845,6 +866,24 @@ onMounted(() => {
   height: 15px;
   width: 15px;
   background-color: #1b5e20;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.dot-purple {
+  height: 15px;
+  width: 15px;
+  background-color: #20c;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.dot-gray {
+  height: 15px;
+  width: 15px;
+  background-color: #5A5A5A;
   border-radius: 50%;
   display: inline-block;
   vertical-align: middle;
