@@ -324,7 +324,7 @@
               <q-btn label="Clear Filters" @click="clearFilters" color="primary" style="width: 90%" />
             </div>
             <div class="col text-center">
-              <q-btn label="Get Results" @click="applyFilters" color="primary" style="width: 90%" />
+              <q-btn label="Download Data" color="primary" style="width: 90%" />
             </div>
           </div>
         </div>
@@ -657,42 +657,42 @@ import stations from "/src/assets/cmcV3_stations.json";
 /****************************
  * Local/'Use' Variables
  ***************************/
-const filteredStations = ref([...stations]);
+const filteredStations = ref(stations.map(transformStation));
 
 const columns = [
   {
-    name: "station",
+    name: "StationId",
     required: true,
     label: "Station Name",
     align: "left",
-    field: "station",
+    field: "StationId",
     sortable: true,
   },
   {
-    name: "organization",
+    name: "GroupNames",
     align: "left",
-    label: "Organization",
-    field: "organization",
+    label: "Organization(s)",
+    field: "GroupNames",
     sortable: true,
   },
   {
-    name: "water_body",
+    name: "Subwatershed",
     align: "left",
     label: "Water Body",
-    field: "water_body",
+    field: "Subwatershed",
     sortable: true,
   },
   {
-    name: "first_sampled",
+    name: "formattedStartDate",
     align: "left",
     label: "First Sampled",
-    field: "first_sampled",
+    field: "formattedStartDate",
   },
   {
-    name: "most_recent_sample",
+    name: "formattedEndDate",
     align: "left",
     label: "Most Recent Sampled",
-    field: "most_recent_sample",
+    field: "formattedEndDate",
   },
   {
     name: "status",
@@ -702,53 +702,7 @@ const columns = [
   },
 ];
 
-const rows = [
-  {
-    id: 1,
-    station: "AO1",
-    organization: "James River Association",
-    water_body: "Appamattox River",
-    first_sampled: "June 1st, 2018",
-    most_recent_sample: "June 31st 2023",
-    status: "Inactive",
-  },
-  {
-    id: 2,
-    station: "AO1",
-    organization: "James River Association",
-    water_body: "Appamattox River",
-    first_sampled: "June 1st, 2018",
-    most_recent_sample: "June 31st 2023",
-    status: "Inactive",
-  },
-  {
-    id: 3,
-    station: "AO1",
-    organization: "James River Association",
-    water_body: "Appamattox River",
-    first_sampled: "June 1st, 2018",
-    most_recent_sample: "June 31st 2023",
-    status: "Inactive",
-  },
-  {
-    id: 4,
-    station: "AO1",
-    organization: "James River Association",
-    water_body: "Appamattox River",
-    first_sampled: "June 1st, 2018",
-    most_recent_sample: "June 31st 2023",
-    status: "Inactive",
-  },
-  {
-    id: 5,
-    station: "AO1",
-    organization: "James River Association",
-    water_body: "Appomattox River",
-    first_sampled: "June 1st, 2018",
-    most_recent_sample: "June 31st, 2023",
-    status: "Inactive",
-  },
-];
+const rows = filteredStations.value;
 
 let chartInstance = null;
 const chartConfig = {
@@ -864,11 +818,8 @@ const plotChartRef = ref(null);
 const collapsed = ref(true);
 const showCityState = ref(false);
 const showWatersheds = ref(false);
-
 const startDate = ref(null);
-const startDateInput = ref(null);
 const endDate = ref(null);
-
 const optionalMetaGroups = ref(false);
 const optionalMetaStations = ref(false);
 const optionalMetaParams = ref(false);
@@ -906,6 +857,24 @@ watch(geoTypes, () => {
     showCityState.value = false;
   }
 });
+
+const filterRefs = [
+  geoTypes,
+  selectedStates,
+  selectedStations,
+  selectedCounties,
+  selectedWatershed,
+  selectedSubwatershed,
+  selectedGroups,
+  selectedParams,
+  startDate,
+  endDate
+];
+
+for (const refItem of filterRefs) {
+  watch(refItem, applyFilters)
+}
+
 /****************************
  * Exposed/Interface Functions
  ***************************/
@@ -921,6 +890,7 @@ function createChart() {
 }
 
 function clearFilters() {
+  selectedDataType.value = null;
   geoTypes.value = "";
   selectedStates.value = [];
   selectedStations.value = [];
@@ -929,11 +899,10 @@ function clearFilters() {
   selectedSubwatershed.value = [];
   selectedGroups.value = [];
   selectedParams.value = [];
-
   startDate.value = null;
   endDate.value = null;
 
-  filteredStations.value = [...stations];
+  filteredStations.value = stations.map(transformStation);
 }
 
 const matchWatershed = (s) => selectedWatershed.value.length === 0 || selectedWatershed.value.includes(s.Watershed);
@@ -980,7 +949,6 @@ const matchEndDate = (s) => {
 };
 
 function applyFilters() {
-
   const filterFunctions = [
     matchWatershed,
     matchSubwatershed,
@@ -992,14 +960,17 @@ function applyFilters() {
     matchStartDate,
     matchEndDate
   ];
+
   const noFilterApplied = filterFunctions.every(filter => filter.length === 0);
 
   if (noFilterApplied) {
-    filteredStations.value = [...stations];
+    filteredStations.value = stations.map(transformStation);
     return;
   }
 
-  filteredStations.value = stations.filter(s => filterFunctions.every(filter => filter(s)));
+  filteredStations.value = stations
+    .filter(s => filterFunctions.every(filter => filter(s)))
+    .map(transformStation);
 }
 
 const dateRule = [(v) => (v === null || isValidDate(v) ? true : 'Invalid Date')];
@@ -1009,11 +980,34 @@ function isValidDate(value) {
   return dateRegEx.test(value);
 }
 
+function formatDate(dateString) {
+  const options = { year: 'numeric', month: 'long', day: 'numeric'};
+  return new Date(dateString).toLocaleDateString(undefined, options);
+}
+
+function transformStation(station) {
+  const currentDate = new Date();
+  const endDate = new Date(station.EndDate);
+  const twoYearsAgo = new Date(currentDate.getFullYear() - 2, currentDate.getMonth(), currentDate.getDate());
+
+  const status = endDate >= twoYearsAgo ? 'Current' : 'Historic';
+  const formattedStartDate = formatDate(station.StartDate);
+  const formattedEndDate =  formatDate(station.EndDate);
+
+  return {
+    ...station,
+    formattedStartDate: formattedStartDate,
+    formattedEndDate: formattedEndDate,
+    status: status
+  };
+}
+
 /****************************
  * View Lifecycle Methods
  ***************************/
 onMounted(() => {
   createChart();
+  applyFilters();
 
   setTimeout(() => {
     collapsed.value = false;
