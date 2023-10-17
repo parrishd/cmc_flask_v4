@@ -338,17 +338,7 @@
 
       <!-- results -->
       <div class="row q-py-lg q-px-md results-title">
-        <div class="col title-font">Data Explorer Results</div>
-        <div class="col-4 q-px-lg text-right">
-          <q-input outlined dense>
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-        </div>
-        <div class="col text-center" style="max-width: 48px">
-          <q-icon class="fa-solid fa-sliders" size="24px" color="primary"/>
-        </div>
+        <div class="col title-font">Currently Viewing</div>
         <div class="col text-center" style="max-width: 48px">
           <q-icon class="fa-solid fa-circle-info" size="24px" color="primary">
             <q-tooltip
