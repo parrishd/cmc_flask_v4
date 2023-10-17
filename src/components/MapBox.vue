@@ -33,23 +33,6 @@
               <span class="dot-gray"></span>
               &nbsp;Historic
             </p>
-
-            <hr>
-
-            <p>Total Sampling Events</p>
-
-            <p>
-              <span class="dot-red"></span>
-              &#60; 10
-            </p>
-            <p>
-              <span class="dot-yellow"></span>
-              10 - 100
-            </p>
-            <p>
-              <span class="dot-green"> </span>
-              &#62; 100
-            </p>
           </q-list>
         </q-card-section>
       </q-card>
