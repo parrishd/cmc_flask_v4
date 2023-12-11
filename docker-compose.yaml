@@ -9,7 +9,9 @@ services:
     - 8080:8080
   volumes:
     - .:/app
-  command: sh -c "quasar dev"
+  #command: sh -c "quasar dev"
+  command: /bin/sh -c "yarn && quasar upgrade -i && quasar dev -m ssr"
+  
       
 
     
