@@ -2,7 +2,7 @@
   <q-page class="q-px-xl q-mx-xl">
     <div class="row q-mt-xl">
       <div class="col about-header">
-        Working together to understand the health of our waters TESTE TESTE
+        Working together to understand the health of our waters
       </div>
     </div>
 
