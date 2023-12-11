@@ -77,10 +77,10 @@ docker run -dp 127.0.0.1:8000:80 cmc_frontend
 - to open the app in the browser: http://localhost:8000 -->
 
 
-## Run with Docker-Compose
+## Run with Docker-Compose (Locally)
 
 
-- Build and run the application in development mode with docker-compose.
+- Build and run the application in development mode with docker-compose, locally.
 
 ### Prerequisites:
 
@@ -101,9 +101,17 @@ docker-compose up --build
 
 
 - to open the app in the browser: http://localhost:8080/
-
-
-#### development mode
-
 - The application will be saved in a Docker container. If you change the code, the application reloads on the browser with the new changes.
 - To run the app next time, just go to Docker Desktop, start the container, and open the app in the browser http://localhost:8080/
+
+
+## Run with Docker Development Environments (Collaboration)
+
+- Open in the Dev Environments feature of Docker Desktop:
+
+[Open in Docker Dev Environments](https://open.docker.com/dashboard/dev-envs?url=https://github.com/parrishd/cmc_frontend_v4.git)
+
+To open this link: 
+
+- select the **Create** button in the top right-hand corner (inside the Dev Docker Desktop), select source **Existing Git repo**, and then paste the URL.
+
