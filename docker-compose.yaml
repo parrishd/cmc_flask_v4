@@ -10,7 +10,7 @@ services:
   volumes:
     - .:/app
   #command: sh -c "quasar dev"
-  command: /bin/sh -c "yarn && quasar upgrade -i && quasar dev -m ssr"
+  command: /bin/sh -c "yarn && quasar upgrade -i && quasar dev"
   
       
 
