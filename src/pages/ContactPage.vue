@@ -11,7 +11,7 @@
         or comments about the Chesapeake Monitoring Cooperative (CMC) or the
         Chesapeake Data Explorer or are interested in having your organization
         participate in the CMC, please contact Liz Chudoba, CMC Project Manager,
-        or visit the CMC website.
+        or visit the CMC website. 
       </div>
     </div>
 
