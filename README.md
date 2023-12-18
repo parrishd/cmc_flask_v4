@@ -1,7 +1,7 @@
 
-# VIMS (vims-ui)
+# CMC Data Explorer (https://cmc.vims.edu)
 
-VIMS Data Explorer
+CMC Data Explorer
 
 ## Preference is to Run with Docker Development Environments (Collaboration)
 
