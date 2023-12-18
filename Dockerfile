@@ -1,5 +1,7 @@
 # develop stage
 FROM node:18-alpine as develop-stage
+RUN apt-get -y update
+RUN apt-get -y install git
 WORKDIR /app
 COPY package*.json ./
 RUN yarn global add @quasar/cli
