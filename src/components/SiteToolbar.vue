@@ -3,7 +3,7 @@
     <q-toolbar-title>
       <div class="row q-px-xl q-mx-xl full-height">
         <div class="col-2 q-my-auto">
-          <a href="http://vims-ui.v4dev.com/data-explorer">
+          <a href="/">
             <q-img
               src="/logo.png"
               loading="lazy"

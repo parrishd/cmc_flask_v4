@@ -12,18 +12,18 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "@quasar/cli": "^2.2.1",
-    "@quasar/extras": "^1.16.4",
+    "@quasar/cli": "^2.3.0",
+    "@quasar/extras": "^1.16.9",
     "axios": "^0.21.1",
     "chart.js": "^4.3.0",
     "mapbox-gl": "^2.10.0",
     "pinia": "^2.0.11",
-    "quasar": "^2.12.0",
+    "quasar": "^2.14.1",
     "vue": "3",
     "vue-router": "4"
   },
   "devDependencies": {
-    "@quasar/app-vite": "^1.4.3",
+    "@quasar/app-vite": "^1.7.1",
     "autoprefixer": "^10.4.2",
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.1.0",
