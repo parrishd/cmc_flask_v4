@@ -6,8 +6,6 @@ services:
     target: "develop-stage"
   ports: 
     - 8080:8080
-    - 8081:8080
-    - 8082:8080
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
   #command: sh -c "quasar dev"
