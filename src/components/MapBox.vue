@@ -62,9 +62,8 @@ import stations from "/src/assets/stations.json";
 import stationsSecondSet from "/src/assets/station-richness-data.json";
 
 // *** Component Props ***
-const props = defineProps(['mapData']);
+const props = defineProps(["mapData"]);
 const { mapData } = toRefs(props);
-
 
 // *** Variables and constants ***
 
@@ -134,9 +133,6 @@ watch(mapData, () => {
   // updateMarkersOnMap();
 });
 
-
-
-
 watch(showWatersheds, () => {
   console.log("showWatersheds: " + showWatersheds.value);
   togglePolygons();
@@ -175,13 +171,30 @@ watch(stationTypeGroup, () => {
 
 //  *** Functions ***
 
-const structureBenthicData = ()  => {
+const structureBenthicData = () => {
   let locationsBenthic = {
     type: "FeatureCollection",
     features: [],
   };
 
+  let minLong = 0;
+  let maxLong = -100;
+  let minLat = 40;
+  let maxLat = 30;
+
   mapData.value.forEach((s) => {
+    if (s.Long < minLong) {
+      minLong = s.Long;
+    }
+    if (s.Lat < minLat) {
+      minLat = s.Lat;
+    }
+    if (s.Long > maxLong) {
+      maxLong = s.Long;
+    }
+    if (s.Lat > maxLat) {
+      maxLat = s.Lat;
+    }
     let station = {
       type: "Feature",
       properties: {
@@ -196,7 +209,7 @@ const structureBenthicData = ()  => {
         latitude: s.Lat,
         longitude: s.Long,
         huc6Name: s.Watershed,
-        status: s.status
+        status: s.status,
       },
       geometry: {
         type: "Point",
@@ -208,10 +221,8 @@ const structureBenthicData = ()  => {
 
     // console.log(s.project, s.id);
   });
-
   locsBenthic = locationsBenthic;
 };
-
 
 // used to populate static data from foo json files
 const getStations = () => {
@@ -288,7 +299,7 @@ const getStations = () => {
   //
   // locsBenthic = locationsBenthic;
   structureBenthicData();
-  locs = locations;
+
   createMap();
 };
 
@@ -298,20 +309,17 @@ const createMap = () => {
   map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/outdoors-v11",
-    center: [-76.4, 37.8],
-    zoom: 6.55,
+    center: [-76.5616315, 37.849295],
+    zoom: 5.75,
   });
   map.addControl(new mapboxgl.NavigationControl());
 
-  map.on("load", () => {
-    addStatesPolygons();
-    updateMarkersOnMap();
-  });
-  // map.on('styledata', () => {
-  //   console.log('A styledata event occurred.');
-  // });
-  // https://github.com/mapbox/mapbox-gl-js/issues/3979
-  // link above is a hack for updating layers once map style changes
+  //this was causing the map to flash, removing for now. There may be a better way to handle this. Leave this commented code here for now.
+  //map.on("load", () => {
+  //  addStatesPolygons();
+  //  updateMarkersOnMap();
+  //});
+
   map.on("style.load", () => {
     console.log("A styledata event occurred.");
 
@@ -634,8 +642,7 @@ const setupWaterData = (e) => {
 };
 
 function popupClickHandler(layerID, e) {
-
-  console.log('hello there');
+  console.log("hello there");
   console.log(e.point);
   console.log("2 Click on layer : " + layerID);
   const features = map.queryRenderedFeatures(e.point, {
@@ -656,7 +663,9 @@ function popupClickHandler(layerID, e) {
         Station
       </div>
       <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
-        ${feature.properties.name}${feature.properties.nameLong ? ' - ' + feature.properties.nameLong : ''}
+        ${feature.properties.name}${
+    feature.properties.nameLong ? " - " + feature.properties.nameLong : ""
+  }
       </div>
       <div style="margin-top:10px; color: #075C7A; font-size: 1.95em; font-weight: 700;">
         Monitored By
@@ -681,7 +690,7 @@ function popupClickHandler(layerID, e) {
 
   popup.addTo(map);
   setupMouseEventListeners(layerID);
-};
+}
 
 function setupLayerClickEvent(layerID) {
   if (!benthicLayerIdsMap.has(layerID)) {
@@ -690,7 +699,7 @@ function setupLayerClickEvent(layerID) {
 
     map.on("click", layerID, boundClickHandler);
   }
-};
+}
 
 function removeLayerClickEvent(layerID) {
   if (benthicLayerIdsMap.has(layerID)) {
@@ -708,8 +717,25 @@ const setupBenthicData = () => {
   map.getSource("benthic").setData(locsBenthic);
 
   let color = "#20c";
+  let minLong = 0;
+  let maxLong = -100;
+  let minLat = 40;
+  let maxLat = 30;
 
   locsBenthic.features.forEach((f, index) => {
+    //console.log(f.properties["latitude"], f.properties["longitude"]);
+    if (f.properties["longitude"] < minLong) {
+      minLong = f.properties["longitude"];
+    }
+    if (f.properties["latitude"] < minLat) {
+      minLat = f.properties["latitude"];
+    }
+    if (f.properties["longitude"] > maxLong) {
+      maxLong = f.properties["longitude"];
+    }
+    if (f.properties["latitude"] > maxLat) {
+      maxLat = f.properties["latitude"];
+    }
     let project = f.properties["project"];
     let layerID = "poi-" + project;
 
@@ -744,6 +770,13 @@ const setupBenthicData = () => {
       setupLayerClickEvent(layerID);
     }
   });
+  console.log(minLat, maxLat, minLong, maxLong);
+  let centerLat = (minLat + maxLat) / 2; // + 1.8;
+  let centerLong = (minLong + maxLong) / 2;
+  let centerCoordinates = { lng: centerLong, lat: centerLat };
+
+  console.log(centerCoordinates);
+  map.setCenter(centerCoordinates);
 };
 
 const updateMarkersOnMap = () => {
@@ -754,7 +787,7 @@ const updateMarkersOnMap = () => {
     setupWaterData();
   } else {
     // here show benthic foo static data from a station-richness-data json
-    console.log('***benthic data setup after update***');
+    console.log("***benthic data setup after update***");
     setupBenthicData();
   }
 };
@@ -780,8 +813,6 @@ const removePopUps = () => {
   if (popups.length) {
     popups[0].remove();
   }
-
-
 };
 
 onMounted(() => {
@@ -792,7 +823,6 @@ onMounted(() => {
 <style scoped>
 .map-container {
   position: relative;
-  //height: 100%;
 }
 
 .map-style {
@@ -823,7 +853,6 @@ onMounted(() => {
 }
 
 #map {
-  //height: 70vh;
   height: 82vh;
 }
 
@@ -866,7 +895,7 @@ onMounted(() => {
 .dot-gray {
   height: 15px;
   width: 15px;
-  background-color: #5A5A5A;
+  background-color: #5a5a5a;
   border-radius: 50%;
   display: inline-block;
   vertical-align: middle;

@@ -6,7 +6,7 @@
         <div class="col-2">Currently Viewing:</div>
         <div class="col">
           <q-icon class="fa-solid fa-file-lines q-mr-sm" size="32px" />
-          {{ sampleCount }} Water Samples
+          {{ sampleCount }} Samples
         </div>
         <div class="col q-ml-md">
           <q-icon class="fa-solid fa-building q-mr-sm" size="32px" />
@@ -73,7 +73,11 @@
               />
             </div>
             <div class="col text-right">
-              <q-icon class="fa-solid fa-circle-info" size="18px" color="primary">
+              <q-icon
+                class="fa-solid fa-circle-info"
+                size="18px"
+                color="primary"
+              >
                 <q-tooltip
                   anchor="bottom left"
                   self="top left"
@@ -321,7 +325,12 @@
 
           <div class="row q-mt-md">
             <div class="col text-center">
-              <q-btn label="Clear Filters" @click="clearFilters" color="primary" style="width: 90%" />
+              <q-btn
+                label="Clear Filters"
+                @click="clearFilters"
+                color="primary"
+                style="width: 90%"
+              />
             </div>
             <div class="col text-center">
               <q-btn label="Download Data" color="primary" style="width: 90%" />
@@ -365,7 +374,13 @@
       </div>
       <div class="row">
         <div class="col">
-          <q-table :rows="rows" :columns="columns" row-key="id" flat bordered />
+          <q-table
+            :rows="rows"
+            :columns="columns"
+            row-key="StationId"
+            flat
+            bordered
+          />
         </div>
       </div>
 
@@ -374,13 +389,15 @@
         <div class="col">
           <!-- header -->
           <div class="row q-py-md q-px-lg result-details-header">
-<!--            <div class="col-1">-->
-<!--              <q-icon class="fa-solid fa-location-dot" size="64px" />-->
-<!--            </div>-->
+            <!--            <div class="col-1">-->
+            <!--              <q-icon class="fa-solid fa-location-dot" size="64px" />-->
+            <!--            </div>-->
             <div class="col">
-              <q-icon class="fa-solid fa-location-dot float-left q-mr-lg" size="64px" />
+              <q-icon
+                class="fa-solid fa-location-dot float-left q-mr-lg"
+                size="64px"
+              />
               <div class="result-details-header-text-1">
-
                 WESBRABIGRUN1.89 - West Branch-Big Run
               </div>
               <div class="result-details-header-text-2">
@@ -503,15 +520,16 @@
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d47822.29913316174!2d-75.98405185!3d41.4849043!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c53bd22acb2935%3A0x3ac68806abf8bd8e!2sBowman%20Creek!5e0!3m2!1sen!2sus!4v1691578563483!5m2!1sen!2sus"
                   width="300"
                   height="225"
-                  style="border:0;"
+                  style="border: 0"
                   allowfullscreen=""
                   loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade">
+                  referrerpolicy="no-referrer-when-downgrade"
+                >
                 </iframe>
-<!--                <q-img-->
-<!--                  src="/images/station/station-map-temp.png"-->
-<!--                  style="height: 150px; max-width: 160px"-->
-<!--                />-->
+                <!--                <q-img-->
+                <!--                  src="/images/station/station-map-temp.png"-->
+                <!--                  style="height: 150px; max-width: 160px"-->
+                <!--                />-->
               </div>
             </div>
           </div>
@@ -623,7 +641,7 @@
 /*****************************
  * Imports
  ****************************/
-import {computed, onMounted, ref, watch} from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 // import MapBox from "components/MapBoxOriginal.vue";
 import MapBox from "components/MapBox.vue";
 import Chart from "chart.js/auto";
@@ -691,7 +709,7 @@ const columns = [
     field: "status",
   },
 ];
-
+const tableKey = ref(0);
 const rows = filteredStations.value;
 
 let chartInstance = null;
@@ -755,31 +773,37 @@ const chartConfig = {
 const dataTypes = ["Water Quality", "Benthic Macroinvertebrates"];
 const geoTypesOptions = ["Watershed Boundary", "Political Boundary"];
 const stateOptions = computed(() => {
-  return [...new Set(filteredStations.value.map(s => s.State))].sort();
+  return [...new Set(filteredStations.value.map((s) => s.State))].sort();
 });
 const countyOptions = computed(() => {
-  return [...new Set(filteredStations.value.map(s => s.CityCounty))].sort();
+  return [...new Set(filteredStations.value.map((s) => s.CityCounty))].sort();
 });
 const watershedOptions = computed(() => {
-  return [...new Set(filteredStations.value.map(s => s.Watershed))].sort();
+  return [...new Set(filteredStations.value.map((s) => s.Watershed))].sort();
 });
 const subwatershedOptions = computed(() => {
-  return [...new Set(filteredStations.value.map(s => s.Subwatershed))].sort();
+  return [...new Set(filteredStations.value.map((s) => s.Subwatershed))].sort();
 });
 
 const groupOptions = computed(() => {
-  const allGroups =  filteredStations.value.map(s => s.GroupNames.split(',').map(group => group.trim()));
+  const allGroups = filteredStations.value.map((s) =>
+    s.GroupNames.split(",").map((group) => group.trim())
+  );
   const flattenedGroups = allGroups.flat();
 
   return [...new Set(flattenedGroups)].sort();
 });
 
 const stationIdOptions = computed(() => {
-  return [...new Set(filteredStations.value.map(s => s.StationId))].sort((a, b) => a - b);
+  return [...new Set(filteredStations.value.map((s) => s.StationId))].sort(
+    (a, b) => a - b
+  );
 });
 
 const paramOptions = computed(() => {
-  const allParameters = filteredStations.value.map(s => s.ParameterCodes.split(',').map(param => param.trim()));
+  const allParameters = filteredStations.value.map((s) =>
+    s.ParameterCodes.split(",").map((param) => param.trim())
+  );
   const flattenedParamCodes = allParameters.flat();
 
   return [...new Set(flattenedParamCodes)].sort();
@@ -790,7 +814,7 @@ const sampleCount = computed(() => {
     return sum + (s.SamplesCount || 0);
   }, 0);
   return new Intl.NumberFormat().format(sampleSum);
-})
+});
 
 const organizationsCount = computed(() => {
   return new Intl.NumberFormat().format(groupOptions.value.length);
@@ -804,7 +828,6 @@ const stationsCount = computed(() => {
  * Ref/UI Variables
  ***************************/
 const plotChartRef = ref(null);
-
 const collapsed = ref(true);
 const showCityState = ref(false);
 const showWatersheds = ref(false);
@@ -825,7 +848,6 @@ const selectedSubwatershed = ref([]);
 const selectedGroups = ref([]);
 const selectedParams = ref([]);
 
-
 /****************************
  * Computed Properties
  ***************************/
@@ -836,16 +858,22 @@ const selectedParams = ref([]);
  **************************/
 // watched properties here
 watch(geoTypes, () => {
-  if (geoTypes.value === 'Watershed Boundary') {
+  if (geoTypes.value === "Watershed Boundary") {
     showCityState.value = false;
     showWatersheds.value = true;
-  } else if (geoTypes.value === 'Political Boundary') {
+  } else if (geoTypes.value === "Political Boundary") {
     showWatersheds.value = false;
     showCityState.value = true;
   } else {
     showWatersheds.value = false;
     showCityState.value = false;
   }
+});
+
+watch(filteredStations, () => {
+  console.log("filteredStations changed");
+  console.log(filteredStations.value);
+  rows.splice(0, rows.length, ...filteredStations.value);
 });
 
 const filterRefs = [
@@ -858,11 +886,11 @@ const filterRefs = [
   selectedGroups,
   selectedParams,
   startDate,
-  endDate
+  endDate,
 ];
 
 for (const refItem of filterRefs) {
-  watch(refItem, applyFilters)
+  watch(refItem, applyFilters);
 }
 
 /****************************
@@ -895,45 +923,53 @@ function clearFilters() {
   filteredStations.value = stations.map(transformStation);
 }
 
-const matchWatershed = (s) => selectedWatershed.value.length === 0 || selectedWatershed.value.includes(s.Watershed);
-const matchSubwatershed = (s) => selectedSubwatershed.value.length === 0 ||
+const matchWatershed = (s) =>
+  selectedWatershed.value.length === 0 ||
+  selectedWatershed.value.includes(s.Watershed);
+const matchSubwatershed = (s) =>
+  selectedSubwatershed.value.length === 0 ||
   selectedSubwatershed.value.includes(s.Subwatershed);
-const matchState = (s) => selectedStates.value.length === 0 || selectedStates.value.includes(s.State);
-const matchCounty = (s) => selectedCounties.value.length === 0 || selectedCounties.value.includes(s.CityCounty);
+const matchState = (s) =>
+  selectedStates.value.length === 0 || selectedStates.value.includes(s.State);
+const matchCounty = (s) =>
+  selectedCounties.value.length === 0 ||
+  selectedCounties.value.includes(s.CityCounty);
 const matchGroup = (s) => {
   if (selectedGroups.value.length === 0) {
     return true;
   }
-  const groupsArray = s.GroupNames.split(',').map(str => str.trim());
+  const groupsArray = s.GroupNames.split(",").map((str) => str.trim());
 
-  return selectedGroups.value.some(group => groupsArray.includes(group));
-}
-const matchStation = (s) => selectedStations.value.length === 0 || selectedStations.value.includes(s.StationId);
+  return selectedGroups.value.some((group) => groupsArray.includes(group));
+};
+const matchStation = (s) =>
+  selectedStations.value.length === 0 ||
+  selectedStations.value.includes(s.StationId);
 const matchParams = (s) => {
   if (selectedParams.value.length === 0) {
     return true;
   }
-  const paramsArray = s.ParameterCodes.split(',').map(str => str.trim());
+  const paramsArray = s.ParameterCodes.split(",").map((str) => str.trim());
 
-  return selectedParams.value.some(param => paramsArray.includes(param));
-}
+  return selectedParams.value.some((param) => paramsArray.includes(param));
+};
 const matchStartDate = (s) => {
   if (!startDate.value) return true;
 
-  const [year, month, day] = startDate.value.split('/').map(Number);
+  const [year, month, day] = startDate.value.split("/").map(Number);
   const selectedStartDate = new Date(year, month - 1, day);
 
-  const stationStartDate = new Date(s.StartDate.split('T')[0]);
+  const stationStartDate = new Date(s.StartDate.split("T")[0]);
 
   return stationStartDate >= selectedStartDate;
 };
 const matchEndDate = (s) => {
   if (!endDate.value) return true;
 
-  const [year, month, day] = endDate.value.split('/').map(Number);
+  const [year, month, day] = endDate.value.split("/").map(Number);
   const selectedEndDate = new Date(year, month - 1, day);
 
-  const stationEndDate = new Date(s.EndDate.split('T')[0]);
+  const stationEndDate = new Date(s.EndDate.split("T")[0]);
 
   return stationEndDate <= selectedEndDate;
 };
@@ -948,10 +984,12 @@ function applyFilters() {
     matchStation,
     matchParams,
     matchStartDate,
-    matchEndDate
+    matchEndDate,
   ];
 
-  const noFilterApplied = filterFunctions.every(filter => filter.length === 0);
+  const noFilterApplied = filterFunctions.every(
+    (filter) => filter.length === 0
+  );
 
   if (noFilterApplied) {
     filteredStations.value = stations.map(transformStation);
@@ -959,11 +997,13 @@ function applyFilters() {
   }
 
   filteredStations.value = stations
-    .filter(s => filterFunctions.every(filter => filter(s)))
+    .filter((s) => filterFunctions.every((filter) => filter(s)))
     .map(transformStation);
 }
 
-const dateRule = [(v) => (v === null || isValidDate(v) ? true : 'Invalid Date')];
+const dateRule = [
+  (v) => (v === null || isValidDate(v) ? true : "Invalid Date"),
+];
 
 function isValidDate(value) {
   const dateRegEx = /^\d{4}-\d{2}-\d{2}$/;
@@ -971,24 +1011,28 @@ function isValidDate(value) {
 }
 
 function formatDate(dateString) {
-  const options = { year: 'numeric', month: 'long', day: 'numeric'};
+  const options = { year: "numeric", month: "long", day: "numeric" };
   return new Date(dateString).toLocaleDateString(undefined, options);
 }
 
 function transformStation(station) {
   const currentDate = new Date();
   const endDate = new Date(station.EndDate);
-  const twoYearsAgo = new Date(currentDate.getFullYear() - 2, currentDate.getMonth(), currentDate.getDate());
+  const twoYearsAgo = new Date(
+    currentDate.getFullYear() - 2,
+    currentDate.getMonth(),
+    currentDate.getDate()
+  );
 
-  const status = endDate >= twoYearsAgo ? 'Current' : 'Historic';
+  const status = endDate >= twoYearsAgo ? "Current" : "Historic";
   const formattedStartDate = formatDate(station.StartDate);
-  const formattedEndDate =  formatDate(station.EndDate);
+  const formattedEndDate = formatDate(station.EndDate);
 
   return {
     ...station,
     formattedStartDate: formattedStartDate,
     formattedEndDate: formattedEndDate,
-    status: status
+    status: status,
   };
 }
 
