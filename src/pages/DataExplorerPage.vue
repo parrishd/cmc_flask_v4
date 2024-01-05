@@ -44,7 +44,7 @@
       <div class="row q-mt-lg">
         <!-- map -->
         <div class="col">
-          <MapBox :mapData="filteredStations" />
+          <MapBox :mapData="filteredStations" @selected-station="receiveEmit" />
         </div>
 
         <!-- form -->
@@ -398,11 +398,10 @@
                 size="64px"
               />
               <div class="result-details-header-text-1">
-                WESBRABIGRUN1.89 - West Branch-Big Run
+                {{ selectedStationDetails.code }}
               </div>
               <div class="result-details-header-text-2">
-                Monitored by: Centre County Pennsylvania Senior Environmental
-                Corps
+                Monitored by: {{ selectedStationDetails.groupNames }}
               </div>
             </div>
             <div class="col-1 text-right">
@@ -509,11 +508,18 @@
               <div class="q-mt-sm" style="font-weight: bold; font-size: 20px">
                 Station Profile
               </div>
-              <div class="q-mt-sm"><b>Description:</b> Bowmans Creek</div>
-              <div class="q-mt-sm"><b>Location:</b> 41.42556, -76.030278</div>
-              <div class="q-mt-sm"><b>First Sampled:</b> May 4, 2011</div>
               <div class="q-mt-sm">
-                <b>Most Recent Sample:</b> October 14, 2012
+                <b>Description:</b> {{ selectedStationDetails.description }}
+              </div>
+              <div class="q-mt-sm">
+                <b>Location:</b> {{ selectedStationDetails.latitude }},
+                {{ selectedStationDetails.longitude }}
+              </div>
+              <div class="q-mt-sm">
+                <b>First Sampled:</b> {{ selectedStationDetails.startDate }}
+              </div>
+              <div class="q-mt-sm">
+                <b>Most Recent Sample:</b> {{ selectedStationDetails.endDate }}
               </div>
               <div class="q-mt-md">
                 <iframe
@@ -642,6 +648,7 @@
  * Imports
  ****************************/
 import { computed, onMounted, ref, watch } from "vue";
+
 // import MapBox from "components/MapBoxOriginal.vue";
 import MapBox from "components/MapBox.vue";
 import Chart from "chart.js/auto";
@@ -665,6 +672,19 @@ import stations from "/src/assets/cmcV3_stations.json";
 /****************************
  * Local/'Use' Variables
  ***************************/
+const selectedStationDetails = ref({
+  code: "LACA.P7",
+  name: "P7",
+  nameLong: "P7",
+  groupNames: "Lake Anna Civic Association",
+  id: "522",
+  latitude: "38.006",
+  longitude: "-77.778",
+  huc6Name: "Lake Anna",
+  startDate: "January 1, 2015",
+  endDate: "December 31, 2020",
+  description: "Lake Anna, Spotsylvania County, VA",
+});
 const filteredStations = ref(stations.map(transformStation));
 
 const columns = [
@@ -1036,9 +1056,19 @@ function transformStation(station) {
   };
 }
 
+function receiveEmit(station) {
+  console.log("receiveEmit");
+  console.log(station);
+
+  selectedStationDetails.value = station;
+  console.log("selectedStationDetails");
+  console.log(selectedStationDetails);
+}
+
 /****************************
  * View Lifecycle Methods
  ***************************/
+
 onMounted(() => {
   createChart();
   applyFilters();

@@ -65,6 +65,8 @@ import stationsSecondSet from "/src/assets/station-richness-data.json";
 const props = defineProps(["mapData"]);
 const { mapData } = toRefs(props);
 
+const emit = defineEmits(["selectedStation"]);
+
 // *** Variables and constants ***
 
 // instance of MapBox GL JS
@@ -176,25 +178,7 @@ const structureBenthicData = () => {
     type: "FeatureCollection",
     features: [],
   };
-
-  let minLong = 0;
-  let maxLong = -100;
-  let minLat = 40;
-  let maxLat = 30;
-
   mapData.value.forEach((s) => {
-    if (s.Long < minLong) {
-      minLong = s.Long;
-    }
-    if (s.Lat < minLat) {
-      minLat = s.Lat;
-    }
-    if (s.Long > maxLong) {
-      maxLong = s.Long;
-    }
-    if (s.Lat > maxLat) {
-      maxLat = s.Lat;
-    }
     let station = {
       type: "Feature",
       properties: {
@@ -210,6 +194,8 @@ const structureBenthicData = () => {
         longitude: s.Long,
         huc6Name: s.Watershed,
         status: s.status,
+        startDate: s.formattedStartDate,
+        endDate: s.formattedEndDate,
       },
       geometry: {
         type: "Point",
@@ -657,7 +643,7 @@ function popupClickHandler(layerID, e) {
   const feature = features[0];
   // remove pop up before adding new one
   removePopUps();
-  const popupContent = `
+  const innerHtmlContent = `
     <div style="padding: 10px 20px 10px 20px">
       <div style="color: #075C7A; font-size: 1.95em; font-weight: 700;">
         Station
@@ -674,19 +660,42 @@ function popupClickHandler(layerID, e) {
         ${feature.properties.groupNames}
       </div>
       <div style="margin-top: 10px">
-        <button style="background-color: #075C7A; color: white; padding: 8px 10px 8px 10px; border: none; border-radius: 5px;">
-          View Station Details
-        </button>
+
       </div>
     </div>
   `;
+  const stationDetails = {
+    code: feature.properties.code,
+    name: feature.properties.name,
+    nameLong: feature.properties.nameLong,
+    groupNames: feature.properties.groupNames,
+    id: feature.properties.id,
+    latitude: feature.properties.latitude,
+    longitude: feature.properties.longitude,
+    huc6Name: feature.properties.huc6Name,
+    status: feature.properties.status,
+    startDate: feature.properties.startDate,
+    endDate: feature.properties.endDate,
+  };
+  const divElement = document.createElement("div");
+  const assignBtn = document.createElement("div");
+  assignBtn.innerHTML = ` <button style="background-color: #075C7A;cursor:pointer; color: white; padding: 8px 10px 8px 10px; border: none; border-radius: 5px;">
+            View Station Details
+          </button>`;
+  divElement.innerHTML = innerHtmlContent;
+  divElement.appendChild(assignBtn);
+  // btn.className = 'btn';
+  assignBtn.addEventListener("click", () => {
+    console.log("Button clicked");
+    stationDetailsClicked(stationDetails);
+  });
 
   const popup = new mapboxgl.Popup({
     offset: [0, 0],
     maxWidth: "400px",
   })
     .setLngLat(feature.geometry.coordinates)
-    .setHTML(popupContent);
+    .setDOMContent(divElement);
 
   popup.addTo(map);
   setupMouseEventListeners(layerID);
@@ -706,6 +715,12 @@ function removeLayerClickEvent(layerID) {
     map.off("click", layerID, benthicLayerIdsMap.get(layerID));
     benthicLayerIdsMap.delete(layerID);
   }
+}
+
+function stationDetailsClicked(station) {
+  console.log("stationDetailsClicked");
+  console.log(station);
+  emit("selectedStation", station);
 }
 
 const setupBenthicData = () => {
