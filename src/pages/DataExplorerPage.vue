@@ -44,7 +44,19 @@
       <div class="row q-mt-lg">
         <!-- map -->
         <div class="col">
-          <MapBox :mapData="filteredStations" @selected-station="receiveEmit" />
+          <MapBox
+            :mapData="filteredStations"
+            :showLegend="true"
+            :collapsed="collapsed"
+            @selected-station="receiveEmit"
+            :mapOptions="{
+              container: 'map',
+              style: 'mapbox://styles/mapbox/streets-v9',
+              center: [-76.5616315, 37.849295],
+              zoom: 6,
+            }"
+            :key="100"
+          />
         </div>
 
         <!-- form -->
@@ -120,7 +132,7 @@
           <div class="row q-mt-md">
             <div class="col">
               <q-select
-                label="Boundary Type"
+                label="Boundary Layer"
                 v-model="geoTypes"
                 :options="geoTypesOptions"
                 outlined
@@ -254,10 +266,9 @@
               <q-input
                 v-model="endDate"
                 label="End Date"
-                mask="date"
-                :rules="dateRule"
                 outlined
                 dense
+                mask="MM-DD-YYYY"
               >
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
@@ -385,7 +396,10 @@
       </div>
 
       <!-- selected data details -->
-      <div class="row q-mt-xl result-details-container">
+      <div
+        class="row q-mt-xl result-details-container"
+        ref="stationDetailsContainer"
+      >
         <div class="col">
           <!-- header -->
           <div class="row q-py-md q-px-lg result-details-header">
@@ -395,13 +409,21 @@
             <div class="col">
               <q-icon
                 class="fa-solid fa-location-dot float-left q-mr-lg"
-                size="64px"
+                size="110px"
               />
               <div class="result-details-header-text-1">
                 {{ selectedStationDetails.code }}
               </div>
               <div class="result-details-header-text-2">
                 Monitored by: {{ selectedStationDetails.groupNames }}
+              </div>
+              <div class="result-details-header-text-2">
+                Location: {{ selectedStationDetails.latitude }},
+                {{ selectedStationDetails.longitude }}
+              </div>
+              <div class="result-details-header-text-2" style="">
+                Date Range: {{ selectedStationDetails.startDate }} -
+                {{ selectedStationDetails.endDate }}
               </div>
             </div>
             <div class="col-1 text-right">
@@ -431,214 +453,112 @@
 
           <!-- details -->
           <div class="row q-mt-md">
-            <!-- details info -->
-            <div class="col-9 q-pr-xl">
-              <div class="row">
-                <div class="col">
-                  Use the Water Quality or Benthic Macroinvertebrates buttons to
-                  select the type of data you want to view for this station.
-                  Click a Quick Plots option to choose commonly viewed water
-                  quality data types. Click Export Plot to download the graph.
-                  Click Download Data to be taken to a data query page for this
-                  station.
-                </div>
-              </div>
-
-              <div class="row q-mt-lg">
-                <div class="col">
-                  <q-btn
-                    label="Water Quality"
-                    color="primary"
-                    class="q-mr-md"
-                  />
-                  <q-btn
-                    label="Benthic Macroinvertebrates"
-                    color="primary"
-                    class="q-ml-md"
-                  />
-                </div>
-              </div>
-
-              <div class="row q-mt-lg">
-                <div class="col">
-                  <div class="text-subtitle1 text-bold">Quick Plots</div>
-                  <div class="text-subtitle1">
-                    pH SU | Dissolved oxygen mg/L | Water temperature deg C
-                  </div>
-                </div>
-              </div>
-
-              <div class="row q-mt-lg">
-                <div class="col">
-                  <div class="text-subtitle1 text-bold">
-                    Water Quality Parameters
-                  </div>
-                  <div class="q-mt-sm">
-                    <q-btn
-                      label="Export Plot"
-                      color="primary"
-                      class="q-mr-md"
-                    />
-                    <q-btn
-                      label="Download Data"
-                      color="primary"
-                      class="q-ml-md"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div class="row q-mt-lg">
-                <div class="col-6 q-pr-md">
-                  <q-select label="Salinity Plots" outlined dense />
-                </div>
-                <div class="col-6 q-pl-md">
-                  <q-select label="Depth" outlined dense />
-                </div>
-              </div>
+            <div class="col-3 q-pr-xl">
+              <q-select
+                label="Data Type"
+                v-model="selectedParamTypePlot"
+                :options="paramTypeOptions"
+                outlined
+                bg-color="white"
+              ></q-select>
             </div>
-
-            <!-- details card -->
-            <div class="col-3 q-py-md station-profile-container">
-              <div>
-                <q-avatar size="76px">
-                  <img src="/images/station/station-profile-photo.png" />
-                </q-avatar>
-              </div>
-              <div class="q-mt-sm" style="font-weight: bold; font-size: 20px">
-                Station Profile
-              </div>
-              <div class="q-mt-sm">
-                <b>Description:</b> {{ selectedStationDetails.description }}
-              </div>
-              <div class="q-mt-sm">
-                <b>Location:</b> {{ selectedStationDetails.latitude }},
-                {{ selectedStationDetails.longitude }}
-              </div>
-              <div class="q-mt-sm">
-                <b>First Sampled:</b> {{ selectedStationDetails.startDate }}
-              </div>
-              <div class="q-mt-sm">
-                <b>Most Recent Sample:</b> {{ selectedStationDetails.endDate }}
-              </div>
-              <div class="q-mt-md">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d47822.29913316174!2d-75.98405185!3d41.4849043!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c53bd22acb2935%3A0x3ac68806abf8bd8e!2sBowman%20Creek!5e0!3m2!1sen!2sus!4v1691578563483!5m2!1sen!2sus"
-                  width="300"
-                  height="225"
-                  style="border: 0"
-                  allowfullscreen=""
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
-                >
-                </iframe>
-                <!--                <q-img-->
-                <!--                  src="/images/station/station-map-temp.png"-->
-                <!--                  style="height: 150px; max-width: 160px"-->
-                <!--                />-->
-              </div>
+            <div class="col-3 q-pr-xl q-pl-xl">
+              <q-select
+                label="Depth"
+                v-model="selectedDepthPlot"
+                :options="depthOptionsPlot"
+                outlined
+                bg-color="white"
+              />
+            </div>
+            <div class="col-3 q-pr-xl q-pl-xl">
+              <q-input
+                label="Start Date"
+                v-model="formattedStartDatePlot"
+                :mask="dateMask"
+                id="date-input"
+                outlined
+              >
+                <template v-slot:prepend>
+                  <q-icon name="event" class="cursor-pointer">
+                    <q-popup-proxy
+                      cover
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-date
+                        v-model="formattedStartDatePlot"
+                        :mask="dateFormat"
+                        today-btn
+                      >
+                        <div class="row items-center justify-end">
+                          <q-btn
+                            v-close-popup
+                            label="Close"
+                            color="primary"
+                            flat
+                          />
+                        </div>
+                      </q-date>
+                    </q-popup-proxy>
+                  </q-icon>
+                </template>
+              </q-input>
+            </div>
+            <div class="col-3 q-pl-xl">
+              <q-input
+                label="End Date"
+                v-model="formattedEndDatePlot"
+                :mask="dateMask"
+                id="date-input"
+                outlined
+              >
+                <template v-slot:prepend>
+                  <q-icon name="event" class="cursor-pointer">
+                    <q-popup-proxy
+                      cover
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-date
+                        v-model="formattedEndDatePlot"
+                        :mask="dateFormat"
+                        today-btn
+                      >
+                        <div class="row items-center justify-end">
+                          <q-btn
+                            v-close-popup
+                            label="Close"
+                            color="primary"
+                            flat
+                          />
+                        </div>
+                      </q-date>
+                    </q-popup-proxy>
+                  </q-icon>
+                </template>
+              </q-input>
             </div>
           </div>
 
-          <!-- graph -->
-          <div class="row q-mt-xl">
-            <div class="col">
-              Values displayed on graph are daily means of duplicate samples
+          <div class="row q-mt-md">
+            <div class="col-12 q-pr-xl">
+              <DashboardPlot></DashboardPlot>
             </div>
           </div>
           <div class="row q-mt-md">
-            <div class="col" style="height: 280px">
-              <canvas ref="plotChartRef" />
-            </div>
-          </div>
-          <div class="row q-mt-lg">
-            <div class="col">
-              Please note that parameters are consolidated in the plot where
-              sampling methodologies may be different. Please click the "Show
-              Details" button for more information.
+            <div class="col-10 q-pr-xl"></div>
+            <div class="col-2 q-pr-xl">
+              <q-btn
+                label="Add Plot"
+                color="primary"
+                icon-right="fas fa-plus"
+              />
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- database statistics -->
-    <div class="row q-mt-xl q-py-lg db-stats-container">
-      <div class="col">
-        <div class="row">
-          <div class="col text-center text-h4 text-bold">
-            Database Statistics
-          </div>
-        </div>
-
-        <div class="row q-mt-md">
-          <div class="col text-center">
-            The summary statistics below provide an overview of the current
-            scope of the Data Explorer.
-          </div>
-        </div>
-
-        <div class="row q-px-xl q-mt-xl text-center">
-          <div class="col">
-            <div>
-              <q-icon class="fa-solid fa-file-lines" size="64px" />
-            </div>
-            <div class="q-mt-xs db-stat-value">765,564</div>
-            <div class="db-stat-label">WATER QUALITY RECORDS</div>
-          </div>
-          <div class="col">
-            <div>
-              <q-icon class="fa-solid fa-memo-pad" size="64px" />
-            </div>
-            <div class="q-mt-xs db-stat-value">4,348</div>
-            <div class="db-stat-label">BENTHIC MACROINVERTEBRATE RECORDS</div>
-          </div>
-          <div class="col">
-            <div>
-              <q-icon class="fa-solid fa-water" size="64px" />
-            </div>
-            <div class="q-mt-xs db-stat-value">658</div>
-            <div class="db-stat-label">RIVERS/STREAMS</div>
-          </div>
-          <div class="col">
-            <div>
-              <q-icon class="fa-solid fa-location-dot" size="64px" />
-            </div>
-            <div class="q-mt-xs db-stat-value">2,286</div>
-            <div class="db-stat-label">STATIONS</div>
-          </div>
-        </div>
-        <div class="row q-px-xl q-pb-xl q-mt-xl text-center">
-          <div class="col">
-            <div>
-              <q-icon class="fa-solid fa-location-pin" size="64px" />
-            </div>
-            <div class="q-mt-xs db-stat-value">861</div>
-            <div class="db-stat-label">BENTHIC STATIONS</div>
-          </div>
-          <div class="col">
-            <div>
-              <q-icon class="fa-solid fa-user" size="64px" />
-            </div>
-            <div class="q-mt-xs db-stat-value">764</div>
-            <div class="db-stat-label">MONITORS</div>
-          </div>
-          <div class="col">
-            <div>
-              <q-icon class="fa-solid fa-clock" size="64px" />
-            </div>
-            <div class="q-mt-xs db-stat-value">43,452</div>
-            <div class="db-stat-label">MONITORING HOURS</div>
-          </div>
-          <div class="col">
-            <div>
-              <q-icon class="fa-solid fa-building" size="64px" />
-            </div>
-            <div class="q-mt-xs db-stat-value">137</div>
-            <div class="db-stat-label">ORGANIZATIONS</div>
-          </div>
-        </div>
-      </div>
+      <div class="row q-mt-xl"></div>
     </div>
   </q-page>
 </template>
@@ -651,8 +571,12 @@ import { computed, onMounted, ref, watch } from "vue";
 
 // import MapBox from "components/MapBoxOriginal.vue";
 import MapBox from "components/MapBox.vue";
-import Chart from "chart.js/auto";
+import DashboardPlot from "components/DashboardPlot.vue";
+
 import stations from "/src/assets/cmcV3_stations.json";
+import { date } from "quasar";
+
+const emit = defineEmits(["update:endDatePlot", "update:startDatePlot"]);
 
 /*****************************
  * Lazy/Async components
@@ -667,7 +591,16 @@ import stations from "/src/assets/cmcV3_stations.json";
 /****************************
  * Component Props
  ***************************/
-// props defined here
+const props = defineProps({
+  endDatePlot: {
+    type: String,
+    required: true,
+  },
+  startDatePlot: {
+    type: String,
+    required: true,
+  },
+});
 
 /****************************
  * Local/'Use' Variables
@@ -678,13 +611,14 @@ const selectedStationDetails = ref({
   nameLong: "P7",
   groupNames: "Lake Anna Civic Association",
   id: "522",
-  latitude: "38.006",
-  longitude: "-77.778",
+  latitude: "38.22682",
+  longitude: "-77.98037",
   huc6Name: "Lake Anna",
   startDate: "January 1, 2015",
   endDate: "December 31, 2020",
   description: "Lake Anna, Spotsylvania County, VA",
 });
+
 const filteredStations = ref(stations.map(transformStation));
 
 const columns = [
@@ -732,65 +666,8 @@ const columns = [
 const tableKey = ref(0);
 const rows = filteredStations.value;
 
-let chartInstance = null;
-const chartConfig = {
-  type: "bar",
-  data: {
-    labels: ["40", "45", "50", "55", "60", "65", "70"],
-    datasets: [
-      {
-        label: "D",
-        data: [25, 36, 54, 65, 59, 56, 55, 25],
-        fill: true,
-        borderColor: "#075C7A",
-        backgroundColor: "rgb(7, 92, 122, 0.25)",
-        borderWidth: 2,
-        borderRadius: Number.MAX_VALUE,
-        borderSkipped: false,
-        barPercentage: 0.25,
-      },
-      {
-        label: "D",
-        data: [42, 56, 34, 35, 69, 36, 45, 8],
-        fill: true,
-        borderColor: "#075C7A",
-        backgroundColor: "rgb(7, 92, 122, 0.25)",
-        borderWidth: 2,
-        borderRadius: Number.MAX_VALUE,
-        borderSkipped: false,
-        barPercentage: 0.25,
-      },
-    ],
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    // scaleShowVerticalLines: false,
-    scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-      },
-    },
-    // scales: {
-    //   xAxes: [
-    //     {
-    //       gridLines: {
-    //         display: false,
-    //       },
-    //     },
-    //   ],
-    // },
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-  },
-};
-
 const dataTypes = ["Water Quality", "Benthic Macroinvertebrates"];
+const paramTypeOptions = ["Depth", "Parameter"];
 const geoTypesOptions = ["Watershed Boundary", "Political Boundary"];
 const stateOptions = computed(() => {
   return [...new Set(filteredStations.value.map((s) => s.State))].sort();
@@ -847,19 +724,21 @@ const stationsCount = computed(() => {
 /****************************
  * Ref/UI Variables
  ***************************/
-const plotChartRef = ref(null);
-const collapsed = ref(true);
+const collapsed = ref(false);
 const showCityState = ref(false);
 const showWatersheds = ref(false);
 const startDate = ref(null);
-const endDate = ref(null);
+const endDate = ref("2024/01/02");
 const optionalMetaGroups = ref(false);
 const optionalMetaStations = ref(false);
 const optionalMetaParams = ref(false);
 const optionalMetaCalibration = ref(false);
 const dataUseAcknowledgment = ref(false);
+const selectedParamPlot = ref("WT.1");
+const selectedDepthPlot = ref(0.3);
 const geoTypes = ref("");
 const selectedDataType = ref([]);
+const selectedParamTypePlot = ref("Depth");
 const selectedStates = ref([]);
 const selectedStations = ref([]);
 const selectedCounties = ref([]);
@@ -867,6 +746,32 @@ const selectedWatershed = ref([]);
 const selectedSubwatershed = ref([]);
 const selectedGroups = ref([]);
 const selectedParams = ref([]);
+const paramOptionsPlot = ref(["DO.1", "PH.1", "WT.1"]);
+const depthOptionsPlot = ref([0.3, 1]);
+const stationDetailsContainer = ref();
+
+//Establish date formatting
+const dateFormat = "YYYY-MM-DD";
+
+//Make a mask for the q-input in the form of ####-##-##
+const dateMask = dateFormat.replace(/[DMY]/g, "#");
+
+//Format the date for display in the q-input.
+const formattedStartDatePlot = ref(
+  date.formatDate(new Date(props.startDatePlot), dateFormat)
+);
+const formattedEndDatePlot = ref(
+  date.formatDate(new Date(props.endDatePlot), dateFormat)
+);
+
+formattedStartDatePlot.value = date.formatDate(
+  new Date(selectedStationDetails.value.startDate),
+  dateFormat
+);
+formattedEndDatePlot.value = date.formatDate(
+  new Date(selectedStationDetails.value.endDate),
+  dateFormat
+);
 
 /****************************
  * Computed Properties
@@ -877,6 +782,23 @@ const selectedParams = ref([]);
  * Watched properties
  **************************/
 // watched properties here
+//Watchers to emit the updated date when changed.
+watch(formattedStartDatePlot, (newDateValue) => {
+  //construct new date ISO string from the formattedEndDate.
+  const newDate = date.extractDate(newDateValue, dateFormat);
+  //convert to iso string
+  const updatedDate = newDate.toISOString();
+  emit("update:startDatePlot", updatedDate);
+});
+
+watch(formattedEndDatePlot, (newDateValue) => {
+  //construct new date ISO string from the formattedEndDate.
+  const newDate = date.extractDate(newDateValue, dateFormat);
+  //convert to iso string
+  const updatedDate = newDate.toISOString();
+  emit("update:endDatePlot", updatedDate);
+});
+
 watch(geoTypes, () => {
   if (geoTypes.value === "Watershed Boundary") {
     showCityState.value = false;
@@ -921,11 +843,6 @@ for (const refItem of filterRefs) {
 /****************************
  * UI Functions
  ***************************/
-function createChart() {
-  if (plotChartRef.value) {
-    chartInstance = new Chart(plotChartRef.value, chartConfig);
-  }
-}
 
 function clearFilters() {
   selectedDataType.value = null;
@@ -1020,6 +937,9 @@ function applyFilters() {
     .filter((s) => filterFunctions.every((filter) => filter(s)))
     .map(transformStation);
 }
+function checkDate(val) {
+  return Quasar.utils.date.isValid(val) || "Invalid date.";
+}
 
 const dateRule = [
   (v) => (v === null || isValidDate(v) ? true : "Invalid Date"),
@@ -1063,6 +983,20 @@ function receiveEmit(station) {
   selectedStationDetails.value = station;
   console.log("selectedStationDetails");
   console.log(selectedStationDetails);
+  stationDetailsContainer.value.scrollIntoView({ behavior: "smooth" });
+  console.log("station end date");
+  console.log(station.endDate);
+  console.log(date.formatDate(new Date(station.endDate), dateFormat));
+
+  formattedEndDatePlot.value = date.formatDate(
+    new Date(station.endDate),
+    dateFormat
+  );
+
+  formattedStartDatePlot.value = date.formatDate(
+    new Date(station.startDate),
+    dateFormat
+  );
 }
 
 /****************************
@@ -1070,12 +1004,11 @@ function receiveEmit(station) {
  ***************************/
 
 onMounted(() => {
-  createChart();
   applyFilters();
 
-  setTimeout(() => {
-    collapsed.value = false;
-  }, 500);
+  // setTimeout(() => {
+  //   collapsed.value = false;
+  // }, 500);
 });
 </script>
 
@@ -1111,37 +1044,13 @@ onMounted(() => {
   color: white;
 }
 .result-details-header-text-1 {
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 600;
 }
 .result-details-header-text-2 {
   color: #dddddd;
   font-size: 18px;
   font-weight: 500;
-}
-
-.station-profile-container {
-  background-color: $vims-medium-blue;
-  //margin-left: 12px;
-
-  div {
-    text-align: center;
-    color: white;
-  }
-}
-
-.db-stats-container {
-  background-color: $vims-light-blue;
-  color: $vims-medium-blue;
-}
-.db-stat-value {
-  font-size: 32px;
-  font-weight: 700;
-}
-.db-stat-label {
-  font-size: 16px;
-  font-weight: 500;
-  color: $vims-dark-gray;
 }
 
 .tooltip-header {

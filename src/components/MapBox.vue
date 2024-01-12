@@ -1,56 +1,65 @@
 <template>
   <div class="map-container">
     <!-- MapBox GL JS instance -->
-    <div id="map" />
-    <!-- Toggle between data type by loading different source and layers -->
-    <div class="data-type-widget">
-      <q-card class="my-card">
-        <q-card-section>
-          <p>Station Type</p>
 
-          <q-option-group
-            v-model="stationTypeGroup"
-            :options="stationTypeOptions"
-            color="primary"
-          ></q-option-group>
-        </q-card-section>
-      </q-card>
-    </div>
+    <div
+      :id="
+        Object.prototype.hasOwnProperty.call(mapOptions, 'container')
+          ? mapOptions.container
+          : 'map'
+      "
+    ></div>
+    <div v-if="showLegend">
+      <!-- Toggle between data type by loading different source and layers -->
+      <div class="data-type-widget">
+        <q-card class="my-card">
+          <q-card-section>
+            <p>Station Type</p>
 
-    <!-- Foo widget to show sampling events, not hooked up to reactive data -->
-    <div class="map-overlay">
-      <q-card class="my-card">
-        <q-card-section>
-          <q-list>
-            <p>Sampling Status</p>
+            <q-option-group
+              v-model="stationTypeGroup"
+              :options="stationTypeOptions"
+              color="primary"
+            ></q-option-group>
+          </q-card-section>
+        </q-card>
+      </div>
 
-            <p>
-              <span class="dot-purple"></span>
-              &nbsp;Current
-            </p>
+      <!-- Foo widget to show sampling events, not hooked up to reactive data -->
+      <div class="map-overlay">
+        <q-card class="my-card">
+          <q-card-section>
+            <q-list>
+              <p>Sampling Status</p>
 
-            <p>
-              <span class="dot-gray"></span>
-              &nbsp;Historic
-            </p>
-          </q-list>
-        </q-card-section>
-      </q-card>
-    </div>
+              <p>
+                <span class="dot-purple"></span>
+                &nbsp;Current
+              </p>
 
-    <!-- toggle raster or vector map style. Check uncheck to show polygon data-->
-    <div class="map-style">
-      <q-card class="my-card">
-        <q-card-section>
-          <q-option-group
-            v-model="mapStyle"
-            :options="mapStyleOptions"
-            color="primary"
-          ></q-option-group>
+              <p>
+                <span class="dot-gray"></span>
+                &nbsp;Historic
+              </p>
+            </q-list>
+          </q-card-section>
+        </q-card>
+      </div>
 
-          <q-checkbox v-model="showWatersheds"> Watersheds</q-checkbox>
-        </q-card-section>
-      </q-card>
+      <!-- toggle raster or vector map style. Check uncheck to show polygon data-->
+      <div class="map-style">
+        <q-card class="my-card">
+          <q-card-section>
+            <q-option-group
+              v-model="mapStyle"
+              :options="mapStyleOptions"
+              color="primary"
+            ></q-option-group>
+
+            <q-checkbox v-model="showWatersheds"> Watersheds</q-checkbox>
+          </q-card-section>
+        </q-card>
+      </div>
     </div>
   </div>
 </template>
@@ -62,8 +71,11 @@ import stations from "/src/assets/stations.json";
 import stationsSecondSet from "/src/assets/station-richness-data.json";
 
 // *** Component Props ***
-const props = defineProps(["mapData"]);
+const props = defineProps(["mapData", "mapOptions", "showLegend", "collapsed"]);
 const { mapData } = toRefs(props);
+const { mapOptions } = toRefs(props);
+const { showLegend } = toRefs(props);
+const { collapsed } = toRefs(props);
 
 const emit = defineEmits(["selectedStation"]);
 
@@ -134,6 +146,13 @@ watch(mapData, () => {
   // removePopUps();
   // updateMarkersOnMap();
 });
+if (showLegend.value === true) {
+  watch(collapsed, () => {
+    console.log("collapsed: " + collapsed.value);
+
+    setTimeout(() => (map.resize(), 50));
+  });
+}
 
 watch(showWatersheds, () => {
   console.log("showWatersheds: " + showWatersheds.value);
@@ -292,12 +311,7 @@ const getStations = () => {
 const createMap = () => {
   mapboxgl.accessToken =
     "pk.eyJ1IjoibXlha2F2ZW5rYSIsImEiOiJjbDlxMDJrNmcwMmE2M3dxeDYyZWE0OWQ0In0.dKzXgJu-ZUH3epnFzxvllg";
-  map = new mapboxgl.Map({
-    container: "map",
-    style: "mapbox://styles/mapbox/outdoors-v11",
-    center: [-76.5616315, 37.849295],
-    zoom: 5.75,
-  });
+  map = new mapboxgl.Map(mapOptions.value);
   map.addControl(new mapboxgl.NavigationControl());
 
   //this was causing the map to flash, removing for now. There may be a better way to handle this. Leave this commented code here for now.
@@ -362,7 +376,7 @@ const addStatesPolygons = () => {
     // Add a source for the state polygons.
     map.addSource("states", {
       type: "geojson",
-      data: "https://docs.mapbox.com/mapbox-gl-js/assets/ne_110m_admin_1_states_provinces_shp.geojson",
+      data: "/src/assets/spatial/huc8_simple.json", //assets/spatial/huc8_simple.json",
     });
 
     // Add a clear layer showing that will be used for on click events
@@ -395,10 +409,12 @@ const addStatesPolygons = () => {
       map.on("mouseleave", "states-layer", onMouseLeaveEvent);
       map.on("click", "states-layer", (e) => {
         console.log("On click polygon event");
+        console.log(e);
+        console.log(e.features[0]);
         removePopUps();
         const popup = new mapboxgl.Popup()
           .setLngLat(e.lngLat)
-          .setHTML(e.features[0].properties.name)
+          .setHTML(e.features[0].properties.ACTNAME)
           .addTo(map);
 
         // flag used to persist this pop up if data type changes as those pop ups need to be removed.
@@ -410,7 +426,7 @@ const addStatesPolygons = () => {
       });
     }
 
-    // map.on('click', 'states-layer', onClickPolygon)
+    //map.on('click', 'states-layer', onClickPolygon)
   }
 };
 
@@ -785,13 +801,17 @@ const setupBenthicData = () => {
       setupLayerClickEvent(layerID);
     }
   });
-  console.log(minLat, maxLat, minLong, maxLong);
-  let centerLat = (minLat + maxLat) / 2; // + 1.8;
-  let centerLong = (minLong + maxLong) / 2;
-  let centerCoordinates = { lng: centerLong, lat: centerLat };
+  console.log("mapOptions.showLegend");
+  console.log(showLegend.value);
+  if (showLegend.value === true) {
+    console.log(minLat, maxLat, minLong, maxLong);
+    let centerLat = (minLat + maxLat) / 2; // + 1.8;
+    let centerLong = (minLong + maxLong) / 2;
+    let centerCoordinates = { lng: centerLong, lat: centerLat };
 
-  console.log(centerCoordinates);
-  map.setCenter(centerCoordinates);
+    console.log(centerCoordinates);
+    map.setCenter(centerCoordinates);
+  }
 };
 
 const updateMarkersOnMap = () => {
@@ -868,7 +888,11 @@ onMounted(() => {
 }
 
 #map {
-  height: 82vh;
+  height: 800px; /* 82vh if want %height */
+}
+
+#map1 {
+  height: 500px;
 }
 
 .dot-green {
