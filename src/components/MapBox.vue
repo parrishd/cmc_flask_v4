@@ -10,22 +10,7 @@
       "
     ></div>
     <div v-if="showLegend">
-      <!-- Toggle between data type by loading different source and layers -->
-      <div class="data-type-widget">
-        <q-card class="my-card">
-          <q-card-section>
-            <p>Station Type</p>
-
-            <q-option-group
-              v-model="stationTypeGroup"
-              :options="stationTypeOptions"
-              color="primary"
-            ></q-option-group>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- Foo widget to show sampling events, not hooked up to reactive data -->
+      <!--
       <div class="map-overlay">
         <q-card class="my-card">
           <q-card-section>
@@ -45,18 +30,40 @@
           </q-card-section>
         </q-card>
       </div>
+      -->
 
       <!-- toggle raster or vector map style. Check uncheck to show polygon data-->
-      <div class="map-style">
+      <div class="legend-style">
         <q-card class="my-card">
           <q-card-section>
+            <div style="font-size: 16px" large>Data Layers</div>
+            <q-checkbox v-model="showStations" class="q-mt-sm">
+              {{ selectedDataType }}</q-checkbox
+            >
+            <!--add padding to left of this div-->
+            <div style="padding-left: 30px; padding-top: 5px">
+              <p>
+                <span class="dot-purple"></span>
+                &nbsp;Current
+              </p>
+
+              <p>
+                <span class="dot-gray"></span>
+                &nbsp;Historic
+              </p>
+            </div>
+            <q-checkbox v-model="showPolygons">
+              {{ selectedGeoType }}</q-checkbox
+            >
+          </q-card-section>
+          <q-card-section>
+            <div style="font-size: 16px" large>Basemap</div>
             <q-option-group
+              class="q-mt-sm"
               v-model="mapStyle"
               :options="mapStyleOptions"
               color="primary"
             ></q-option-group>
-
-            <q-checkbox v-model="showWatersheds"> Watersheds</q-checkbox>
           </q-card-section>
         </q-card>
       </div>
@@ -66,16 +73,23 @@
 
 <script setup>
 import mapboxgl from "mapbox-gl";
-import { onMounted, reactive, ref, watch, toRefs } from "vue";
-import stations from "/src/assets/stations.json";
-import stationsSecondSet from "/src/assets/station-richness-data.json";
+import { onMounted, reactive, ref, watch, toRefs, onUnmounted } from "vue";
 
 // *** Component Props ***
-const props = defineProps(["mapData", "mapOptions", "showLegend", "collapsed"]);
+const props = defineProps([
+  "mapData",
+  "mapOptions",
+  "showLegend",
+  "collapsed",
+  "selectedDataType",
+  "selectedGeoType",
+]);
 const { mapData } = toRefs(props);
 const { mapOptions } = toRefs(props);
 const { showLegend } = toRefs(props);
 const { collapsed } = toRefs(props);
+const { selectedDataType } = toRefs(props);
+const { selectedGeoType } = toRefs(props);
 
 const emit = defineEmits(["selectedStation"]);
 
@@ -84,12 +98,12 @@ const emit = defineEmits(["selectedStation"]);
 // instance of MapBox GL JS
 let map = reactive({});
 
-let isPolygonsClickEventSet = ref(false);
 // shows hides polygons that represent 50 states per foo geojson file
-let showWatersheds = ref(true);
+let showPolygons = ref(true);
+let showStations = ref(true);
 
 // used to persist the polygons layer pop up in case we toggle data type
-let isShowingPolygonPopUp = ref(false);
+//let isShowingPolygonPopUp = ref(false);
 
 // group of options to select to show map as aerial (raster) vs vector street map
 let mapStyle = ref("vector");
@@ -104,30 +118,10 @@ const mapStyleOptions = ref([
   },
 ]);
 
-// group of options to select data type via radio toggle
-let stationTypeGroup = ref("benthic");
-const stationTypeOptions = ref([
-  {
-    label: "Benthic",
-    value: "benthic",
-  },
-  {
-    label: "Water Quality",
-    value: "water",
-  },
-]);
-
-let waterLayerIdsMap = new Map();
-let benthicLayerIdsMap = new Map();
+let stationLayersIdsMap = new Map();
 
 // locs static foo data for demo on markers
 let locs = reactive({
-  type: "FeatureCollection",
-  features: [],
-});
-
-// locs static foo data for demo on markers
-let locsBenthic = reactive({
   type: "FeatureCollection",
   features: [],
 });
@@ -136,16 +130,8 @@ let locsBenthic = reactive({
 watch(mapData, () => {
   removePopUps();
   getStations();
-  // console.log('######################')
-  // console.log(mapData);
-  // structureBenthicData();
-  // console.log(locsBenthic);
-  // console.log('######################')
-  // console.log(mapData);
-  // console.log(locsBenthic);
-  // removePopUps();
-  // updateMarkersOnMap();
 });
+
 if (showLegend.value === true) {
   watch(collapsed, () => {
     console.log("collapsed: " + collapsed.value);
@@ -154,9 +140,23 @@ if (showLegend.value === true) {
   });
 }
 
-watch(showWatersheds, () => {
-  console.log("showWatersheds: " + showWatersheds.value);
+watch(showPolygons, () => {
+  console.log("showPolygons: " + showPolygons.value);
   togglePolygons();
+});
+
+watch(showStations, () => {
+  console.log("showStations: " + showStations.value);
+  toggleStations();
+});
+
+watch(selectedGeoType, () => {
+  console.log("geoType: " + selectedGeoType.value);
+  togglePolygons();
+});
+watch(selectedDataType, () => {
+  console.log("geoType: " + selectedGeoType.value);
+  toggleStations();
 });
 
 // https://github.com/mapbox/mapbox-gl-js/issues/8660
@@ -173,139 +173,50 @@ watch(mapStyle, () => {
   }
 });
 
-// toggle between data source to display, shown as data type toggle on the map
-watch(stationTypeGroup, () => {
-  console.log("stationTypeOptions.value " + stationTypeGroup.value);
-  if (stationTypeGroup.value) {
-    // on data type toggle only remove if popup is for station type layers
-    // otherwise if its polygons, the popup is tracked with isShowingPolygonPopUp to not remove it
-    if (isShowingPolygonPopUp.value === false) {
-      console.log("why not here?");
-      removePopUps();
-    } else {
-      console.log("Strange");
-      console.log(isShowingPolygonPopUp.value);
-    }
-    updateMarkersOnMap();
-  }
-});
-
 //  *** Functions ***
-
-const structureBenthicData = () => {
-  let locationsBenthic = {
-    type: "FeatureCollection",
-    features: [],
-  };
-  mapData.value.forEach((s) => {
-    let station = {
-      type: "Feature",
-      properties: {
-        // project: s.State,
-        project: s.StationId,
-        selected: false,
-        code: s.Code,
-        name: s.Name,
-        nameLong: s.NameLong,
-        groupNames: s.GroupNames,
-        id: s.StationId,
-        latitude: s.Lat,
-        longitude: s.Long,
-        huc6Name: s.Watershed,
-        status: s.status,
-        startDate: s.formattedStartDate,
-        endDate: s.formattedEndDate,
-      },
-      geometry: {
-        type: "Point",
-        coordinates: [s.Long, s.Lat],
-      },
-      id: s.id,
-    };
-    locationsBenthic.features.push(station);
-
-    // console.log(s.project, s.id);
-  });
-  locsBenthic = locationsBenthic;
-};
 
 // used to populate static data from foo json files
 const getStations = () => {
-  console.log(map);
-  console.log("stations data!");
-  console.log(locsBenthic);
-  // let's create two data sets for toggling between data types widget
-
-  // call first one for water locations == locs
-  let locations = {
-    type: "FeatureCollection",
-    features: [],
-  };
-
-  stations.forEach((s) => {
-    let station = {
-      type: "Feature",
-      properties: {
-        project: s.project,
-        selected: false,
-        code: s.code,
-        name: s.name,
-        id: s.id,
-        latitude: s.latitude,
-        longitude: s.longitude,
-        huc12Name: s.huc12Name,
-        huc6Name: s.huc6Name,
-        cbseg2003: s.cbseg2003,
-        cityCounty: s.cityCounty,
-      },
-      geometry: {
-        type: "Point",
-        coordinates: [s.longitude, s.latitude],
-      },
-      id: s.id,
+  console.log("getStations");
+  console.log(mapData.value);
+  if (mapData.value) {
+    let locations = {
+      type: "FeatureCollection",
+      features: [],
     };
-    locations.features.push(station);
+    mapData.value.forEach((s) => {
+      let station = {
+        type: "Feature",
+        properties: {
+          // project: s.State,
+          project: s.status, //s.StationId,
+          selected: false,
+          code: s.Code,
+          name: s.Name,
+          nameLong: s.NameLong,
+          groupNames: s.GroupNames,
+          id: s.StationId,
+          latitude: s.Lat,
+          longitude: s.Long,
+          huc6Name: s.Watershed,
+          status: s.status,
+          startDate: s.formattedStartDate,
+          endDate: s.formattedEndDate,
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [s.Long, s.Lat],
+        },
+        id: s.id,
+      };
+      locations.features.push(station);
 
-    // console.log(s.project, s.id);
-  });
+      // console.log(s.project, s.id);
+    });
+    locs = locations;
 
-  // we will call second one for benthic as locationsBenthic ==  locsBenthic
-  // let locationsBenthic = {
-  //   type: "FeatureCollection",
-  //   features: [],
-  // };
-  //
-  // mapData.value.forEach((s) => {
-  //   let station = {
-  //     type: "Feature",
-  //     properties: {
-  //       // project: s.State,
-  //       project: s.StationId,
-  //       selected: false,
-  //       code: s.Code,
-  //       name: s.Name,
-  //       nameLong: s.NameLong,
-  //       groupNames: s.GroupNames,
-  //       id: s.StationId,
-  //       latitude: s.Lat,
-  //       longitude: s.Long,
-  //       huc6Name: s.Watershed,
-  //     },
-  //     geometry: {
-  //       type: "Point",
-  //       coordinates: [s.Long, s.Lat],
-  //     },
-  //     id: s.id,
-  //   };
-  //   locationsBenthic.features.push(station);
-  //
-  //   // console.log(s.project, s.id);
-  // });
-  //
-  // locsBenthic = locationsBenthic;
-  structureBenthicData();
-
-  createMap();
+    createMap();
+  }
 };
 
 const createMap = () => {
@@ -323,9 +234,9 @@ const createMap = () => {
   map.on("style.load", () => {
     console.log("A styledata event occurred.");
 
-    if (showWatersheds.value === true) {
+    if (showPolygons.value === true) {
       // re-add polygons in case check box was still on
-      addStatesPolygons();
+      addPolygons();
     }
     // re-add all the markers per whatever data type is selected
     updateMarkersOnMap();
@@ -333,9 +244,10 @@ const createMap = () => {
 };
 
 const togglePolygons = () => {
-  if (showWatersheds.value === true) {
+  removePopUps();
+  if (showPolygons.value === true) {
     console.log("should be showing the polygons for states");
-    addStatesPolygons();
+    addPolygons();
     updateMarkersOnMap();
   } else {
     console.log("should be hiding the polygons");
@@ -344,11 +256,21 @@ const togglePolygons = () => {
   }
 };
 
+const toggleStations = () => {
+  removePopUps();
+  if (showStations.value === true) {
+    console.log("should be showing the stationss");
+    setupStationsOnMap();
+  } else {
+    removeStations();
+  }
+};
+
 // removes the layers associated with geojsons states polygons and removes source after
 const removePolygons = () => {
-  if (map.getSource("states")) {
-    const layerForPolygon = "states-layer";
-    const layerForPolygonOutline = "states-layer-outline";
+  if (map.getSource("polygons")) {
+    const layerForPolygon = "polygons-layer";
+    const layerForPolygonOutline = "polygons-layer-outline";
 
     if (map.getLayer(layerForPolygonOutline)) {
       console.log("removing layer for layerForPolygonOutline");
@@ -364,72 +286,77 @@ const removePolygons = () => {
     }
 
     // finally remove the source after removing layers and callbacks
-    map.removeSource("states");
+    map.removeSource("polygons");
   }
 };
 
 // Add a data source containing GeoJSON data.
 // https://docs.mapbox.com/mapbox-gl-js/example/polygon-popup-on-click/
-const addStatesPolygons = () => {
-  if (!map.getSource("states")) {
-    console.log("states exist already thats why we get an error!");
-    // Add a source for the state polygons.
-    map.addSource("states", {
-      type: "geojson",
-      data: "/src/assets/spatial/huc8_simple.json", //assets/spatial/huc8_simple.json",
-    });
-
-    // Add a clear layer showing that will be used for on click events
-    map.addLayer({
-      id: "states-layer",
-      type: "fill",
-      source: "states",
-      paint: {
-        "fill-color": "rgba(0, 0, 0, 0.0)",
-        // 'fill-outline-color': 'rgba(200, 100, 240, 1)',
-      },
-    });
-    // Add an outline layer that will be visible and will outline geojson states polygons
-    map.addLayer({
-      id: "states-layer-outline",
-      type: "line",
-      source: "states",
-      paint: {
-        "line-color": "rgba(200, 100, 0, 0.9)",
-        "line-width": 3,
-      },
-    });
-
-    if (isPolygonsClickEventSet.value === false) {
-      isPolygonsClickEventSet.value = true;
-      // When a click event occurs on a feature in the states layer,
-      // open a popup at the location of the click, with description
-      // HTML from the click event's properties.
-      map.on("mouseenter", "states-layer", onMouseEnterEvent);
-      map.on("mouseleave", "states-layer", onMouseLeaveEvent);
-      map.on("click", "states-layer", (e) => {
-        console.log("On click polygon event");
-        console.log(e);
-        console.log(e.features[0]);
-        removePopUps();
-        const popup = new mapboxgl.Popup()
-          .setLngLat(e.lngLat)
-          .setHTML(e.features[0].properties.ACTNAME)
-          .addTo(map);
-
-        // flag used to persist this pop up if data type changes as those pop ups need to be removed.
-        isShowingPolygonPopUp.value = true;
-        popup.on("close", () => {
-          console.log("Why tho here? we set it false on close..");
-          isShowingPolygonPopUp.value = false;
-        });
-      });
-    }
-
-    //map.on('click', 'states-layer', onClickPolygon)
+const addPolygons = () => {
+  let dataUrl = "/src/assets/spatial/va_counties_simple.json";
+  if (selectedGeoType.value === "Watershed") {
+    dataUrl = "/src/assets/spatial/huc8_simple.json";
   }
-};
+  if (map.getSource("polygons")) {
+    removePolygons();
+  }
+  map.addSource("polygons", {
+    type: "geojson",
+    data: dataUrl,
+  });
 
+  // Add a clear layer showing that will be used for on click events
+  map.addLayer({
+    id: "polygons-layer",
+    type: "fill",
+    source: "polygons",
+    paint: {
+      "fill-color": "rgba(0, 0, 0, 0.0)",
+      // 'fill-outline-color': 'rgba(200, 100, 240, 1)',
+    },
+  });
+  // Add an outline layer that will be visible and will outline geojson states polygons
+  map.addLayer({
+    id: "polygons-layer-outline",
+    type: "line",
+    source: "polygons",
+    paint: {
+      "line-color": "rgba(200, 100, 0, 0.9)",
+      "line-width": 3,
+    },
+  });
+
+  // When a click event occurs on a feature in the states layer,
+  // open a popup at the location of the click, with description
+  // HTML from the click event's properties.
+  map.on("mouseenter", "polygons-layer", onMouseEnterEvent);
+  map.on("mouseleave", "polygons-layer", onMouseLeaveEvent);
+  map.on("click", "polygons-layer", (e) => {
+    map.fire("closeAllStationsPopups");
+    console.log("On click polygon event");
+    console.log(e);
+    console.log(e.features[0]);
+    let polyName = e.features[0].properties.NAMELSAD;
+    if (selectedGeoType.value === "Watershed") {
+      polyName = e.features[0].properties.ACTNAME;
+    }
+    const popup = new mapboxgl.Popup()
+      .setLngLat(e.lngLat)
+      .setHTML(polyName)
+      .addTo(map);
+
+    // flag used to persist this pop up if data type changes as those pop ups need to be removed.
+    // isShowingPolygonPopUp.value = true;
+    // popup.on("close", () => {
+    //   console.log("Why tho here? we set it false on close..");
+    //   isShowingPolygonPopUp.value = false;
+    // });
+    map.on("closeAllPolygonPopups", () => {
+      popup.remove();
+    });
+    //map.fire("closeAllPolygonPopups");
+  });
+};
 // Change the cursor to a pointer when
 // the mouse is over the layer.
 const onMouseEnterEvent = () => {
@@ -466,272 +393,12 @@ const onMouseLeaveEvent = () => {
 
 // checks per data type id and then loops over the data to find and remove each layer prior to removing the source
 // used to clear out map on toggle of data source
-const removeLayerAndSources = () => {
-  if (map.getSource("water")) {
-    console.log("remove water layer");
-
-    locs.features.forEach((f) => {
-      let project = f.properties["project"];
-      let layerID = "poi-" + project;
-      if (map.getLayer(layerID)) {
-        map.removeLayer(layerID);
-      }
-    });
-    map.removeSource("water"); // remove
-  }
-
-  if (map.getSource("benthic")) {
-    console.log("remove benthic layer");
-
-    locsBenthic.features.forEach((f) => {
-      let project = f.properties["project"];
-      let layerID = "poi-" + project;
-      if (map.getLayer(layerID)) {
-        map.removeLayer(layerID);
-      }
-    });
-    map.removeSource("benthic"); // remove
+const removeStations = () => {
+  if (map.getSource("stations")) {
+    map.removeLayer("places");
+    map.removeSource("stations"); // remove
   }
 };
-
-const onClickWaterLayer = (e) => {
-  // // map.on('click', layerID, (e) => {
-  // console.log("1 Click on layer. ");
-  //
-  // // const features = map.queryRenderedFeatures(e.point, {
-  // //   layers: [layerID] // replace with your layer name
-  // // });
-  // // if (!features.length) {
-  // //   return;
-  // // }
-  // // const feature = features[0];
-  // // remove pop up before adding new one
-  // removePopUps();
-  //
-  // // const popup = new mapboxgl.Popup({offset: [0, -15]})
-  // //   .setLngLat(feature.geometry.coordinates)
-  // //   .setHTML(
-  // //     `<h3> Station </h3>
-  // //    <p>${feature.properties.code} - ${feature.properties.name}</p>`
-  // //   );
-  // if (e.features[0].length) {
-  //   console.log('here features length : ' + e.features[0].length)
-  //   const popup = new mapboxgl.Popup()
-  //     .setLngLat(e.lngLat)
-  //     .setHTML(
-  //       `<div>
-  //               <p>${e.features[0].properties.code} - ${e.features[0].properties.name}</p>
-  //               <button id='button-id'>View Details</button>
-  //              </div>`
-  //     );
-  //   setTimeout(() => (
-  //       document.getElementById('button-id').addEventListener('click', testFoo)),
-  //     50
-  //   );
-  //   popup.addTo(map);
-  //
-  // } else {
-  //   console.log('boooooooo');
-  // }
-  // // todo: check if i can create a pop up component with 1-btn in it, is there a way to get components raw html.
-  //
-  // // const popup = new mapboxgl.Popup({offset: [0, -15]})
-  // //   .setLngLat(feature.geometry.coordinates)
-  // //   .setHTML(
-  // //     `<div>
-  // //       <p>Some Text</p>
-  // //       <q-btn  @click="alert('hello world')" >Button Title</q-btn>
-  // //      </div>`
-  // //   );
-  //
-  //
-  // // popup.addTo(map);
-  // // setupMouseEventListeners(layerID);
-  // // });
-};
-
-const setupWaterData = (e) => {
-  console.log("updateMarkersOnMap for water");
-  map.addSource("water", {
-    type: "geojson",
-    data: locs,
-  });
-
-  map.getSource("water").setData(locs);
-
-  let color = "#ff11f3";
-  locs.features.forEach((f, index) => {
-    let project = f.properties["project"];
-    let layerID = "poi-" + project;
-
-    if (project === "DFLO") {
-      color = "#ff11f3";
-    } else if (project === "CMON") {
-      color = "#c19e00";
-    } else if (project === "MAIN") {
-      color = "#bf1f2f";
-    } else if (project === "TRIB") {
-      color = "#ff9933";
-    } else if (project === "CBIB") {
-      color = "#20c6b6";
-    } else {
-      color = "#9c51b6";
-    }
-    // Add a layer for this symbol type if it hasn't been added already.
-    if (!map.getLayer(layerID)) {
-      map.addLayer({
-        id: layerID,
-        type: "circle",
-        source: "water",
-        paint: {
-          // 'circle-radius': 7,
-          "circle-color": color,
-          "circle-radius": [
-            "case",
-            ["boolean", ["feature-state", "hover"], false],
-            22,
-            7,
-          ],
-          "circle-stroke-color": "white",
-          "circle-stroke-width": 1,
-          "circle-opacity": 0.5,
-        },
-        filter: ["==", "project", project],
-      });
-
-      // using a dictionary to keep track of layers with click events already attached
-      if (!waterLayerIdsMap.has(layerID)) {
-        console.log("Should only add once for this layer: " + layerID);
-        waterLayerIdsMap.set(layerID, true);
-
-        // setup on click event to show appropriate pop up
-        map.on("click", layerID, (e) => {
-          console.log("1 Click on layer: " + layerID);
-
-          const features = map.queryRenderedFeatures(e.point, {
-            layers: [layerID], // replace with your layer name
-          });
-          if (!features.length) {
-            return;
-          }
-          const feature = features[0];
-          // remove pop up before adding new one
-          removePopUps();
-
-          const popup = new mapboxgl.Popup({ offset: [0, -10] })
-            .setLngLat(e.lngLat)
-            .setHTML(
-              `<div>
-                <p>${feature.properties.code} - ${feature.properties.name}</p>
-                <button id='button-id'>View Details</button>
-               </div>`
-            );
-          setTimeout(
-            () =>
-              document
-                .getElementById("button-id")
-                .addEventListener("click", testFoo),
-            50
-          );
-
-          // todo: check if i can create a pop up component with 1-btn in it, is there a way to get components raw html.
-          popup.addTo(map);
-          setupMouseEventListeners(layerID);
-        });
-      }
-    }
-  });
-};
-
-function popupClickHandler(layerID, e) {
-  console.log("hello there");
-  console.log(e.point);
-  console.log("2 Click on layer : " + layerID);
-  const features = map.queryRenderedFeatures(e.point, {
-    layers: [layerID], // replace with your layer name
-  });
-  console.log("features");
-  console.log(features);
-  if (!features.length) {
-    return;
-  }
-
-  const feature = features[0];
-  // remove pop up before adding new one
-  removePopUps();
-  const innerHtmlContent = `
-    <div style="padding: 10px 20px 10px 20px">
-      <div style="color: #075C7A; font-size: 1.95em; font-weight: 700;">
-        Station
-      </div>
-      <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
-        ${feature.properties.name}${
-    feature.properties.nameLong ? " - " + feature.properties.nameLong : ""
-  }
-      </div>
-      <div style="margin-top:10px; color: #075C7A; font-size: 1.95em; font-weight: 700;">
-        Monitored By
-      </div>
-      <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
-        ${feature.properties.groupNames}
-      </div>
-      <div style="margin-top: 10px">
-
-      </div>
-    </div>
-  `;
-  const stationDetails = {
-    code: feature.properties.code,
-    name: feature.properties.name,
-    nameLong: feature.properties.nameLong,
-    groupNames: feature.properties.groupNames,
-    id: feature.properties.id,
-    latitude: feature.properties.latitude,
-    longitude: feature.properties.longitude,
-    huc6Name: feature.properties.huc6Name,
-    status: feature.properties.status,
-    startDate: feature.properties.startDate,
-    endDate: feature.properties.endDate,
-  };
-  const divElement = document.createElement("div");
-  const assignBtn = document.createElement("div");
-  assignBtn.innerHTML = ` <button style="background-color: #075C7A;cursor:pointer; color: white; padding: 8px 10px 8px 10px; border: none; border-radius: 5px;">
-            View Station Details
-          </button>`;
-  divElement.innerHTML = innerHtmlContent;
-  divElement.appendChild(assignBtn);
-  // btn.className = 'btn';
-  assignBtn.addEventListener("click", () => {
-    console.log("Button clicked");
-    stationDetailsClicked(stationDetails);
-  });
-
-  const popup = new mapboxgl.Popup({
-    offset: [0, 0],
-    maxWidth: "400px",
-  })
-    .setLngLat(feature.geometry.coordinates)
-    .setDOMContent(divElement);
-
-  popup.addTo(map);
-  setupMouseEventListeners(layerID);
-}
-
-function setupLayerClickEvent(layerID) {
-  if (!benthicLayerIdsMap.has(layerID)) {
-    const boundClickHandler = (e) => popupClickHandler(layerID, e);
-    benthicLayerIdsMap.set(layerID, boundClickHandler);
-
-    map.on("click", layerID, boundClickHandler);
-  }
-}
-
-function removeLayerClickEvent(layerID) {
-  if (benthicLayerIdsMap.has(layerID)) {
-    map.off("click", layerID, benthicLayerIdsMap.get(layerID));
-    benthicLayerIdsMap.delete(layerID);
-  }
-}
 
 function stationDetailsClicked(station) {
   console.log("stationDetailsClicked");
@@ -739,21 +406,21 @@ function stationDetailsClicked(station) {
   emit("selectedStation", station);
 }
 
-const setupBenthicData = () => {
-  console.log("updateMarkersOnMap for benthic");
-  map.addSource("benthic", {
+const setupStationsOnMap = () => {
+  console.log("setup stations on map");
+  if (map.getSource("stations")) {
+    removeStations();
+  }
+  map.addSource("stations", {
     type: "geojson",
-    data: locsBenthic,
+    data: locs,
   });
-  map.getSource("benthic").setData(locsBenthic);
-
-  let color = "#20c";
+  map.getSource("stations").setData(locs);
   let minLong = 0;
   let maxLong = -100;
   let minLat = 40;
   let maxLat = 30;
-
-  locsBenthic.features.forEach((f, index) => {
+  locs.features.forEach((f, index) => {
     //console.log(f.properties["latitude"], f.properties["longitude"]);
     if (f.properties["longitude"] < minLong) {
       minLong = f.properties["longitude"];
@@ -767,68 +434,126 @@ const setupBenthicData = () => {
     if (f.properties["latitude"] > maxLat) {
       maxLat = f.properties["latitude"];
     }
-    let project = f.properties["project"];
-    let layerID = "poi-" + project;
-
-    if (f.properties.status === "Historic") {
-      color = "#5A5A5A";
-    } else if (f.properties.status === "Current") {
-      color = "#20c";
-    }
-
-    removeLayerClickEvent(layerID);
-    // Add a layer for this symbol type if it hasn't been added already.
-    if (!map.getLayer(layerID)) {
-      map.addLayer({
-        id: layerID,
-        type: "circle",
-        source: "benthic",
-        paint: {
-          // 'circle-radius': 7,
-          "circle-color": color,
-          "circle-radius": [
-            "case",
-            ["boolean", ["feature-state", "hover"], false],
-            22,
-            7,
-          ],
-          "circle-stroke-color": "white",
-          "circle-stroke-width": 1,
-          "circle-opacity": 0.5,
-        },
-        filter: ["==", "project", project],
-      });
-      setupLayerClickEvent(layerID);
-    }
   });
-  console.log("mapOptions.showLegend");
-  console.log(showLegend.value);
-  if (showLegend.value === true) {
-    console.log(minLat, maxLat, minLong, maxLong);
-    let centerLat = (minLat + maxLat) / 2; // + 1.8;
-    let centerLong = (minLong + maxLong) / 2;
-    let centerCoordinates = { lng: centerLong, lat: centerLat };
+  //if (showLegend.value === true) {
+  let centerLat = (minLat + maxLat) / 2; // + 1.8;
+  let centerLong = (minLong + maxLong) / 2;
+  let centerCoordinates = { lng: centerLong, lat: centerLat };
+  map.setCenter(centerCoordinates);
+  map.addLayer({
+    id: "places",
+    type: "circle",
+    source: "stations",
+    paint: {
+      // 'circle-radius': 7,
+      "circle-color": [
+        "match",
+        ["get", "status"], // get the property
+        "Historic",
+        "#5A5A5A", // if 'GP' then yellow
+        "Current",
+        "#20c", // if 'XX' then black
+        "white",
+      ], // white otherwise
+      "circle-radius": [
+        "case",
+        ["boolean", ["feature-state", "hover"], false],
+        22,
+        7,
+      ],
+      "circle-stroke-color": "white",
+      "circle-stroke-width": 1,
+      "circle-opacity": 0.5,
+    },
+  });
+  // When a click event occurs on a feature in the places layer, open a popup at the
+  // location of the feature, with description HTML from its properties.
+  map.on("click", "places", (e) => {
+    // Copy coordinates array.
+    map.fire("closeAllPolygonPopups");
+    console.log(e);
+    console.log(e.features[0].properties.groupnames);
+    const coordinates = e.features[0].geometry.coordinates.slice();
+    const description = e.features[0].properties.id;
+    const feature = e.features[0];
 
-    console.log(centerCoordinates);
-    map.setCenter(centerCoordinates);
-  }
+    const stationDetails = {
+      code: feature.properties.code,
+      name: feature.properties.name,
+      nameLong: feature.properties.nameLong,
+      groupNames: feature.properties.groupNames,
+      id: feature.properties.id,
+      latitude: feature.properties.latitude,
+      longitude: feature.properties.longitude,
+      huc6Name: feature.properties.huc6Name,
+      status: feature.properties.status,
+      startDate: feature.properties.startDate,
+      endDate: feature.properties.endDate,
+    };
+    console.log(stationDetails);
+    console.log(feature.properties);
+    console.log(feature.properties.name);
+    console.log(feature.properties.groupNames);
+    const innerHtmlContent = `
+    <div style="padding: 10px 20px 10px 20px">
+      <div style="color: #075C7A; font-size: 1.95em; font-weight: 700;">
+        Station
+      </div>
+      <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
+        ${feature.properties.code}${
+      feature.properties.nameLong ? " - " + feature.properties.nameLong : ""
+    }
+      </div>
+      <div style="margin-top:10px; color: #075C7A; font-size: 1.95em; font-weight: 700;">
+        Monitored By
+      </div>
+      <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
+        ${feature.properties.groupNames}
+      </div>
+      <div style="margin-top: 10px">
+
+      </div>
+    </div>
+    `;
+    const divElement = document.createElement("div");
+    const assignBtn = document.createElement("div");
+    assignBtn.innerHTML = ` <button style="background-color: #075C7A;cursor:pointer; color: white; padding: 8px 10px 8px 10px; border: none; border-radius: 5px;">
+              View Station Details
+            </button>`;
+    divElement.innerHTML = innerHtmlContent;
+    divElement.appendChild(assignBtn);
+
+    assignBtn.addEventListener("click", () => {
+      console.log("Button clicked");
+
+      stationDetailsClicked(stationDetails);
+    });
+
+    const popup = new mapboxgl.Popup({
+      offset: [0, 0],
+      maxWidth: "400px",
+    })
+      .setLngLat(feature.geometry.coordinates)
+      .setDOMContent(divElement);
+
+    // Add a custom event listener to the map
+    map.on("closeAllStationPopups", () => {
+      popup.remove();
+    });
+    popup.addTo(map);
+    //setupMouseEventListeners(layerID);
+
+    //new mapboxgl.Popup().setLngLat(coordinates).setHTML(divElement).addTo(map);
+  });
+  //}
 };
 
 const updateMarkersOnMap = () => {
   console.log("updateMarkersOnMap");
-  removeLayerAndSources();
+  removeStations();
 
-  if (stationTypeGroup.value === "water") {
-    setupWaterData();
-  } else {
-    // here show benthic foo static data from a station-richness-data json
-    console.log("***benthic data setup after update***");
-    setupBenthicData();
-  }
-};
-
-const testFoo = () => {
-  console.log("testFoo clicked!");
+  console.log("*** data setup after update***");
+  setupStationsOnMap();
 };
 
 const setupMouseEventListeners = (layerID) => {
@@ -841,17 +566,16 @@ const setupMouseEventListeners = (layerID) => {
 };
 
 const removePopUps = () => {
-  console.log("removePopUps");
-
-  const popups = document.getElementsByClassName("mapboxgl-popup");
-  console.log(popups[0]);
-  if (popups.length) {
-    popups[0].remove();
-  }
+  map.fire("closeAllPolygonPopups");
+  map.fire("closeAllStationPopups");
 };
 
 onMounted(() => {
   getStations();
+});
+onUnmounted(() => {
+  console.log("unmounted");
+  map.remove();
 });
 </script>
 
@@ -860,11 +584,11 @@ onMounted(() => {
   position: relative;
 }
 
-.map-style {
+.legend-style {
   font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
   position: absolute;
-  width: 180px;
-  top: 154px;
+  width: 220px;
+  top: 5px; /* 154px if want to adjust below data type widget */
   left: 0px;
   padding: 4px;
 }

@@ -48,6 +48,8 @@
             :mapData="filteredStations"
             :showLegend="true"
             :collapsed="collapsed"
+            :selectedDataType="selectedDataType"
+            :selectedGeoType="selectedGeoType"
             @selected-station="receiveEmit"
             :mapOptions="{
               container: 'map',
@@ -133,7 +135,7 @@
             <div class="col">
               <q-select
                 label="Boundary Layer"
-                v-model="geoTypes"
+                v-model="selectedGeoType"
                 :options="geoTypesOptions"
                 outlined
                 dense
@@ -568,12 +570,12 @@
  * Imports
  ****************************/
 import { computed, onMounted, ref, watch } from "vue";
-
+import axios from "axios";
 // import MapBox from "components/MapBoxOriginal.vue";
 import MapBox from "components/MapBox.vue";
 import DashboardPlot from "components/DashboardPlot.vue";
 
-import stations from "/src/assets/cmcV3_stations.json";
+//import stations from "/src/assets/cmcV3_stations.json";
 import { date } from "quasar";
 
 const emit = defineEmits(["update:endDatePlot", "update:startDatePlot"]);
@@ -594,11 +596,11 @@ const emit = defineEmits(["update:endDatePlot", "update:startDatePlot"]);
 const props = defineProps({
   endDatePlot: {
     type: String,
-    required: true,
+    default: "2021-01-01",
   },
   startDatePlot: {
     type: String,
-    required: true,
+    default: "2015-01-01",
   },
 });
 
@@ -619,7 +621,26 @@ const selectedStationDetails = ref({
   description: "Lake Anna, Spotsylvania County, VA",
 });
 
-const filteredStations = ref(stations.map(transformStation));
+const loading = ref[true];
+
+const filteredStations = ref([
+  {
+    Name: "P7",
+    CityCounty: "Wicomico County",
+    EndDate: "11/06/2022",
+    GroupNames: "Nanticoke Watershed Alliance",
+    Lat: 38.4555,
+    Long: -75.7569,
+    SamplesCount: 1539,
+    StartDate: "03/27/2017",
+    State: "Maryland",
+    StationId: 166,
+    WaterBody: "Barren Creek-Nanticoke River",
+    formattedEndDate: "November 6, 2022",
+    formattedStartDate: "March 27, 2017",
+    status: "historic",
+  },
+]);
 
 const columns = [
   {
@@ -668,7 +689,7 @@ const rows = filteredStations.value;
 
 const dataTypes = ["Water Quality", "Benthic Macroinvertebrates"];
 const paramTypeOptions = ["Depth", "Parameter"];
-const geoTypesOptions = ["Watershed Boundary", "Political Boundary"];
+const geoTypesOptions = ["Watershed", "Political"];
 const stateOptions = computed(() => {
   return [...new Set(filteredStations.value.map((s) => s.State))].sort();
 });
@@ -697,14 +718,19 @@ const stationIdOptions = computed(() => {
   );
 });
 
-const paramOptions = computed(() => {
-  const allParameters = filteredStations.value.map((s) =>
-    s.ParameterCodes.split(",").map((param) => param.trim())
-  );
-  const flattenedParamCodes = allParameters.flat();
+const paramOptions = ref(["WT.1", "PH.1", "DO.1"]);
 
-  return [...new Set(flattenedParamCodes)].sort();
-});
+//computed(() => {
+//   const allParameters = filteredStations.value.map((s) =>
+//     s.ParameterCodes.split(",").map((param) => param.trim())
+//   );
+//   const flattenedParamCodes = allParameters.flat();
+
+//   return [...new Set(flattenedParamCodes)].sort();
+// });
+
+console.log("filteredStations.value samplesCount");
+console.log(filteredStations.value);
 
 const sampleCount = computed(() => {
   const sampleSum = filteredStations.value.reduce((sum, s) => {
@@ -725,7 +751,7 @@ const stationsCount = computed(() => {
  * Ref/UI Variables
  ***************************/
 const collapsed = ref(false);
-const showCityState = ref(false);
+const showCityState = ref(true);
 const showWatersheds = ref(false);
 const startDate = ref(null);
 const endDate = ref("2024/01/02");
@@ -736,8 +762,8 @@ const optionalMetaCalibration = ref(false);
 const dataUseAcknowledgment = ref(false);
 const selectedParamPlot = ref("WT.1");
 const selectedDepthPlot = ref(0.3);
-const geoTypes = ref("");
-const selectedDataType = ref([]);
+const selectedGeoType = ref("Watershed");
+const selectedDataType = ref("Water Quality");
 const selectedParamTypePlot = ref("Depth");
 const selectedStates = ref([]);
 const selectedStations = ref([]);
@@ -749,6 +775,38 @@ const selectedParams = ref([]);
 const paramOptionsPlot = ref(["DO.1", "PH.1", "WT.1"]);
 const depthOptionsPlot = ref([0.3, 1]);
 const stationDetailsContainer = ref();
+const stations = ref(null);
+
+// Simple POST request with a JSON body using fetch
+const requestOptions = {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json;charset=utf-8",
+  },
+  body: JSON.stringify({ groups: "LACA", stations: "LACA.EX-5" }),
+};
+
+const getStationsFromCMC = async (type) => {
+  const payload = {
+    groups: "",
+    stations: "",
+  };
+  console.log("getting stations from CMC");
+  console.log(type);
+  try {
+    const res = await axios.post(
+      "https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
+      payload
+    );
+    stations.value = res.data;
+  } catch (error) {
+    console.log("getStationsFromCMC error");
+    console.log(error);
+  }
+};
+
+getStationsFromCMC("wq");
 
 //Establish date formatting
 const dateFormat = "YYYY-MM-DD";
@@ -799,17 +857,62 @@ watch(formattedEndDatePlot, (newDateValue) => {
   emit("update:endDatePlot", updatedDate);
 });
 
-watch(geoTypes, () => {
-  if (geoTypes.value === "Watershed Boundary") {
+watch(selectedGeoType, () => {
+  if (selectedGeoType.value === "Watershed") {
     showCityState.value = false;
     showWatersheds.value = true;
-  } else if (geoTypes.value === "Political Boundary") {
+  } else if (selectedGeoType.value === "Political") {
     showWatersheds.value = false;
     showCityState.value = true;
   } else {
     showWatersheds.value = false;
     showCityState.value = false;
   }
+});
+
+watch(stations, () => {
+  console.log("stations changed");
+  console.log(stations.value);
+  let transformedStations = stations.value.map(transformStation);
+  let aggregatedStations = [];
+
+  //this will aggregate stations with the same station id and concatenate group names and
+  //get minium StartDate and maximum EndDate
+  transformedStations.forEach((station) => {
+    const existingStation = aggregatedStations.find(
+      (s) => s.StationId === station.StationId
+    );
+
+    if (existingStation) {
+      existingStation.GroupNames = `${existingStation.GroupNames}, ${station.GroupNames}`;
+      existingStation.StartDate = new Date(
+        Math.min(
+          new Date(existingStation.StartDate),
+          new Date(station.StartDate)
+        )
+      ).toISOString();
+      existingStation.formattedStartDate = formatDate(
+        existingStation.StartDate
+      );
+      existingStation.EndDate = new Date(
+        Math.max(new Date(existingStation.EndDate), new Date(station.EndDate))
+      ).toISOString();
+      existingStation.formattedEndDate = formatDate(existingStation.EndDate);
+
+      existingStation.SamplesCount += station.SamplesCount;
+      //use station status from the station with the most recent end date
+      // if (
+      //   new Date(existingStation.EndDate) > new Date(station.EndDate) &&
+      //   station.status === "Current"
+      // ) {
+      //   existingStation.status = station.status;
+      // }
+    } else {
+      aggregatedStations.push(station);
+    }
+  });
+
+  filteredStations.value = aggregatedStations;
 });
 
 watch(filteredStations, () => {
@@ -819,7 +922,7 @@ watch(filteredStations, () => {
 });
 
 const filterRefs = [
-  geoTypes,
+  selectedGeoType,
   selectedStates,
   selectedStations,
   selectedCounties,
@@ -831,9 +934,9 @@ const filterRefs = [
   endDate,
 ];
 
-for (const refItem of filterRefs) {
-  watch(refItem, applyFilters);
-}
+//for (const refItem of filterRefs) {
+//  watch(refItem, applyFilters);
+//}
 
 /****************************
  * Exposed/Interface Functions
@@ -845,8 +948,8 @@ for (const refItem of filterRefs) {
  ***************************/
 
 function clearFilters() {
-  selectedDataType.value = null;
-  geoTypes.value = "";
+  selectedDataType.value = "Water Quality";
+  selectedGeoType.value = "Watershed";
   selectedStates.value = [];
   selectedStations.value = [];
   selectedCounties.value = [];
@@ -857,7 +960,7 @@ function clearFilters() {
   startDate.value = null;
   endDate.value = null;
 
-  filteredStations.value = stations.map(transformStation);
+  filteredStations.value = stations.value.map(transformStation);
 }
 
 const matchWatershed = (s) =>
@@ -929,11 +1032,11 @@ function applyFilters() {
   );
 
   if (noFilterApplied) {
-    filteredStations.value = stations.map(transformStation);
+    filteredStations.value = stations.value.map(transformStation);
     return;
   }
 
-  filteredStations.value = stations
+  filteredStations.value = stations.value
     .filter((s) => filterFunctions.every((filter) => filter(s)))
     .map(transformStation);
 }
@@ -952,27 +1055,21 @@ function isValidDate(value) {
 
 function formatDate(dateString) {
   const options = { year: "numeric", month: "long", day: "numeric" };
-  return new Date(dateString).toLocaleDateString(undefined, options);
+  return new Date(dateString).toLocaleDateString("en-us", options);
 }
 
 function transformStation(station) {
-  const currentDate = new Date();
-  const endDate = new Date(station.EndDate);
-  const twoYearsAgo = new Date(
-    currentDate.getFullYear() - 2,
-    currentDate.getMonth(),
-    currentDate.getDate()
-  );
-
-  const status = endDate >= twoYearsAgo ? "Current" : "Historic";
-  const formattedStartDate = formatDate(station.StartDate);
-  const formattedEndDate = formatDate(station.EndDate);
+  let transformStation = {};
+  station.forEach((item) => {
+    transformStation[item["Key"]] = item["Value"];
+  });
+  const formattedStartDate = formatDate(transformStation.StartDate);
+  const formattedEndDate = formatDate(transformStation.EndDate);
 
   return {
-    ...station,
+    ...transformStation,
     formattedStartDate: formattedStartDate,
     formattedEndDate: formattedEndDate,
-    status: status,
   };
 }
 
@@ -1004,8 +1101,7 @@ function receiveEmit(station) {
  ***************************/
 
 onMounted(() => {
-  applyFilters();
-
+  //applyFilters();
   // setTimeout(() => {
   //   collapsed.value = false;
   // }, 500);
