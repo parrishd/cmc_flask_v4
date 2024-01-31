@@ -815,8 +815,8 @@ const stationsCount = computed(() => {
  * Ref/UI Variables
  ***************************/
 const collapsed = ref(false);
-const showCityState = ref(true);
-const showWatersheds = ref(false);
+const showCityState = ref(false);
+const showWatersheds = ref(true);
 const startDateMap = ref(null);
 const endDateMap = ref(null);
 const optionalMetaGroups = ref(false);
@@ -841,6 +841,8 @@ const depthOptionsPlot = ref([0.3, 1]);
 const stationDetailsContainer = ref();
 const stations = ref(null);
 const paramOptions = ref([]);
+const loadMaxDate = ref(new Date());
+const loadMinDate = ref(new Date("1992-11-1"));
 //Establish date formatting
 const dateFormat = "YYYY-MM-DD";
 
@@ -848,9 +850,9 @@ const dateFormat = "YYYY-MM-DD";
 const dateMask = dateFormat.replace(/[DMY]/g, "#");
 
 const formattedStartDateMap = ref(
-  date.formatDate(new Date("1992-11-1"), dateFormat)
+  date.formatDate(loadMinDate.value, dateFormat)
 );
-const formattedEndDateMap = ref(date.formatDate(new Date(), dateFormat));
+const formattedEndDateMap = ref(date.formatDate(loadMaxDate.value, dateFormat));
 
 // Simple POST request with a JSON body using fetch
 const requestOptions = {
@@ -884,10 +886,10 @@ const getStationsFromCMC = async () => {
     dataType: selectedDataType.value,
     groups: groupCodes,
     stations: selectedStations.value.join(","),
-    states: "",
-    counties: "",
-    watersheds: "",
-    subwatersheds: "",
+    states: selectedStates.value.join(","),
+    counties: selectedCounties.value.join(","),
+    watersheds: selectedWatershed.value.join(","),
+    subwatersheds: selectedSubwatershed.value.join(","),
     parameters: paramIds, //218,228
     startDate: formattedStartDateMap.value,
     endDate: formattedEndDateMap.value,
@@ -981,6 +983,31 @@ watch(groupOptions, () => {
 });
 
 watch(stations, () => {
+  aggregateStations();
+});
+
+watch(filteredStations, () => {
+  console.log("filteredStations changed");
+  console.log(filteredStations.value);
+  rows.splice(0, rows.length, ...filteredStations.value);
+  console.log("rows");
+  console.log(rows);
+});
+
+const filterRefs = [
+  selectedGeoType,
+  selectedStates,
+  selectedStations,
+  selectedCounties,
+  selectedWatershed,
+  selectedSubwatershed,
+  selectedGroups,
+  selectedParams,
+  formattedEndDateMap,
+  formattedStartDateMap,
+];
+
+const aggregateStations = () => {
   console.log("stations changed");
   console.log(stations.value);
   let transformedStations = stations.value.map(transformStation);
@@ -1051,28 +1078,7 @@ watch(stations, () => {
   });
 
   filteredStations.value = aggregatedStations;
-});
-
-watch(filteredStations, () => {
-  console.log("filteredStations changed");
-  console.log(filteredStations.value);
-  rows.splice(0, rows.length, ...filteredStations.value);
-  console.log("rows");
-  console.log(rows);
-});
-
-const filterRefs = [
-  selectedGeoType,
-  selectedStates,
-  selectedStations,
-  selectedCounties,
-  selectedWatershed,
-  selectedSubwatershed,
-  selectedGroups,
-  selectedParams,
-  formattedEndDateMap,
-  formattedStartDateMap,
-];
+};
 
 //for (const refItem of filterRefs) {
 //  watch(refItem, applyFilters);
@@ -1097,7 +1103,9 @@ function clearFilters() {
   selectedSubwatershed.value = [];
   selectedGroups.value = [];
   selectedParams.value = [];
-  filteredStations.value = stations.value.map(transformStation);
+  formattedStartDateMap.value = date.formatDate(loadMinDate.value, dateFormat);
+  formattedEndDateMap.value = date.formatDate(loadMaxDate.value, dateFormat);
+  aggregateStations();
 }
 
 const matchWatershed = (s) =>
