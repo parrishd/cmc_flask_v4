@@ -14,6 +14,7 @@ RUN quasar build
 # production stage
 FROM nginx:1.25.3-alpine as production-stage
 COPY --from=build-stage /app/dist/spa /usr/share/nginx/html
+
 # Add nginx config
 COPY nginx.conf /temp/prod.conf
 RUN envsubst /app < /temp/prod.conf > /etc/nginx/conf.d/default.conf

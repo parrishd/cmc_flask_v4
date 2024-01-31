@@ -197,6 +197,8 @@
                 label="Groups (pick all that apply)"
                 v-model="selectedGroups"
                 :options="groupOptions"
+                option-value="value"
+                option-label="name"
                 multiple
                 outlined
                 dense
@@ -223,6 +225,8 @@
                 label="Parameters (pick all that apply)"
                 v-model="selectedParams"
                 :options="paramOptions"
+                option-value="value"
+                option-label="name"
                 multiple
                 outlined
                 dense
@@ -234,21 +238,24 @@
             <div class="col-6 q-pr-xs">
               <!--              <q-select label="Start Date" outlined dense></q-select>-->
               <q-input
-                v-model="startDate"
                 label="Start Date"
-                mask="date"
-                :rules="dateRule"
+                v-model="formattedStartDateMap"
+                :mask="dateMask"
+                id="date-input"
                 outlined
-                dense
               >
-                <template v-slot:append>
+                <template v-slot:prepend>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy
                       cover
                       transition-show="scale"
                       transition-hide="scale"
                     >
-                      <q-date v-model="startDate" minimal>
+                      <q-date
+                        v-model="formattedStartDateMap"
+                        :mask="dateFormat"
+                        today-btn
+                      >
                         <div class="row items-center justify-end">
                           <q-btn
                             v-close-popup
@@ -266,20 +273,24 @@
             <div class="col-6 q-pl-xs">
               <!--              <q-select label="End Date" outlined dense></q-select>-->
               <q-input
-                v-model="endDate"
                 label="End Date"
+                v-model="formattedEndDateMap"
+                :mask="dateMask"
+                id="date-input"
                 outlined
-                dense
-                mask="MM-DD-YYYY"
               >
-                <template v-slot:append>
+                <template v-slot:prepend>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy
                       cover
                       transition-show="scale"
                       transition-hide="scale"
                     >
-                      <q-date v-model="endDate" minimal>
+                      <q-date
+                        v-model="formattedEndDateMap"
+                        :mask="dateFormat"
+                        today-btn
+                      >
                         <div class="row items-center justify-end">
                           <q-btn
                             v-close-popup
@@ -295,7 +306,24 @@
               </q-input>
             </div>
           </div>
-
+          <div class="row q-mt-sm">
+            <div class="col text-center">
+              <q-btn
+                label="Clear Filters"
+                @click="clearFilters"
+                color="primary"
+                style="width: 90%"
+              />
+            </div>
+            <div class="col text-center">
+              <q-btn
+                label="Filter Map"
+                @click="getStationsFromCMC()"
+                color="primary"
+                style="width: 90%"
+              />
+            </div>
+          </div>
           <div class="row q-mt-md">
             <div class="col">
               Choose optional metadata to include with download
@@ -337,14 +365,6 @@
           </div>
 
           <div class="row q-mt-md">
-            <div class="col text-center">
-              <q-btn
-                label="Clear Filters"
-                @click="clearFilters"
-                color="primary"
-                style="width: 90%"
-              />
-            </div>
             <div class="col text-center">
               <q-btn label="Download Data" color="primary" style="width: 90%" />
             </div>
@@ -577,6 +597,7 @@ import DashboardPlot from "components/DashboardPlot.vue";
 
 //import stations from "/src/assets/cmcV3_stations.json";
 import { date } from "quasar";
+import { EvaluationParameters } from "plotly.js-dist";
 
 const emit = defineEmits(["update:endDatePlot", "update:startDatePlot"]);
 
@@ -629,6 +650,7 @@ const filteredStations = ref([
     CityCounty: "Wicomico County",
     EndDate: "11/06/2022",
     GroupNames: "Nanticoke Watershed Alliance",
+    GroupCodes: "NWA",
     Lat: 38.4555,
     Long: -75.7569,
     SamplesCount: 1539,
@@ -644,11 +666,11 @@ const filteredStations = ref([
 
 const columns = [
   {
-    name: "StationId",
+    name: "StationCode",
     required: true,
     label: "Station Name",
     align: "left",
-    field: "StationId",
+    field: "StationCode",
     sortable: true,
   },
   {
@@ -704,21 +726,63 @@ const subwatershedOptions = computed(() => {
 });
 
 const groupOptions = computed(() => {
-  const allGroups = filteredStations.value.map((s) =>
-    s.GroupNames.split(",").map((group) => group.trim())
-  );
-  const flattenedGroups = allGroups.flat();
+  // const allGroups = filteredStations.value.map((s) =>
+  //   s.GroupNames.split(",").map((group) => group.trim())
+  // );
 
-  return [...new Set(flattenedGroups)].sort();
+  // console.log()
+  // const allGroupCodes = filteredStations.value.map((s) =>
+  //   s.GroupCodes.split(",").map((group) => group.trim())
+  // );
+  // const options = allGroups.map((name, index) => ({
+  //   name: allGroups[index],
+  //   value: allGroupCodes[index],
+  // }));
+  // console.log("options");
+  // console.log(options);
+
+  //get unique options then sort by name into new array
+  // const uniqueStations = new Map(
+  //   stations.value.map((o) => [o.stationCode, o])
+  // ).values();
+  if (stations.value !== null) {
+    console.log("stations.value");
+    console.log(stations.value);
+    let subStations = stations.value.map(transformStation);
+    subStations = subStations.map((s) => ({
+      name: s.GroupName,
+      value: s.GroupCode,
+    }));
+
+    console.log("subStations");
+    console.log(subStations);
+
+    //get unique stations by stationCode
+    const uniqueGroups = new Map(subStations.map((o) => [o.name, o])).values();
+
+    console.log("uniqueGroups");
+    console.log(uniqueGroups);
+
+    const sortedOptions = [...uniqueGroups].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    ); //;
+
+    console.log("sortedOptions");
+    console.log(sortedOptions);
+
+    return [...sortedOptions];
+  } else {
+    return [];
+  }
 });
 
 const stationIdOptions = computed(() => {
-  return [...new Set(filteredStations.value.map((s) => s.StationId))].sort(
+  return [...new Set(filteredStations.value.map((s) => s.StationCode))].sort(
     (a, b) => a - b
   );
 });
 
-const paramOptions = ref(["WT.1", "PH.1", "DO.1"]);
+//const paramOptions = ref(["WT.1", "PH.1", "DO.1"]);
 
 //computed(() => {
 //   const allParameters = filteredStations.value.map((s) =>
@@ -753,8 +817,8 @@ const stationsCount = computed(() => {
 const collapsed = ref(false);
 const showCityState = ref(true);
 const showWatersheds = ref(false);
-const startDate = ref(null);
-const endDate = ref("2024/01/02");
+const startDateMap = ref(null);
+const endDateMap = ref(null);
 const optionalMetaGroups = ref(false);
 const optionalMetaStations = ref(false);
 const optionalMetaParams = ref(false);
@@ -776,6 +840,17 @@ const paramOptionsPlot = ref(["DO.1", "PH.1", "WT.1"]);
 const depthOptionsPlot = ref([0.3, 1]);
 const stationDetailsContainer = ref();
 const stations = ref(null);
+const paramOptions = ref([]);
+//Establish date formatting
+const dateFormat = "YYYY-MM-DD";
+
+//Make a mask for the q-input in the form of ####-##-##
+const dateMask = dateFormat.replace(/[DMY]/g, "#");
+
+const formattedStartDateMap = ref(
+  date.formatDate(new Date("1992-11-1"), dateFormat)
+);
+const formattedEndDateMap = ref(date.formatDate(new Date(), dateFormat));
 
 // Simple POST request with a JSON body using fetch
 const requestOptions = {
@@ -784,16 +859,40 @@ const requestOptions = {
     "Content-Type": "application/json",
     Accept: "application/json;charset=utf-8",
   },
-  body: JSON.stringify({ groups: "LACA", stations: "LACA.EX-5" }),
+  body: JSON.stringify({ groups: "LACA", stations: "" }),
 };
 
-const getStationsFromCMC = async (type) => {
+const getStationsFromCMC = async () => {
+  console.log("getStationsFromCMC");
+  console.log(selectedDataType.value);
+  console.log(selectedGeoType.value);
+  console.log(selectedStates.value);
+  console.log(selectedStations.value);
+  console.log(selectedCounties.value);
+  console.log(selectedWatershed.value);
+  console.log(selectedSubwatershed.value);
+  console.log(selectedGroups.value);
+  const groupCodes = selectedGroups.value.map(({ value }) => value).join(",");
+  console.log("groupCodes");
+  console.log(groupCodes);
+  console.log(selectedParams.value);
+  const paramIds = selectedParams.value.map(({ value }) => value).join(",");
+  console.log("formattedStartDateMap");
+  console.log(formattedStartDateMap.value);
+
   const payload = {
-    groups: "",
-    stations: "",
+    dataType: selectedDataType.value,
+    groups: groupCodes,
+    stations: selectedStations.value.join(","),
+    states: "",
+    counties: "",
+    watersheds: "",
+    subwatersheds: "",
+    parameters: paramIds, //218,228
+    startDate: formattedStartDateMap.value,
+    endDate: formattedEndDateMap.value,
   };
   console.log("getting stations from CMC");
-  console.log(type);
   try {
     const res = await axios.post(
       "https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
@@ -804,15 +903,30 @@ const getStationsFromCMC = async (type) => {
     console.log("getStationsFromCMC error");
     console.log(error);
   }
+
+  try {
+    const res = await axios.post(
+      "https://cmc.vims.edu/DashboardApi/FetchParametersForMap",
+      payload
+    );
+    let params = res.data;
+    params = params.map(transformParameter);
+
+    console.log("params");
+    console.log(params);
+
+    //map params to an array of objects with value and name properties
+    paramOptions.value = params.map((param) => ({
+      value: param.Id,
+      name: param.Code,
+    }));
+  } catch (error) {
+    console.log("getParametersFromCMC error");
+    console.log(error);
+  }
 };
 
-getStationsFromCMC("wq");
-
-//Establish date formatting
-const dateFormat = "YYYY-MM-DD";
-
-//Make a mask for the q-input in the form of ####-##-##
-const dateMask = dateFormat.replace(/[DMY]/g, "#");
+getStationsFromCMC();
 
 //Format the date for display in the q-input.
 const formattedStartDatePlot = ref(
@@ -820,15 +934,6 @@ const formattedStartDatePlot = ref(
 );
 const formattedEndDatePlot = ref(
   date.formatDate(new Date(props.endDatePlot), dateFormat)
-);
-
-formattedStartDatePlot.value = date.formatDate(
-  new Date(selectedStationDetails.value.startDate),
-  dateFormat
-);
-formattedEndDatePlot.value = date.formatDate(
-  new Date(selectedStationDetails.value.endDate),
-  dateFormat
 );
 
 /****************************
@@ -870,21 +975,54 @@ watch(selectedGeoType, () => {
   }
 });
 
+watch(groupOptions, () => {
+  console.log("groupOptions changed");
+  console.log(groupOptions.value);
+});
+
 watch(stations, () => {
   console.log("stations changed");
   console.log(stations.value);
   let transformedStations = stations.value.map(transformStation);
   let aggregatedStations = [];
 
+  //define max date as EndDate of the most recent station in transformedStations
+  let maxDate = new Date(
+    Math.max.apply(
+      null,
+      transformedStations.map((s) => new Date(s.EndDate))
+    )
+  );
+
+  //define min date as StartDate of the oldest station in transformedStations
+  let minDate = new Date(
+    Math.min.apply(
+      null,
+      transformedStations.map((s) => new Date(s.StartDate))
+    )
+  );
+
+  formattedStartDateMap.value = date.formatDate(minDate, dateFormat);
+  formattedEndDateMap.value = date.formatDate(maxDate, dateFormat);
+
+  console.log("maxDate");
+  console.log(maxDate);
+  console.log("minDate");
+  console.log(minDate);
+
   //this will aggregate stations with the same station id and concatenate group names and
   //get minium StartDate and maximum EndDate
   transformedStations.forEach((station) => {
+    station.GroupNames = station.GroupName;
     const existingStation = aggregatedStations.find(
       (s) => s.StationId === station.StationId
     );
 
+    //check if station StartDate is less
+
     if (existingStation) {
-      existingStation.GroupNames = `${existingStation.GroupNames}, ${station.GroupNames}`;
+      existingStation.GroupNames = `${existingStation.GroupName}, ${station.GroupName}`;
+      existingStation.GroupCodes = `${existingStation.GroupCode}, ${station.GroupCode}`;
       existingStation.StartDate = new Date(
         Math.min(
           new Date(existingStation.StartDate),
@@ -919,6 +1057,8 @@ watch(filteredStations, () => {
   console.log("filteredStations changed");
   console.log(filteredStations.value);
   rows.splice(0, rows.length, ...filteredStations.value);
+  console.log("rows");
+  console.log(rows);
 });
 
 const filterRefs = [
@@ -930,8 +1070,8 @@ const filterRefs = [
   selectedSubwatershed,
   selectedGroups,
   selectedParams,
-  startDate,
-  endDate,
+  formattedEndDateMap,
+  formattedStartDateMap,
 ];
 
 //for (const refItem of filterRefs) {
@@ -957,9 +1097,6 @@ function clearFilters() {
   selectedSubwatershed.value = [];
   selectedGroups.value = [];
   selectedParams.value = [];
-  startDate.value = null;
-  endDate.value = null;
-
   filteredStations.value = stations.value.map(transformStation);
 }
 
@@ -1071,6 +1208,15 @@ function transformStation(station) {
     formattedStartDate: formattedStartDate,
     formattedEndDate: formattedEndDate,
   };
+}
+
+function transformParameter(param) {
+  let transformParameter = {};
+  param.forEach((item) => {
+    transformParameter[item["Key"]] = item["Value"];
+  });
+
+  return transformParameter;
 }
 
 function receiveEmit(station) {
