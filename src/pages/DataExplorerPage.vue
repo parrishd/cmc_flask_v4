@@ -3,7 +3,7 @@
     <div class="q-px-xl q-mx-xl">
       <!-- stats bar -->
       <div class="row q-mt-lg viewing-stats">
-        <div class="col-2">Currently Viewing:</div>
+        <div class="col-2">Currently Viewing Test:</div>
         <div class="col">
           <q-icon class="fa-solid fa-file-lines q-mr-sm" size="32px" />
           {{ sampleCount }} Samples
@@ -841,6 +841,7 @@ const depthOptionsPlot = ref([0.3, 1]);
 const stationDetailsContainer = ref();
 const stations = ref(null);
 const paramOptions = ref([]);
+const paramsForMapFilter = ref([]);
 const loadMaxDate = ref(new Date());
 const loadMinDate = ref(new Date("1992-11-1"));
 //Establish date formatting
@@ -895,37 +896,25 @@ const getStationsFromCMC = async () => {
     endDate: formattedEndDateMap.value,
   };
   console.log("getting stations from CMC");
+  console.log("current time1: " + new Date().toLocaleTimeString());
   try {
     const res = await axios.post(
+      //"https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
       "https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
       payload
     );
+    //const res = await axios.get("/src/assets/spatial/stations.json", payload);
+    console.log("current time2: " + new Date().toLocaleTimeString());
     stations.value = res.data;
   } catch (error) {
     console.log("getStationsFromCMC error");
     console.log(error);
   }
 
-  try {
-    const res = await axios.post(
-      "https://cmc.vims.edu/DashboardApi/FetchParametersForMap",
-      payload
-    );
-    let params = res.data;
-    params = params.map(transformParameter);
-
-    console.log("params");
-    console.log(params);
-
-    //map params to an array of objects with value and name properties
-    paramOptions.value = params.map((param) => ({
-      value: param.Id,
-      name: param.Code,
-    }));
-  } catch (error) {
-    console.log("getParametersFromCMC error");
-    console.log(error);
-  }
+  axios
+    .post("https://cmc.vims.edu/DashboardApi/FetchParametersForMap", payload)
+    .then((response) => (paramOptions.value = response.data))
+    .catch((error) => console.log(error));
 };
 
 getStationsFromCMC();
@@ -977,6 +966,16 @@ watch(selectedGeoType, () => {
   }
 });
 
+watch(paramsForMapFilter, () => {
+  console.log("paramsForMapFilter changed");
+  console.log(paramsForMapFilter.value);
+});
+
+watch(paramOptions, () => {
+  console.log("paramsOptions changed");
+  console.log(paramOptions.value);
+});
+
 watch(groupOptions, () => {
   console.log("groupOptions changed");
   console.log(groupOptions.value);
@@ -1011,7 +1010,6 @@ const aggregateStations = () => {
   console.log("stations changed");
   console.log(stations.value);
   let transformedStations = stations.value.map(transformStation);
-  let aggregatedStations = [];
 
   //define max date as EndDate of the most recent station in transformedStations
   let maxDate = new Date(
@@ -1031,11 +1029,7 @@ const aggregateStations = () => {
 
   formattedStartDateMap.value = date.formatDate(minDate, dateFormat);
   formattedEndDateMap.value = date.formatDate(maxDate, dateFormat);
-
-  console.log("maxDate");
-  console.log(maxDate);
-  console.log("minDate");
-  console.log(minDate);
+  let aggregatedStations = [];
 
   //this will aggregate stations with the same station id and concatenate group names and
   //get minium StartDate and maximum EndDate
@@ -1204,10 +1198,11 @@ function formatDate(dateString) {
 }
 
 function transformStation(station) {
-  let transformStation = {};
-  station.forEach((item) => {
-    transformStation[item["Key"]] = item["Value"];
-  });
+  //let transformStation = {};
+  let transformStation = station;
+  // station.forEach((item) => {
+  //   transformStation[item["Key"]] = item["Value"];
+  // });
   const formattedStartDate = formatDate(transformStation.StartDate);
   const formattedEndDate = formatDate(transformStation.EndDate);
 

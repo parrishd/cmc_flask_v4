@@ -199,7 +199,7 @@ const getStations = () => {
           latitude: s.Lat,
           longitude: s.Long,
           huc6Name: s.Watershed,
-          status: s.status,
+          status: s.Status,
           startDate: s.formattedStartDate,
           endDate: s.formattedEndDate,
         },
@@ -408,6 +408,7 @@ function stationDetailsClicked(station) {
 
 const setupStationsOnMap = () => {
   console.log("setup stations on map");
+  console.log(locs);
   if (map.getSource("stations")) {
     removeStations();
   }

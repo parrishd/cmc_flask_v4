@@ -81,8 +81,18 @@ module.exports = configure(function (/* ctx */) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       // https: true
-      port:8080,
+      port: "8080",
       open: false, // opens browser window automatically
+      proxy: {
+        // proxy all requests starting with /api to jsonplaceholder
+        "/api": {
+          target: "https://cmc.vims.edu",
+          changeOrigin: true,
+          pathRewrite: {
+            "^/api": "",
+          },
+        },
+      },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
@@ -132,7 +142,7 @@ module.exports = configure(function (/* ctx */) {
       // manualStoreHydration: true,
       // manualPostHydrationTrigger: true,
 
-      prodPort: 3000, // The default port that the production server should use
+      prodPort: 80, // The default port that the production server should use
       // (gets superseded if process.env.PORT is specified at runtime)
 
       middlewares: [

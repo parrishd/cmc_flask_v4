@@ -1,12 +1,9 @@
 version: "3.8"
 services:
- frontend:
-  image: cmc_frontend
-  build: 
-    context: .
-  ports: 
-    - 80:80
-  
-      
-
-    
+  frontend:
+    image: cmc_frontend
+    build:
+      context: .
+      target: production-stage
+    ports:
+      - 80:80

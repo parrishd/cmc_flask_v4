@@ -16,14 +16,14 @@
     "@quasar/extras": "^1.16.9",
     "axios": "^0.21.1",
     "mapbox-gl": "^2.10.0",
-    "plotly.js-dist": "2.21.0",
     "pinia": "^2.0.11",
-    "quasar": "^2.14.2",
+    "plotly.js-dist": "2.21.0",
+    "quasar": "^2.14.3",
     "vue": "3",
     "vue-router": "4"
   },
   "devDependencies": {
-    "@quasar/app-vite": "^1.7.1",
+    "@quasar/app-vite": "^1.7.3",
     "autoprefixer": "^10.4.2",
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.1.0",
