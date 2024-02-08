@@ -436,6 +436,9 @@ const setupStationsOnMap = () => {
       maxLat = f.properties["latitude"];
     }
   });
+  //console log time stamp
+  console.log;
+
   //if (showLegend.value === true) {
   let centerLat = (minLat + maxLat) / 2; // + 1.8;
   let centerLong = (minLong + maxLong) / 2;

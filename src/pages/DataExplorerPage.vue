@@ -172,6 +172,8 @@
                 label="Watersheds (pick all that apply)"
                 v-model="selectedWatershed"
                 :options="watershedOptions"
+                option-value="value"
+                option-label="value"
                 multiple
                 outlined
                 dense
@@ -184,6 +186,8 @@
                 label="Subwatersheds (pick all that apply)"
                 v-model="selectedSubwatershed"
                 :options="subwatershedOptions"
+                option-value="value"
+                option-label="value"
                 multiple
                 outlined
                 dense
@@ -591,6 +595,7 @@
  ****************************/
 import { computed, onMounted, ref, watch } from "vue";
 import axios from "axios";
+
 // import MapBox from "components/MapBoxOriginal.vue";
 import MapBox from "components/MapBox.vue";
 import DashboardPlot from "components/DashboardPlot.vue";
@@ -644,26 +649,6 @@ const selectedStationDetails = ref({
 
 const loading = ref[true];
 
-const filteredStations = ref([
-  {
-    Name: "P7",
-    CityCounty: "Wicomico County",
-    EndDate: "11/06/2022",
-    GroupNames: "Nanticoke Watershed Alliance",
-    GroupCodes: "NWA",
-    Lat: 38.4555,
-    Long: -75.7569,
-    SamplesCount: 1539,
-    StartDate: "03/27/2017",
-    State: "Maryland",
-    StationId: 166,
-    WaterBody: "Barren Creek-Nanticoke River",
-    formattedEndDate: "November 6, 2022",
-    formattedStartDate: "March 27, 2017",
-    status: "historic",
-  },
-]);
-
 const columns = [
   {
     name: "StationCode",
@@ -707,23 +692,23 @@ const columns = [
   },
 ];
 const tableKey = ref(0);
-const rows = filteredStations.value;
 
 const dataTypes = ["Water Quality", "Benthic Macroinvertebrates"];
 const paramTypeOptions = ["Depth", "Parameter"];
 const geoTypesOptions = ["Watershed", "Political"];
-const stateOptions = computed(() => {
-  return [...new Set(filteredStations.value.map((s) => s.State))].sort();
-});
-const countyOptions = computed(() => {
-  return [...new Set(filteredStations.value.map((s) => s.CityCounty))].sort();
-});
-const watershedOptions = computed(() => {
-  return [...new Set(filteredStations.value.map((s) => s.Watershed))].sort();
-});
-const subwatershedOptions = computed(() => {
-  return [...new Set(filteredStations.value.map((s) => s.Subwatershed))].sort();
-});
+//const stateOptions = computed(() => {
+//  return [...new Set(filteredStations.value.map((s) => s.State))].sort();
+//});
+//const countyOptions = computed(() => {
+//  return [...new Set(filteredStations.value.map((s) => s.CityCounty))].sort();
+//});
+//const watershedOptions = computed(() => {
+//return watersheds as array sorted
+//  return [...new Set(watersheds.value.map((s) => s.value))].sort();
+//});
+//const subwatershedOptions = computed(() => {
+//  return [...new Set(filteredStations.value.map((s) => s.Subwatershed))].sort();
+//});
 
 const groupOptions = computed(() => {
   // const allGroups = filteredStations.value.map((s) =>
@@ -793,9 +778,6 @@ const stationIdOptions = computed(() => {
 //   return [...new Set(flattenedParamCodes)].sort();
 // });
 
-console.log("filteredStations.value samplesCount");
-console.log(filteredStations.value);
-
 const sampleCount = computed(() => {
   const sampleSum = filteredStations.value.reduce((sum, s) => {
     return sum + (s.SamplesCount || 0);
@@ -817,8 +799,6 @@ const stationsCount = computed(() => {
 const collapsed = ref(false);
 const showCityState = ref(false);
 const showWatersheds = ref(true);
-const startDateMap = ref(null);
-const endDateMap = ref(null);
 const optionalMetaGroups = ref(false);
 const optionalMetaStations = ref(false);
 const optionalMetaParams = ref(false);
@@ -843,9 +823,77 @@ const stations = ref(null);
 const paramOptions = ref([]);
 const paramsForMapFilter = ref([]);
 const loadMaxDate = ref(new Date());
-const loadMinDate = ref(new Date("1992-11-1"));
-//Establish date formatting
+const loadMinDate = ref(new Date("11/1/1995"));
+const watershedOptions = ref([]);
+const subwatershedOptions = ref([]);
+const stateOptions = ref([]);
+const countyOptions = ref([]);
 const dateFormat = "YYYY-MM-DD";
+const STATIONS = "stations";
+console.log("STATIONS");
+console.log(localStorage.getItem(STATIONS));
+console.log(typeof localStorage.getItem(STATIONS));
+//console.log(JSON.parse(localStorage.getItem(STATIONS)));
+const isJson = (str) => {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
+
+if (typeof localStorage.getItem(STATIONS) !== null) {
+  if (isJson(localStorage.getItem(STATIONS))) {
+    console.log("isjson");
+    try {
+      console.log("trying this");
+      stations.value = JSON.parse(localStorage.getItem(STATIONS));
+    } catch (e) {
+      console.log("could not parse stations in local storage");
+      console.log(e);
+    }
+  }
+}
+const rows = ref([]);
+// const filteredStations = ref([
+//   {
+//     Name: "P7",
+//     CityCounty: "Wicomico County",
+//     EndDate: "11/06/2022",
+//     GroupNames: "Nanticoke Watershed Alliance",
+//     GroupCodes: "NWA",
+//     Lat: 38.4555,
+//     Long: -75.7569,
+//     SamplesCount: 1539,
+//     StartDate: "03/27/2017",
+//     State: "Maryland",
+//     StationId: 166,
+//     WaterBody: "Barren Creek-Nanticoke River",
+//     formattedEndDate: "November 6, 2022",
+//     formattedStartDate: "March 27, 2017",
+//     status: "historic",
+//   },
+// ]);
+const filteredStations = ref([]);
+
+//stations.value = localStorage.getItem(STATIONS);
+//if (!stations.value) {
+// stations.value = [
+//   {
+//     StationId: 148,
+//     StationCode: "NWA.MANA3",
+//     Lat: 38.4828,
+//     Long: -75.8232,
+//     EndDate: "11/07/2022",
+//     StartDate: "03/27/2017",
+//     GroupName: "Nanticoke Watershed Alliance",
+//     GroupCode: "NWA",
+//     SamplesCount: 3206,
+//     Status: "Current",
+//   },
+// ];
+//}
 
 //Make a mask for the q-input in the form of ####-##-##
 const dateMask = dateFormat.replace(/[DMY]/g, "#");
@@ -855,33 +903,11 @@ const formattedStartDateMap = ref(
 );
 const formattedEndDateMap = ref(date.formatDate(loadMaxDate.value, dateFormat));
 
-// Simple POST request with a JSON body using fetch
-const requestOptions = {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json;charset=utf-8",
-  },
-  body: JSON.stringify({ groups: "LACA", stations: "" }),
-};
-
 const getStationsFromCMC = async () => {
   console.log("getStationsFromCMC");
-  console.log(selectedDataType.value);
-  console.log(selectedGeoType.value);
-  console.log(selectedStates.value);
-  console.log(selectedStations.value);
-  console.log(selectedCounties.value);
-  console.log(selectedWatershed.value);
-  console.log(selectedSubwatershed.value);
-  console.log(selectedGroups.value);
   const groupCodes = selectedGroups.value.map(({ value }) => value).join(",");
-  console.log("groupCodes");
-  console.log(groupCodes);
-  console.log(selectedParams.value);
+
   const paramIds = selectedParams.value.map(({ value }) => value).join(",");
-  console.log("formattedStartDateMap");
-  console.log(formattedStartDateMap.value);
 
   const payload = {
     dataType: selectedDataType.value,
@@ -897,23 +923,42 @@ const getStationsFromCMC = async () => {
   };
   console.log("getting stations from CMC");
   console.log("current time1: " + new Date().toLocaleTimeString());
+
+  console.log("current time2: " + new Date().toLocaleTimeString());
   try {
     const res = await axios.post(
-      //"https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
       "https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
+      //"https://cmc.vims.edu/odata/FetchStationsForDashboardMap",
       payload
     );
     //const res = await axios.get("/src/assets/spatial/stations.json", payload);
-    console.log("current time2: " + new Date().toLocaleTimeString());
+    console.log("current time3: " + new Date().toLocaleTimeString());
     stations.value = res.data;
+    localStorage.setItem(STATIONS, JSON.stringify(res.data));
   } catch (error) {
+    stations.value = JSON.parse(localStorage.getItem(STATIONS));
     console.log("getStationsFromCMC error");
     console.log(error);
   }
-
+  axios
+    .post("https://cmc.vims.edu/DashboardApi/FetchWatershedsForMap", payload)
+    .then((response) => (subwatershedOptions.value = response.data))
+    .catch((error) => console.log(error));
+  axios
+    .post("https://cmc.vims.edu/DashboardApi/FetchWatershedsForMap", payload)
+    .then((response) => (watershedOptions.value = response.data))
+    .catch((error) => console.log(error));
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchParametersForMap", payload)
     .then((response) => (paramOptions.value = response.data))
+    .catch((error) => console.log(error));
+  axios
+    .post("https://cmc.vims.edu/DashboardApi/FetchCountiesForMap", payload)
+    .then((response) => (countyOptions.value = response.data))
+    .catch((error) => console.log(error));
+  axios
+    .post("https://cmc.vims.edu/DashboardApi/FetchStatesForMap", payload)
+    .then((response) => (stateOptions.value = response.data))
     .catch((error) => console.log(error));
 };
 
@@ -988,7 +1033,7 @@ watch(stations, () => {
 watch(filteredStations, () => {
   console.log("filteredStations changed");
   console.log(filteredStations.value);
-  rows.splice(0, rows.length, ...filteredStations.value);
+  rows.value.splice(0, rows.value.length, ...filteredStations.value);
   console.log("rows");
   console.log(rows);
 });
@@ -1019,13 +1064,15 @@ const aggregateStations = () => {
     )
   );
 
-  //define min date as StartDate of the oldest station in transformedStations
+  //define min date as StartDate of the oldest station in transformedStations. exclude nulls
   let minDate = new Date(
     Math.min.apply(
       null,
       transformedStations.map((s) => new Date(s.StartDate))
     )
   );
+  console.log("minDate");
+  console.log(minDate);
 
   formattedStartDateMap.value = date.formatDate(minDate, dateFormat);
   formattedEndDateMap.value = date.formatDate(maxDate, dateFormat);
