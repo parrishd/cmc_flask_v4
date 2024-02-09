@@ -128,8 +128,10 @@ let locs = reactive({
 
 // *** Watch properties ***
 watch(mapData, () => {
-  removePopUps();
-  getStations();
+  if (mapData.value.length > 0) {
+    removePopUps();
+    getStations();
+  }
 });
 
 if (showLegend.value === true) {
@@ -188,17 +190,12 @@ const getStations = () => {
       let station = {
         type: "Feature",
         properties: {
-          // project: s.State,
-          project: s.status, //s.StationId,
           selected: false,
-          code: s.Code,
-          name: s.Name,
-          nameLong: s.NameLong,
+          code: s.StationCode,
           groupNames: s.GroupNames,
           id: s.StationId,
           latitude: s.Lat,
           longitude: s.Long,
-          huc6Name: s.Watershed,
           status: s.Status,
           startDate: s.formattedStartDate,
           endDate: s.formattedEndDate,
@@ -210,8 +207,6 @@ const getStations = () => {
         id: s.id,
       };
       locations.features.push(station);
-
-      // console.log(s.project, s.id);
     });
     locs = locations;
 
@@ -409,6 +404,11 @@ function stationDetailsClicked(station) {
 const setupStationsOnMap = () => {
   console.log("setup stations on map");
   console.log(locs);
+
+  console.log("time stamp map stations 1: " + new Date().getTime());
+  if (locs.features.length === 0) {
+    return;
+  }
   if (map.getSource("stations")) {
     removeStations();
   }
@@ -417,6 +417,7 @@ const setupStationsOnMap = () => {
     data: locs,
   });
   map.getSource("stations").setData(locs);
+  console.log("time stamp map stations 2: " + new Date().getTime());
   let minLong = 0;
   let maxLong = -100;
   let minLat = 40;
@@ -437,13 +438,14 @@ const setupStationsOnMap = () => {
     }
   });
   //console log time stamp
-  console.log;
+  console.log("time stamp map stations 3: " + new Date().getTime());
 
   //if (showLegend.value === true) {
   let centerLat = (minLat + maxLat) / 2; // + 1.8;
   let centerLong = (minLong + maxLong) / 2;
   let centerCoordinates = { lng: centerLong, lat: centerLat };
   map.setCenter(centerCoordinates);
+  console.log("centerCoordinates: " + centerLat + " " + centerLong);
   map.addLayer({
     id: "places",
     type: "circle",
@@ -470,6 +472,7 @@ const setupStationsOnMap = () => {
       "circle-opacity": 0.5,
     },
   });
+  console.log("time stamp map stations 4: " + new Date().getTime());
   // When a click event occurs on a feature in the places layer, open a popup at the
   // location of the feature, with description HTML from its properties.
   map.on("click", "places", (e) => {
@@ -483,20 +486,17 @@ const setupStationsOnMap = () => {
 
     const stationDetails = {
       code: feature.properties.code,
-      name: feature.properties.name,
-      nameLong: feature.properties.nameLong,
       groupNames: feature.properties.groupNames,
       id: feature.properties.id,
       latitude: feature.properties.latitude,
       longitude: feature.properties.longitude,
-      huc6Name: feature.properties.huc6Name,
       status: feature.properties.status,
       startDate: feature.properties.startDate,
       endDate: feature.properties.endDate,
     };
     console.log(stationDetails);
     console.log(feature.properties);
-    console.log(feature.properties.name);
+    console.log(feature.properties.code);
     console.log(feature.properties.groupNames);
     const innerHtmlContent = `
     <div style="padding: 10px 20px 10px 20px">
@@ -504,9 +504,7 @@ const setupStationsOnMap = () => {
         Station
       </div>
       <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
-        ${feature.properties.code}${
-      feature.properties.nameLong ? " - " + feature.properties.nameLong : ""
-    }
+        ${feature.properties.code}
       </div>
       <div style="margin-top:10px; color: #075C7A; font-size: 1.95em; font-weight: 700;">
         Monitored By
@@ -549,6 +547,7 @@ const setupStationsOnMap = () => {
 
     //new mapboxgl.Popup().setLngLat(coordinates).setHTML(divElement).addTo(map);
   });
+  console.log("time stamp map stations 5: " + new Date().getTime());
   //}
 };
 

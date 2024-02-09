@@ -54,7 +54,7 @@
             :mapOptions="{
               container: 'map',
               style: 'mapbox://styles/mapbox/streets-v9',
-              center: [-76.5616315, 37.849295],
+              center: [-77.636161, 39.77338],
               zoom: 6,
             }"
             :key="100"
@@ -322,12 +322,21 @@
             <div class="col text-center">
               <q-btn
                 label="Filter Map"
-                @click="getStationsFromCMC()"
+                @click="getStationsFromCMC(false)"
                 color="primary"
                 style="width: 90%"
               />
             </div>
           </div>
+          <div class="row q-mt-md">
+            <div class="col">
+              <div v-show="showQueryError" style="color: red">
+                The filters you selected returned no stations. Clicking "Filter
+                Map" after selecting each new filter may help.
+              </div>
+            </div>
+          </div>
+
           <div class="row q-mt-md">
             <div class="col">
               Choose optional metadata to include with download
@@ -595,6 +604,7 @@
  ****************************/
 import { computed, onMounted, ref, watch } from "vue";
 import axios from "axios";
+import _ from "lodash";
 
 // import MapBox from "components/MapBoxOriginal.vue";
 import MapBox from "components/MapBox.vue";
@@ -711,26 +721,7 @@ const geoTypesOptions = ["Watershed", "Political"];
 //});
 
 const groupOptions = computed(() => {
-  // const allGroups = filteredStations.value.map((s) =>
-  //   s.GroupNames.split(",").map((group) => group.trim())
-  // );
-
-  // console.log()
-  // const allGroupCodes = filteredStations.value.map((s) =>
-  //   s.GroupCodes.split(",").map((group) => group.trim())
-  // );
-  // const options = allGroups.map((name, index) => ({
-  //   name: allGroups[index],
-  //   value: allGroupCodes[index],
-  // }));
-  // console.log("options");
-  // console.log(options);
-
-  //get unique options then sort by name into new array
-  // const uniqueStations = new Map(
-  //   stations.value.map((o) => [o.stationCode, o])
-  // ).values();
-  if (stations.value !== null) {
+  if (stations.value !== null && stations.value.length > 0) {
     console.log("stations.value");
     console.log(stations.value);
     let subStations = stations.value.map(transformStation);
@@ -817,6 +808,7 @@ const selectedSubwatershed = ref([]);
 const selectedGroups = ref([]);
 const selectedParams = ref([]);
 const paramOptionsPlot = ref(["DO.1", "PH.1", "WT.1"]);
+const showQueryError = ref(false);
 const depthOptionsPlot = ref([0.3, 1]);
 const stationDetailsContainer = ref();
 const stations = ref(null);
@@ -830,9 +822,6 @@ const stateOptions = ref([]);
 const countyOptions = ref([]);
 const dateFormat = "YYYY-MM-DD";
 const STATIONS = "stations";
-console.log("STATIONS");
-console.log(localStorage.getItem(STATIONS));
-console.log(typeof localStorage.getItem(STATIONS));
 //console.log(JSON.parse(localStorage.getItem(STATIONS)));
 const isJson = (str) => {
   try {
@@ -843,12 +832,16 @@ const isJson = (str) => {
   return true;
 };
 
-if (typeof localStorage.getItem(STATIONS) !== null) {
+if (
+  typeof localStorage.getItem(STATIONS) !== null &&
+  localStorage.getItem(STATIONS) !== ""
+) {
   if (isJson(localStorage.getItem(STATIONS))) {
     console.log("isjson");
     try {
       console.log("trying this");
       stations.value = JSON.parse(localStorage.getItem(STATIONS));
+      console.log(stations.value);
     } catch (e) {
       console.log("could not parse stations in local storage");
       console.log(e);
@@ -903,7 +896,11 @@ const formattedStartDateMap = ref(
 );
 const formattedEndDateMap = ref(date.formatDate(loadMaxDate.value, dateFormat));
 
-const getStationsFromCMC = async () => {
+/****************************
+ * Functions
+ ***************************/
+
+const getStationsFromCMC = async (load) => {
   console.log("getStationsFromCMC");
   const groupCodes = selectedGroups.value.map(({ value }) => value).join(",");
 
@@ -923,23 +920,31 @@ const getStationsFromCMC = async () => {
   };
   console.log("getting stations from CMC");
   console.log("current time1: " + new Date().toLocaleTimeString());
+  console.log(payload);
 
-  console.log("current time2: " + new Date().toLocaleTimeString());
-  try {
-    const res = await axios.post(
+  axios
+    .post(
       "https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
       //"https://cmc.vims.edu/odata/FetchStationsForDashboardMap",
       payload
-    );
-    //const res = await axios.get("/src/assets/spatial/stations.json", payload);
-    console.log("current time3: " + new Date().toLocaleTimeString());
-    stations.value = res.data;
-    localStorage.setItem(STATIONS, JSON.stringify(res.data));
-  } catch (error) {
-    stations.value = JSON.parse(localStorage.getItem(STATIONS));
-    console.log("getStationsFromCMC error");
-    console.log(error);
-  }
+    )
+    .then((res) => {
+      console.log("current time2: " + new Date().toLocaleTimeString());
+      const res_str = JSON.stringify(res.data);
+      stations.value = res.data;
+      console.log(res.data.length);
+      console.log(res.data);
+      if (load) {
+        localStorage.setItem(STATIONS, res_str);
+      }
+    })
+    .catch((error) => {
+      stations.value = JSON.parse(localStorage.getItem(STATIONS));
+      console.log("getStationsFromCMC error");
+      console.log(error);
+    });
+  //const res = await axios.get("/src/assets/spatial/stations.json", payload);
+
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchWatershedsForMap", payload)
     .then((response) => (subwatershedOptions.value = response.data))
@@ -950,7 +955,15 @@ const getStationsFromCMC = async () => {
     .catch((error) => console.log(error));
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchParametersForMap", payload)
-    .then((response) => (paramOptions.value = response.data))
+    .then((response) => {
+      console.log("paramOptions.value");
+      if (response.data.length > 0) {
+        paramOptions.value = response.data;
+        showQueryError.value = false;
+      } else {
+        showQueryError.value = true;
+      }
+    })
     .catch((error) => console.log(error));
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchCountiesForMap", payload)
@@ -962,7 +975,79 @@ const getStationsFromCMC = async () => {
     .catch((error) => console.log(error));
 };
 
-getStationsFromCMC();
+const aggregateStations = () => {
+  if (stations.value === null || stations.value.length === 0) {
+    return;
+  }
+  console.log("aggregate stations");
+  console.log(stations.value);
+  console.log("agg time: " + new Date().toLocaleTimeString());
+  let transformedStations = stations.value.map(transformStation);
+
+  //define max date as EndDate of the most recent station in transformedStations
+  let maxDate = new Date(
+    Math.max.apply(
+      null,
+      transformedStations.map((s) => new Date(s.EndDate))
+    )
+  );
+
+  //define min date as StartDate of the oldest station in transformedStations. exclude nulls
+  let minDate = new Date(
+    Math.min.apply(
+      null,
+      transformedStations.map((s) => new Date(s.StartDate))
+    )
+  );
+  console.log("AGG time2: " + new Date().toLocaleTimeString());
+
+  formattedStartDateMap.value = date.formatDate(minDate, dateFormat);
+  formattedEndDateMap.value = date.formatDate(maxDate, dateFormat);
+  let aggregatedStations = [];
+
+  //this will aggregate stations with the same station id and concatenate group names and
+  //get minium StartDate and maximum EndDate
+  transformedStations.forEach((station) => {
+    station.GroupNames = station.GroupName;
+    const existingStation = aggregatedStations.find(
+      (s) => s.StationId === station.StationId
+    );
+
+    //check if station StartDate is less
+
+    if (existingStation) {
+      existingStation.GroupNames = `${existingStation.GroupName}, ${station.GroupName}`;
+      existingStation.GroupCodes = `${existingStation.GroupCode}, ${station.GroupCode}`;
+      existingStation.StartDate = new Date(
+        Math.min(
+          new Date(existingStation.StartDate),
+          new Date(station.StartDate)
+        )
+      ).toISOString();
+      existingStation.formattedStartDate = formatDate(
+        existingStation.StartDate
+      );
+      existingStation.EndDate = new Date(
+        Math.max(new Date(existingStation.EndDate), new Date(station.EndDate))
+      ).toISOString();
+      existingStation.formattedEndDate = formatDate(existingStation.EndDate);
+
+      existingStation.SamplesCount += station.SamplesCount;
+      //use station status from the station with the most recent end date
+      // if (
+      //   new Date(existingStation.EndDate) > new Date(station.EndDate) &&
+      //   station.status === "Current"
+      // ) {
+      //   existingStation.status = station.status;
+      // }
+    } else {
+      aggregatedStations.push(station);
+    }
+  });
+  console.log("agg time3: " + new Date().toLocaleTimeString());
+
+  filteredStations.value = aggregatedStations;
+};
 
 //Format the date for display in the q-input.
 const formattedStartDatePlot = ref(
@@ -1027,7 +1112,11 @@ watch(groupOptions, () => {
 });
 
 watch(stations, () => {
-  aggregateStations();
+  if (stations.value.length > 0 && stations.value !== null) {
+    console.log("stations changed");
+    console.log(stations.value);
+    aggregateStations();
+  }
 });
 
 watch(filteredStations, () => {
@@ -1050,76 +1139,6 @@ const filterRefs = [
   formattedEndDateMap,
   formattedStartDateMap,
 ];
-
-const aggregateStations = () => {
-  console.log("stations changed");
-  console.log(stations.value);
-  let transformedStations = stations.value.map(transformStation);
-
-  //define max date as EndDate of the most recent station in transformedStations
-  let maxDate = new Date(
-    Math.max.apply(
-      null,
-      transformedStations.map((s) => new Date(s.EndDate))
-    )
-  );
-
-  //define min date as StartDate of the oldest station in transformedStations. exclude nulls
-  let minDate = new Date(
-    Math.min.apply(
-      null,
-      transformedStations.map((s) => new Date(s.StartDate))
-    )
-  );
-  console.log("minDate");
-  console.log(minDate);
-
-  formattedStartDateMap.value = date.formatDate(minDate, dateFormat);
-  formattedEndDateMap.value = date.formatDate(maxDate, dateFormat);
-  let aggregatedStations = [];
-
-  //this will aggregate stations with the same station id and concatenate group names and
-  //get minium StartDate and maximum EndDate
-  transformedStations.forEach((station) => {
-    station.GroupNames = station.GroupName;
-    const existingStation = aggregatedStations.find(
-      (s) => s.StationId === station.StationId
-    );
-
-    //check if station StartDate is less
-
-    if (existingStation) {
-      existingStation.GroupNames = `${existingStation.GroupName}, ${station.GroupName}`;
-      existingStation.GroupCodes = `${existingStation.GroupCode}, ${station.GroupCode}`;
-      existingStation.StartDate = new Date(
-        Math.min(
-          new Date(existingStation.StartDate),
-          new Date(station.StartDate)
-        )
-      ).toISOString();
-      existingStation.formattedStartDate = formatDate(
-        existingStation.StartDate
-      );
-      existingStation.EndDate = new Date(
-        Math.max(new Date(existingStation.EndDate), new Date(station.EndDate))
-      ).toISOString();
-      existingStation.formattedEndDate = formatDate(existingStation.EndDate);
-
-      existingStation.SamplesCount += station.SamplesCount;
-      //use station status from the station with the most recent end date
-      // if (
-      //   new Date(existingStation.EndDate) > new Date(station.EndDate) &&
-      //   station.status === "Current"
-      // ) {
-      //   existingStation.status = station.status;
-      // }
-    } else {
-      aggregatedStations.push(station);
-    }
-  });
-
-  filteredStations.value = aggregatedStations;
-};
 
 //for (const refItem of filterRefs) {
 //  watch(refItem, applyFilters);
@@ -1146,7 +1165,7 @@ function clearFilters() {
   selectedParams.value = [];
   formattedStartDateMap.value = date.formatDate(loadMinDate.value, dateFormat);
   formattedEndDateMap.value = date.formatDate(loadMaxDate.value, dateFormat);
-  getStationsFromCMC();
+  getStationsFromCMC(true);
 }
 
 const matchWatershed = (s) =>
@@ -1200,39 +1219,39 @@ const matchEndDate = (s) => {
   return stationEndDate <= selectedEndDate;
 };
 
-function applyFilters() {
-  const filterFunctions = [
-    matchWatershed,
-    matchSubwatershed,
-    matchState,
-    matchCounty,
-    matchGroup,
-    matchStation,
-    matchParams,
-    matchStartDate,
-    matchEndDate,
-  ];
+// function applyFilters() {
+//   const filterFunctions = [
+//     matchWatershed,
+//     matchSubwatershed,
+//     matchState,
+//     matchCounty,
+//     matchGroup,
+//     matchStation,
+//     matchParams,
+//     matchStartDate,
+//     matchEndDate,
+//   ];
 
-  const noFilterApplied = filterFunctions.every(
-    (filter) => filter.length === 0
-  );
+//   const noFilterApplied = filterFunctions.every(
+//     (filter) => filter.length === 0
+//   );
 
-  if (noFilterApplied) {
-    filteredStations.value = stations.value.map(transformStation);
-    return;
-  }
+//   if (noFilterApplied) {
+//     filteredStations.value = stations.value.map(transformStation);
+//     return;
+//   }
 
-  filteredStations.value = stations.value
-    .filter((s) => filterFunctions.every((filter) => filter(s)))
-    .map(transformStation);
-}
-function checkDate(val) {
-  return Quasar.utils.date.isValid(val) || "Invalid date.";
-}
+//   filteredStations.value = stations.value
+//     .filter((s) => filterFunctions.every((filter) => filter(s)))
+//     .map(transformStation);
+// }
+// function checkDate(val) {
+//   return Quasar.utils.date.isValid(val) || "Invalid date.";
+// }
 
-const dateRule = [
-  (v) => (v === null || isValidDate(v) ? true : "Invalid Date"),
-];
+// const dateRule = [
+//   (v) => (v === null || isValidDate(v) ? true : "Invalid Date"),
+// ];
 
 function isValidDate(value) {
   const dateRegEx = /^\d{4}-\d{2}-\d{2}$/;
@@ -1274,6 +1293,7 @@ function receiveEmit(station) {
   console.log(station);
 
   selectedStationDetails.value = station;
+
   console.log("selectedStationDetails");
   console.log(selectedStationDetails);
   stationDetailsContainer.value.scrollIntoView({ behavior: "smooth" });
@@ -1301,6 +1321,11 @@ onMounted(() => {
   // setTimeout(() => {
   //   collapsed.value = false;
   // }, 500);
+  if (stations.value !== null) {
+    aggregateStations();
+  }
+
+  clearFilters();
 });
 </script>
 
