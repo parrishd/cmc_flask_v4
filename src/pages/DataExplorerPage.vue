@@ -148,6 +148,8 @@
                 label="States (pick all that apply)"
                 v-model="selectedStates"
                 :options="stateOptions"
+                option-value="value"
+                option-label="value"
                 multiple
                 outlined
                 dense
@@ -160,6 +162,8 @@
                 label="City/County (pick all that apply)"
                 v-model="selectedCounties"
                 :options="countyOptions"
+                option-value="value"
+                option-label="value"
                 multiple
                 outlined
                 dense
@@ -216,6 +220,8 @@
                 label="Stations (pick all that apply)"
                 v-model="selectedStations"
                 :options="stationIdOptions"
+                option-value="value"
+                option-label="value"
                 multiple
                 outlined
                 dense
@@ -720,70 +726,6 @@ const geoTypesOptions = ["Watershed", "Political"];
 //  return [...new Set(filteredStations.value.map((s) => s.Subwatershed))].sort();
 //});
 
-const groupOptions = computed(() => {
-  if (stations.value !== null && stations.value.length > 0) {
-    console.log("stations.value");
-    console.log(stations.value);
-    let subStations = stations.value.map(transformStation);
-    subStations = subStations.map((s) => ({
-      name: s.GroupName,
-      value: s.GroupCode,
-    }));
-
-    console.log("subStations");
-    console.log(subStations);
-
-    //get unique stations by stationCode
-    const uniqueGroups = new Map(subStations.map((o) => [o.name, o])).values();
-
-    console.log("uniqueGroups");
-    console.log(uniqueGroups);
-
-    const sortedOptions = [...uniqueGroups].sort((a, b) =>
-      a.name.localeCompare(b.name)
-    ); //;
-
-    console.log("sortedOptions");
-    console.log(sortedOptions);
-
-    return [...sortedOptions];
-  } else {
-    return [];
-  }
-});
-
-const stationIdOptions = computed(() => {
-  return [...new Set(filteredStations.value.map((s) => s.StationCode))].sort(
-    (a, b) => a - b
-  );
-});
-
-//const paramOptions = ref(["WT.1", "PH.1", "DO.1"]);
-
-//computed(() => {
-//   const allParameters = filteredStations.value.map((s) =>
-//     s.ParameterCodes.split(",").map((param) => param.trim())
-//   );
-//   const flattenedParamCodes = allParameters.flat();
-
-//   return [...new Set(flattenedParamCodes)].sort();
-// });
-
-const sampleCount = computed(() => {
-  const sampleSum = filteredStations.value.reduce((sum, s) => {
-    return sum + (s.SamplesCount || 0);
-  }, 0);
-  return new Intl.NumberFormat().format(sampleSum);
-});
-
-const organizationsCount = computed(() => {
-  return new Intl.NumberFormat().format(groupOptions.value.length);
-});
-
-const stationsCount = computed(() => {
-  return new Intl.NumberFormat().format(stationIdOptions.value.length);
-});
-
 /****************************
  * Ref/UI Variables
  ***************************/
@@ -895,26 +837,61 @@ const formattedStartDateMap = ref(
   date.formatDate(loadMinDate.value, dateFormat)
 );
 const formattedEndDateMap = ref(date.formatDate(loadMaxDate.value, dateFormat));
+//Format the date for display in the q-input.
+const formattedStartDatePlot = ref(
+  date.formatDate(new Date(props.startDatePlot), dateFormat)
+);
+const formattedEndDatePlot = ref(
+  date.formatDate(new Date(props.endDatePlot), dateFormat)
+);
 
 /****************************
  * Functions
  ***************************/
 
 const getStationsFromCMC = async (load) => {
+  if (!load) {
+    stateOptions.value = [];
+    countyOptions.value = [];
+    watershedOptions.value = [];
+    subwatershedOptions.value = [];
+    paramOptions.value = [];
+  }
   console.log("getStationsFromCMC");
-  const groupCodes = selectedGroups.value.map(({ value }) => value).join(",");
+  console.log(selectedWatershed.value);
+  const groupCodesCsv = selectedGroups.value
+    .map(({ value }) => value)
+    .join(",");
 
-  const paramIds = selectedParams.value.map(({ value }) => value).join(",");
+  const paramIdsCsv = selectedParams.value.map(({ value }) => value).join(",");
+  const watershedsCsv = selectedWatershed.value
+    .map(({ value }) => value)
+    .join(",");
+  console.log("watersheds");
+  console.log(watershedsCsv);
+  const countiesCsv = selectedCounties.value
+    .map(({ value }) => value)
+    .join(",");
+  const statesCsv = selectedStates.value.map(({ value }) => value).join(",");
+
+  console.log("selectedStations.value");
+  console.log(selectedStations.value);
+  const stationsCsv = selectedStations.value
+    .map(({ value }) => value)
+    .join(",");
+  const subwatershedsCsv = selectedSubwatershed.value
+    .map(({ value }) => value)
+    .join(",");
 
   const payload = {
     dataType: selectedDataType.value,
-    groups: groupCodes,
-    stations: selectedStations.value.join(","),
-    states: selectedStates.value.join(","),
-    counties: selectedCounties.value.join(","),
-    watersheds: selectedWatershed.value.join(","),
-    subwatersheds: selectedSubwatershed.value.join(","),
-    parameters: paramIds, //218,228
+    groups: groupCodesCsv,
+    stations: stationsCsv,
+    states: statesCsv,
+    counties: countiesCsv,
+    watersheds: watershedsCsv,
+    subwatersheds: subwatershedsCsv,
+    parameters: paramIdsCsv,
     startDate: formattedStartDateMap.value,
     endDate: formattedEndDateMap.value,
   };
@@ -931,27 +908,45 @@ const getStationsFromCMC = async (load) => {
     .then((res) => {
       console.log("current time2: " + new Date().toLocaleTimeString());
       const res_str = JSON.stringify(res.data);
+      console.log("res_str");
+      console.log(res_str);
       stations.value = res.data;
       console.log(res.data.length);
       console.log(res.data);
-      if (load) {
+      if (load & (res.data.length > 0)) {
         localStorage.setItem(STATIONS, res_str);
       }
     })
     .catch((error) => {
-      stations.value = JSON.parse(localStorage.getItem(STATIONS));
+      if (load) {
+        stations.value = JSON.parse(localStorage.getItem(STATIONS));
+      }
       console.log("getStationsFromCMC error");
       console.log(error);
     });
   //const res = await axios.get("/src/assets/spatial/stations.json", payload);
 
   axios
-    .post("https://cmc.vims.edu/DashboardApi/FetchWatershedsForMap", payload)
-    .then((response) => (subwatershedOptions.value = response.data))
+    .post("https://cmc.vims.edu/DashboardApi/FetchSubWatershedsForMap", payload)
+    .then((response) => {
+      if (response.data.length > 0) {
+        subwatershedOptions.value = response.data;
+        showQueryError.value = false;
+      } else {
+        showQueryError.value = true;
+      }
+    })
     .catch((error) => console.log(error));
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchWatershedsForMap", payload)
-    .then((response) => (watershedOptions.value = response.data))
+    .then((response) => {
+      if (response.data.length > 0) {
+        watershedOptions.value = response.data;
+        showQueryError.value = false;
+      } else {
+        showQueryError.value = true;
+      }
+    })
     .catch((error) => console.log(error));
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchParametersForMap", payload)
@@ -967,11 +962,25 @@ const getStationsFromCMC = async (load) => {
     .catch((error) => console.log(error));
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchCountiesForMap", payload)
-    .then((response) => (countyOptions.value = response.data))
+    .then((response) => {
+      if (response.data.length > 0) {
+        countyOptions.value = response.data;
+        showQueryError.value = false;
+      } else {
+        showQueryError.value = true;
+      }
+    })
     .catch((error) => console.log(error));
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchStatesForMap", payload)
-    .then((response) => (stateOptions.value = response.data))
+    .then((response) => {
+      if (response.data.length > 0) {
+        stateOptions.value = response.data;
+        showQueryError.value = false;
+      } else {
+        showQueryError.value = true;
+      }
+    })
     .catch((error) => console.log(error));
 };
 
@@ -1049,18 +1058,92 @@ const aggregateStations = () => {
   filteredStations.value = aggregatedStations;
 };
 
-//Format the date for display in the q-input.
-const formattedStartDatePlot = ref(
-  date.formatDate(new Date(props.startDatePlot), dateFormat)
-);
-const formattedEndDatePlot = ref(
-  date.formatDate(new Date(props.endDatePlot), dateFormat)
-);
-
 /****************************
  * Computed Properties
  ***************************/
 // computed properties here
+
+const groupOptions = computed(() => {
+  if (stations.value !== null && stations.value.length > 0) {
+    console.log("stations.value");
+    console.log(stations.value);
+    let subStations = stations.value.map(transformStation);
+    subStations = subStations.map((s) => ({
+      name: s.GroupName,
+      value: s.GroupCode,
+    }));
+
+    console.log("subStations");
+    console.log(subStations);
+
+    //get unique stations by stationCode
+    const uniqueGroups = new Map(subStations.map((o) => [o.name, o])).values();
+
+    console.log("uniqueGroups");
+    console.log(uniqueGroups);
+
+    const sortedOptions = [...uniqueGroups].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    ); //;
+
+    console.log("sortedOptions");
+    console.log(sortedOptions);
+
+    return [...sortedOptions];
+  } else {
+    return [];
+  }
+});
+
+//create stationIdOptions from filteredStations with value and labl as StationCode
+const stationIdOptions = computed(() => {
+  if (filteredStations.value !== null && filteredStations.value.length > 0) {
+    const options = filteredStations.value.map((s) => ({
+      value: s.StationCode,
+    }));
+
+    //sort fi
+    const sortedOptions = [...options].sort((a, b) =>
+      a.value.localeCompare(b.value)
+    );
+
+    return [...sortedOptions];
+  } else {
+    return [];
+  }
+});
+
+// const stationIdOptions = computed(() => {
+//   return [...new Set(filteredStations.value.map((s) => s.StationCode))].sort(
+//     (a, b) => a - b
+//   );
+// });
+
+//const paramOptions = ref(["WT.1", "PH.1", "DO.1"]);
+
+//computed(() => {
+//   const allParameters = filteredStations.value.map((s) =>
+//     s.ParameterCodes.split(",").map((param) => param.trim())
+//   );
+//   const flattenedParamCodes = allParameters.flat();
+
+//   return [...new Set(flattenedParamCodes)].sort();
+// });
+
+const sampleCount = computed(() => {
+  const sampleSum = filteredStations.value.reduce((sum, s) => {
+    return sum + (s.SamplesCount || 0);
+  }, 0);
+  return new Intl.NumberFormat().format(sampleSum);
+});
+
+const organizationsCount = computed(() => {
+  return new Intl.NumberFormat().format(groupOptions.value.length);
+});
+
+const stationsCount = computed(() => {
+  return new Intl.NumberFormat().format(stationIdOptions.value.length);
+});
 
 /***************************
  * Watched properties
@@ -1310,6 +1393,33 @@ function receiveEmit(station) {
     new Date(station.startDate),
     dateFormat
   );
+  const payload = {
+    stations: station.code,
+    startDate: formattedStartDatePlot.value,
+    endDate: formattedEndDatePlot.value,
+    dataType: selectedDataType.value,
+    groups: "",
+    states: "",
+    counties: "",
+    watersheds: "",
+    subwatersheds: "",
+    parameters: "", //218,228
+  };
+  console.log("payload");
+  console.log(payload);
+  axios
+    .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForMap", payload)
+    .then((response) => {
+      console.log("fetch parameters for plot");
+      console.log(response.data);
+
+      if (response.data.length > 0) {
+        paramOptionsPlot.value = response.data;
+      } else {
+        console.log("no parameters returned");
+      }
+    })
+    .catch((error) => console.log(error));
 }
 
 /****************************
