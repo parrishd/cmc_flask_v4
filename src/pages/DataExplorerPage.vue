@@ -319,16 +319,16 @@
           <div class="row q-mt-sm">
             <div class="col text-center">
               <q-btn
-                label="Clear Filters"
-                @click="clearFilters"
+                label="Filter Map"
+                @click="getStationsFromCMC(false)"
                 color="primary"
                 style="width: 90%"
               />
             </div>
             <div class="col text-center">
               <q-btn
-                label="Filter Map"
-                @click="getStationsFromCMC(false)"
+                label="Clear Filters"
+                @click="clearFilters"
                 color="primary"
                 style="width: 90%"
               />
@@ -437,11 +437,21 @@
       </div>
 
       <!-- selected data details -->
+
       <div
         class="row q-mt-xl result-details-container"
         ref="stationDetailsContainer"
       >
-        <div class="col">
+        <div class="col" v-show="!showStationDetails">
+          <div class="row q-py-md q-px-lg result-details-header">
+            <div class="col">
+              <h5>
+                Select a station on the map or table above to view details.
+              </h5>
+            </div>
+          </div>
+        </div>
+        <div class="col" v-show="showStationDetails">
           <!-- header -->
           <div class="row q-py-md q-px-lg result-details-header">
             <!--            <div class="col-1">-->
@@ -505,9 +515,11 @@
             </div>
             <div class="col-3 q-pr-xl q-pl-xl">
               <q-select
-                label="Depth"
-                v-model="selectedDepthPlot"
-                :options="depthOptionsPlot"
+                :label="
+                  selectedParamTypePlot === 'Depth' ? 'Depth (m)' : 'Parameter'
+                "
+                v-model="primaryFilterPlot"
+                :options="filterOptionsPlot"
                 outlined
                 bg-color="white"
               />
@@ -581,10 +593,26 @@
               </q-input>
             </div>
           </div>
-
           <div class="row q-mt-md">
-            <div class="col-12 q-pr-xl">
-              <DashboardPlot></DashboardPlot>
+            <div class="col-5">
+              <q-btn
+                label="Filter Samples for station"
+                @click="getSamples(selectedStationDetails.id)"
+                color="primary"
+              />
+            </div>
+          </div>
+          <div class="row q-mt-md">
+            <div
+              class="col-12 q-pr-xl"
+              v-for="count in plotCount"
+              :key="`plot-${count}`"
+            >
+              <DashboardPlot
+                :plotData="samplesForPlot"
+                :plotIndex="count"
+                :paramType="selectedParamTypePlot"
+              ></DashboardPlot>
             </div>
           </div>
           <div class="row q-mt-md">
@@ -594,6 +622,7 @@
                 label="Add Plot"
                 color="primary"
                 icon-right="fas fa-plus"
+                @click="addPlot"
               />
             </div>
           </div>
@@ -618,7 +647,7 @@ import DashboardPlot from "components/DashboardPlot.vue";
 
 //import stations from "/src/assets/cmcV3_stations.json";
 import { date } from "quasar";
-import { EvaluationParameters } from "plotly.js-dist";
+import { EvaluationParameters, get } from "plotly.js-dist";
 
 const emit = defineEmits(["update:endDatePlot", "update:startDatePlot"]);
 
@@ -649,19 +678,7 @@ const props = defineProps({
 /****************************
  * Local/'Use' Variables
  ***************************/
-const selectedStationDetails = ref({
-  code: "LACA.P7",
-  name: "P7",
-  nameLong: "P7",
-  groupNames: "Lake Anna Civic Association",
-  id: "522",
-  latitude: "38.22682",
-  longitude: "-77.98037",
-  huc6Name: "Lake Anna",
-  startDate: "January 1, 2015",
-  endDate: "December 31, 2020",
-  description: "Lake Anna, Spotsylvania County, VA",
-});
+const selectedStationDetails = ref({});
 
 const loading = ref[true];
 
@@ -709,9 +726,6 @@ const columns = [
 ];
 const tableKey = ref(0);
 
-const dataTypes = ["Water Quality", "Benthic Macroinvertebrates"];
-const paramTypeOptions = ["Depth", "Parameter"];
-const geoTypesOptions = ["Watershed", "Political"];
 //const stateOptions = computed(() => {
 //  return [...new Set(filteredStations.value.map((s) => s.State))].sort();
 //});
@@ -729,6 +743,9 @@ const geoTypesOptions = ["Watershed", "Political"];
 /****************************
  * Ref/UI Variables
  ***************************/
+const dataTypes = ["Water Quality", "Benthic Macroinvertebrates"];
+const paramTypeOptions = ["Depth", "Parameter"];
+const geoTypesOptions = ["Watershed", "Political"];
 const collapsed = ref(false);
 const showCityState = ref(false);
 const showWatersheds = ref(true);
@@ -737,8 +754,8 @@ const optionalMetaStations = ref(false);
 const optionalMetaParams = ref(false);
 const optionalMetaCalibration = ref(false);
 const dataUseAcknowledgment = ref(false);
-const selectedParamPlot = ref("WT.1");
-const selectedDepthPlot = ref(0.3);
+const primaryFilterPlot = ref(null);
+const filterOptionsPlot = ref([]);
 const selectedGeoType = ref("Watershed");
 const selectedDataType = ref("Water Quality");
 const selectedParamTypePlot = ref("Depth");
@@ -749,9 +766,7 @@ const selectedWatershed = ref([]);
 const selectedSubwatershed = ref([]);
 const selectedGroups = ref([]);
 const selectedParams = ref([]);
-const paramOptionsPlot = ref(["DO.1", "PH.1", "WT.1"]);
 const showQueryError = ref(false);
-const depthOptionsPlot = ref([0.3, 1]);
 const stationDetailsContainer = ref();
 const stations = ref(null);
 const paramOptions = ref([]);
@@ -764,6 +779,9 @@ const stateOptions = ref([]);
 const countyOptions = ref([]);
 const dateFormat = "YYYY-MM-DD";
 const STATIONS = "stations";
+const samples = ref([]);
+const samplesForPlot = ref([]);
+const plotCount = ref(1);
 //console.log(JSON.parse(localStorage.getItem(STATIONS)));
 const isJson = (str) => {
   try {
@@ -848,6 +866,11 @@ const formattedEndDatePlot = ref(
 /****************************
  * Functions
  ***************************/
+
+//add a plot to the page
+const addPlot = () => {
+  plotCount.value++;
+};
 
 const getStationsFromCMC = async (load) => {
   if (!load) {
@@ -1058,6 +1081,38 @@ const aggregateStations = () => {
   filteredStations.value = aggregatedStations;
 };
 
+const getUniqueValues = (data, param, reset) => {
+  console.log("getUniqueParams", data);
+  let uniqueParams = [];
+  if (param == "Parameter") {
+    //push unique parameterCode in samples to uniqueParams array. Only include one instance of each parameterCode
+    //in the uniqueParams array.
+    uniqueParams = data.reduce((acc, sample) => {
+      if (!acc.includes(sample.parameterCode)) {
+        acc.push(sample.parameterCode);
+      }
+      return acc;
+    }, []);
+  } else if (param == "Depth") {
+    uniqueParams = data.reduce((acc, sample) => {
+      if (!acc.includes(sample.depth)) {
+        acc.push(sample.depth);
+      }
+      return acc;
+    }, []);
+  }
+  console.log("uniqueParams", uniqueParams);
+  filterOptionsPlot.value = uniqueParams;
+  //set the primaryFilterPlot to the first value in the uniqueParams array
+  if (
+    primaryFilterPlot.value == null ||
+    primaryFilterPlot.value == "" ||
+    reset
+  ) {
+    primaryFilterPlot.value = uniqueParams[0];
+  }
+};
+
 /****************************
  * Computed Properties
  ***************************/
@@ -1113,6 +1168,10 @@ const stationIdOptions = computed(() => {
   }
 });
 
+const showStationDetails = computed(() => {
+  return Object.keys(selectedStationDetails.value).length > 0;
+});
+
 // const stationIdOptions = computed(() => {
 //   return [...new Set(filteredStations.value.map((s) => s.StationCode))].sort(
 //     (a, b) => a - b
@@ -1164,6 +1223,14 @@ watch(formattedEndDatePlot, (newDateValue) => {
   //convert to iso string
   const updatedDate = newDate.toISOString();
   emit("update:endDatePlot", updatedDate);
+});
+
+watch(selectedParamTypePlot, () => {
+  console.log("selectedParamTypePlot changed");
+  console.log(selectedParamTypePlot.value);
+  //if the selectedParamTypePlot is Depth, then filter the filterOptionsPlot to only include unique depths from samples.
+  //the unique depth should only include one instance of each depth value.
+  getUniqueValues(samples.value, selectedParamTypePlot.value, true);
 });
 
 watch(selectedGeoType, () => {
@@ -1362,6 +1429,50 @@ function transformStation(station) {
   };
 }
 
+function getSamples(stationId) {
+  console.log("getSamples");
+  if (!stationId) {
+    return;
+  }
+  const payload = {
+    stationId: stationId,
+    startDate: formattedStartDatePlot.value,
+    endDate: formattedEndDatePlot.value,
+    dataType: selectedDataType.value,
+  };
+  console.log("payload");
+  console.log(payload);
+  axios
+    .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForPlot", payload)
+    .then((response) => {
+      console.log("fetch samples for plot");
+      console.log(response.data);
+      if (response.data.length > 0) {
+        samples.value = response.data;
+        getUniqueValues(response.data, selectedParamTypePlot.value);
+        filterSamples(
+          response.data,
+          selectedParamTypePlot.value,
+          primaryFilterPlot.value
+        );
+      } else {
+        console.log("no samples returned");
+      }
+    })
+    .catch((error) => console.log(error));
+}
+
+function filterSamples(data, paramType, value) {
+  console.log("filterSamples");
+  console.log(data);
+  console.log(value);
+  if (paramType == "Parameter") {
+    samplesForPlot.value = data.filter((s) => s.parameterCode === value);
+  } else if (paramType == "Depth") {
+    samplesForPlot.value = data.filter((s) => s.depth === value);
+  }
+}
+
 function transformParameter(param) {
   let transformParameter = {};
   param.forEach((item) => {
@@ -1393,33 +1504,7 @@ function receiveEmit(station) {
     new Date(station.startDate),
     dateFormat
   );
-  const payload = {
-    stations: station.code,
-    startDate: formattedStartDatePlot.value,
-    endDate: formattedEndDatePlot.value,
-    dataType: selectedDataType.value,
-    groups: "",
-    states: "",
-    counties: "",
-    watersheds: "",
-    subwatersheds: "",
-    parameters: "", //218,228
-  };
-  console.log("payload");
-  console.log(payload);
-  axios
-    .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForMap", payload)
-    .then((response) => {
-      console.log("fetch parameters for plot");
-      console.log(response.data);
-
-      if (response.data.length > 0) {
-        paramOptionsPlot.value = response.data;
-      } else {
-        console.log("no parameters returned");
-      }
-    })
-    .catch((error) => console.log(error));
+  getSamples(station.id);
 }
 
 /****************************

@@ -7,6 +7,8 @@
           label="Parameters (pick all that apply)"
           v-model="selectedParamPlot"
           :options="paramOptionsPlot"
+          option-value="value"
+          option-label="name"
           outlined
           dense
         ></q-select>
@@ -14,7 +16,7 @@
     </div>
     <div class="row q-mt-lg">
       <div class="col-12">
-        <div id="chart" class="chart"></div>
+        <div :id="`chart-${plotIndex}`" class="chart"></div>
       </div>
     </div>
   </div>
@@ -22,35 +24,123 @@
 
 <script setup>
 import { onMounted, reactive, ref, watch, toRefs } from "vue";
-import Plotly from "plotly.js-dist";
+import Plotly, { filterObject, get } from "plotly.js-dist";
 
-const trace1 = {
-  x: [
-    "2013-10-04 22:23:00",
-    "2013-11-04 22:23:00",
-    "2013-12-04 22:23:00",
-    "2014-01-04 22:23:00",
-    "2014-02-04 22:23:00",
-    "2014-03-04 22:23:00",
-    "2014-04-04 22:23:00",
-    "2014-05-04 22:23:00",
-    "2014-06-04 22:23:00",
-    "2014-07-04 22:23:00",
-    "2014-08-04 22:23:00",
-    "2014-09-04 22:23:00",
-  ],
-  y: [23.6, 30.7, 19.6, 20.7, 26.6, 23.7, 34.6, 30.7, 24.6, 20.7, 14.6, 10.7],
-  type: "scatter",
+const props = defineProps(["plotData", "plotIndex", "paramType"]);
+const { plotData } = toRefs(props);
+const { plotIndex } = toRefs(props);
+const { paramType } = toRefs(props);
+
+//const trace1 = ref([]);
+const selectedParamPlot = ref([]);
+const paramOptionsPlot = ref([]);
+
+watch(
+  () => plotData.value,
+  (newVal, oldVal) => {
+    console.log("plotData", newVal);
+    getUniqueParams(newVal);
+  }
+);
+
+// Get unique parameter code values from the plotData object. Set unique parameter code as options for the select dropdown. Ther
+// should only be one instance of each parameter code in the new object. selectedParamPlot as the first parameter code in the options array.
+const getUniqueParams = (data) => {
+  if (data.length === 0) {
+    return;
+  }
+  console.log("getUniqueParams", data);
+  let uniqueParams = []; //loop throught the data and get the unique parameter (code,name,units) values
+  console.log("paramType", paramType.value);
+  if (paramType.value == "Depth") {
+    uniqueParams = data
+      .map((sample) => {
+        return {
+          value: sample.parameterCode,
+          name: sample.parameterName,
+          units: sample.parameterUnits,
+        };
+      })
+      .filter(
+        (value, index, self) =>
+          self.findIndex((t) => t.value === value.value) === index
+      );
+  } else {
+    uniqueParams = data
+      .map((sample) => {
+        return {
+          value: sample.depth,
+          name: sample.depth,
+          units: "m",
+        };
+      })
+      .filter(
+        (value, index, self) =>
+          self.findIndex((t) => t.value === value.value) === index
+      );
+  }
+  console.log("uniqueParams", uniqueParams);
+  paramOptionsPlot.value = uniqueParams;
+  selectedParamPlot.value = uniqueParams[0];
 };
 
-const data = [trace1];
-const selectedParamPlot = ref("WT.1");
-const paramOptionsPlot = ref(["WT.1", "PH.1", "DO.1"]);
-onMounted(() => {
-  var layout = {
+watch(
+  () => selectedParamPlot.value,
+  (newVal, oldVal) => {
+    console.log("selectedParamPlot", newVal);
+    filterSamples(newVal);
+  }
+);
+watch(
+  () => plotIndex.value,
+  (newVal, oldVal) => {
+    console.log("plotIndex", newVal);
+    filterSamples(selectedParamPlot.value);
+  }
+);
+
+const filterSamples = (param) => {
+  console.log("filterSamples", param);
+  if (typeof param === "undefined") {
+    return;
+  }
+  let filteredData = [];
+  if (paramType.value === "Depth") {
+    filteredData = plotData.value.filter(
+      (sample) => sample.parameterCode === param.value
+    );
+  } else {
+    filteredData = plotData.value.filter(
+      (sample) => sample.depth === param.value
+    );
+  }
+  console.log("filteredData", filteredData);
+  const trace = {
+    x: filteredData.map((sample) =>
+      // format the sample.DateTime as "yyyy-MM-dd HH:mm"
+      new Date(sample.dateTime).toISOString().slice(0, 16)
+    ),
+    y: filteredData.map((sample) => sample.value),
+    type: "scatter",
+  };
+  //order trace by x
+  //trace.x.sort();
+  updatePlot(trace, param);
+};
+
+const updatePlot = (trace, param) => {
+  if (trace.x.length === 0) {
+    return;
+  }
+  if (typeof param === "undefined") {
+    return;
+  }
+  console.log("updatePlot");
+
+  const layout = {
     yaxis: {
       title: {
-        text: "Water Temperature (Celsius)",
+        text: param.name + " (" + param.units + ")",
 
         font: {
           size: 20,
@@ -73,8 +163,13 @@ onMounted(() => {
       pad: 4,
     },
   };
-  Plotly.newPlot("chart", data, layout);
-  //Plotly.plot("chart", data);
+  Plotly.newPlot("chart-" + plotIndex.value, [trace], layout);
+};
+
+onMounted(() => {
+  console.log("onMounted");
+  getUniqueParams(plotData.value);
+  filterSamples(selectedParamPlot.value);
 });
 </script>
 
