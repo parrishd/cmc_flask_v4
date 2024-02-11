@@ -20,6 +20,7 @@
           <a href="/about">ABOUT</a>
           <a href="/resources">RESOURCES</a>
           <a href="/contact">CONTACT</a>
+          <a href="https://cmc.vims.edu/admin">DATA HUB</a>
 
           <q-btn-dropdown
             v-if="loggedIn"
@@ -101,7 +102,7 @@
           <!--          <a v-if="loggedIn" href="/manage">MANAGE</a>-->
           <!--          <a v-if="loggedIn" href="/admin">ADMIN</a>-->
         </div>
-        <div v-if="!loggedIn" class="col-5 flex justify-end">
+        <div v-if="loggedIn" class="col-5 flex justify-end">
           <q-btn
             class="q-mr-sm action-button"
             color="primary"

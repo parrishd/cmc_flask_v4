@@ -400,14 +400,9 @@
       <!-- results -->
       <div class="row q-py-lg q-px-md results-title">
         <div class="col title-font">Currently Viewing</div>
-        <div class="col text-center" style="max-width: 48px">
+        <div class="col-2" style="max-width: 70px">
           <q-icon class="fa-solid fa-circle-info" size="24px" color="primary">
-            <q-tooltip
-              anchor="bottom left"
-              self="top left"
-              class="bg-grey-2"
-              :offset="[360, 10]"
-            >
+            <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
               <div class="q-pa-md" style="max-width: 360px">
                 <div class="tooltip-header">Stations Table</div>
                 <div class="q-mt-sm tooltip-text">
@@ -422,9 +417,31 @@
               </div>
             </q-tooltip>
           </q-icon>
+
+          <!--            <q-icon class="fa-solid fa-arrow-left" size="24px" />-->
+          <q-btn
+            v-show="tableCollapsed"
+            icon="fa-solid fa-arrow-down"
+            @click="tableCollapsed = !tableCollapsed"
+            round
+            flat
+            color="primary"
+            class=""
+          />
+
+          <!--              <q-icon class="fa-solid fa-arrow-right" size="24px" />-->
+          <q-btn
+            v-show="!tableCollapsed"
+            icon="fa-solid fa-arrow-up"
+            @click="tableCollapsed = !tableCollapsed"
+            round
+            flat
+            color="primary"
+            class=""
+          />
         </div>
       </div>
-      <div class="row">
+      <div v-show="!tableCollapsed" class="row">
         <div class="col">
           <q-table
             :rows="rows"
@@ -435,23 +452,18 @@
           />
         </div>
       </div>
-
+      <div class="row q-mt-lg">
+        <div class="col">
+          <q-separator />
+        </div>
+      </div>
       <!-- selected data details -->
 
       <div
         class="row q-mt-xl result-details-container"
         ref="stationDetailsContainer"
       >
-        <div class="col" v-show="!showStationDetails">
-          <div class="row q-py-md q-px-lg result-details-header">
-            <div class="col">
-              <h5>
-                Select a station on the map or table above to view details.
-              </h5>
-            </div>
-          </div>
-        </div>
-        <div class="col" v-show="showStationDetails">
+        <div class="col">
           <!-- header -->
           <div class="row q-py-md q-px-lg result-details-header">
             <!--            <div class="col-1">-->
@@ -462,17 +474,35 @@
                 class="fa-solid fa-location-dot float-left q-mr-lg"
                 size="110px"
               />
-              <div class="result-details-header-text-1">
+              <div
+                class="result-details-header-text-1"
+                v-show="showStationDetails"
+              >
                 {{ selectedStationDetails.code }}
               </div>
-              <div class="result-details-header-text-2">
+              <div
+                class="result-details-header-text-1"
+                v-show="!showStationDetails"
+              >
+                Select a station on the map or table above to view details.
+              </div>
+              <div
+                class="result-details-header-text-2"
+                v-show="showStationDetails"
+              >
                 Monitored by: {{ selectedStationDetails.groupNames }}
               </div>
-              <div class="result-details-header-text-2">
+              <div
+                class="result-details-header-text-2"
+                v-show="showStationDetails"
+              >
                 Location: {{ selectedStationDetails.latitude }},
                 {{ selectedStationDetails.longitude }}
               </div>
-              <div class="result-details-header-text-2" style="">
+              <div
+                class="result-details-header-text-2"
+                v-show="showStationDetails"
+              >
                 Date Range: {{ selectedStationDetails.startDate }} -
                 {{ selectedStationDetails.endDate }}
               </div>
@@ -501,129 +531,132 @@
               </q-icon>
             </div>
           </div>
-
-          <!-- details -->
-          <div class="row q-mt-md">
-            <div class="col-3 q-pr-xl">
-              <q-select
-                label="Data Type"
-                v-model="selectedParamTypePlot"
-                :options="paramTypeOptions"
-                outlined
-                bg-color="white"
-              ></q-select>
-            </div>
-            <div class="col-3 q-pr-xl q-pl-xl">
-              <q-select
-                :label="
-                  selectedParamTypePlot === 'Depth' ? 'Depth (m)' : 'Parameter'
-                "
-                v-model="primaryFilterPlot"
-                :options="filterOptionsPlot"
-                outlined
-                bg-color="white"
-              />
-            </div>
-            <div class="col-3 q-pr-xl q-pl-xl">
-              <q-input
-                label="Start Date"
-                v-model="formattedStartDatePlot"
-                :mask="dateMask"
-                id="date-input"
-                outlined
-              >
-                <template v-slot:prepend>
-                  <q-icon name="event" class="cursor-pointer">
-                    <q-popup-proxy
-                      cover
-                      transition-show="scale"
-                      transition-hide="scale"
-                    >
-                      <q-date
-                        v-model="formattedStartDatePlot"
-                        :mask="dateFormat"
-                        today-btn
+          <div v-show="showStationDetails">
+            <!-- details -->
+            <div class="row q-mt-md">
+              <div class="col-3 q-pr-xl">
+                <q-select
+                  label="Data Type"
+                  v-model="selectedParamTypePlot"
+                  :options="paramTypeOptions"
+                  outlined
+                  bg-color="white"
+                ></q-select>
+              </div>
+              <div class="col-3 q-pr-xl q-pl-xl">
+                <q-select
+                  :label="
+                    selectedParamTypePlot === 'Depth'
+                      ? 'Depth (m)'
+                      : 'Parameter'
+                  "
+                  v-model="primaryFilterPlot"
+                  :options="filterOptionsPlot"
+                  outlined
+                  bg-color="white"
+                />
+              </div>
+              <div class="col-3 q-pr-xl q-pl-xl">
+                <q-input
+                  label="Start Date"
+                  v-model="formattedStartDatePlot"
+                  :mask="dateMask"
+                  id="date-input"
+                  outlined
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
                       >
-                        <div class="row items-center justify-end">
-                          <q-btn
-                            v-close-popup
-                            label="Close"
-                            color="primary"
-                            flat
-                          />
-                        </div>
-                      </q-date>
-                    </q-popup-proxy>
-                  </q-icon>
-                </template>
-              </q-input>
-            </div>
-            <div class="col-3 q-pl-xl">
-              <q-input
-                label="End Date"
-                v-model="formattedEndDatePlot"
-                :mask="dateMask"
-                id="date-input"
-                outlined
-              >
-                <template v-slot:prepend>
-                  <q-icon name="event" class="cursor-pointer">
-                    <q-popup-proxy
-                      cover
-                      transition-show="scale"
-                      transition-hide="scale"
-                    >
-                      <q-date
-                        v-model="formattedEndDatePlot"
-                        :mask="dateFormat"
-                        today-btn
+                        <q-date
+                          v-model="formattedStartDatePlot"
+                          :mask="dateFormat"
+                          today-btn
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-3 q-pl-xl">
+                <q-input
+                  label="End Date"
+                  v-model="formattedEndDatePlot"
+                  :mask="dateMask"
+                  id="date-input"
+                  outlined
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
                       >
-                        <div class="row items-center justify-end">
-                          <q-btn
-                            v-close-popup
-                            label="Close"
-                            color="primary"
-                            flat
-                          />
-                        </div>
-                      </q-date>
-                    </q-popup-proxy>
-                  </q-icon>
-                </template>
-              </q-input>
+                        <q-date
+                          v-model="formattedEndDatePlot"
+                          :mask="dateFormat"
+                          today-btn
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
             </div>
-          </div>
-          <div class="row q-mt-md">
-            <div class="col-5">
-              <q-btn
-                label="Filter Samples for station"
-                @click="getSamples(selectedStationDetails.id)"
-                color="primary"
-              />
+            <div class="row q-mt-md">
+              <div class="col-5">
+                <q-btn
+                  label="Filter Samples for station"
+                  @click="getSamples(selectedStationDetails.id)"
+                  color="primary"
+                />
+              </div>
             </div>
-          </div>
-          <div class="row q-mt-md">
-            <div
-              class="col-12 q-pr-xl"
-              v-for="count in plotCount"
-              :key="`plot-${count}`"
-            >
-              <DashboardPlot
-                :plotData="samplesForPlot"
-                :plotIndex="count"
-                :paramType="selectedParamTypePlot"
-              ></DashboardPlot>
+            <div class="row q-mt-md">
+              <div
+                class="col-12 q-pr-xl"
+                v-for="count in plotCount"
+                :key="`plot-${count}`"
+              >
+                <DashboardPlot
+                  :plotData="samplesForPlot"
+                  :plotIndex="count"
+                  :paramType="selectedParamTypePlot"
+                ></DashboardPlot>
+              </div>
             </div>
-          </div>
-          <div class="row q-mt-md">
-            <div class="col-10 q-pr-xl"></div>
-            <div class="col-2 q-pr-xl">
-              <q-btn
-                label="Add Plot"
-                color="primary"
-                icon-right="fas fa-plus"
-                @click="addPlot"
-              />
+            <div class="row q-mt-md">
+              <div class="col-10 q-pr-xl"></div>
+              <div class="col-2 q-pr-xl">
+                <q-btn
+                  label="Add Plot"
+                  color="primary"
+                  icon-right="fas fa-plus"
+                  @click="addPlot"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -747,6 +780,7 @@ const dataTypes = ["Water Quality", "Benthic Macroinvertebrates"];
 const paramTypeOptions = ["Depth", "Parameter"];
 const geoTypesOptions = ["Watershed", "Political"];
 const collapsed = ref(false);
+const tableCollapsed = ref(false);
 const showCityState = ref(false);
 const showWatersheds = ref(true);
 const optionalMetaGroups = ref(false);
@@ -1512,10 +1546,6 @@ function receiveEmit(station) {
  ***************************/
 
 onMounted(() => {
-  //applyFilters();
-  // setTimeout(() => {
-  //   collapsed.value = false;
-  // }, 500);
   if (stations.value !== null) {
     aggregateStations();
   }
