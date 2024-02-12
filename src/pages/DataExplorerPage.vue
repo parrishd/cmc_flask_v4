@@ -3,7 +3,7 @@
     <div class="q-px-xl q-mx-xl">
       <!-- stats bar -->
       <div class="row q-mt-lg viewing-stats">
-        <div class="col-2">Currently Viewing Test:</div>
+        <div class="col-2">Currently Viewing:</div>
         <div class="col">
           <q-icon class="fa-solid fa-file-lines q-mr-sm" size="32px" />
           {{ sampleCount }} Samples
@@ -48,7 +48,7 @@
             :mapData="filteredStations"
             :showLegend="true"
             :collapsed="collapsed"
-            :selectedDataType="selectedDataType"
+            :selectedDataType="selectedDataTypeForLegend"
             :selectedGeoType="selectedGeoType"
             @selected-station="receiveEmit"
             :mapOptions="{
@@ -344,52 +344,116 @@
           </div>
 
           <div class="row q-mt-md">
-            <div class="col">
-              Choose optional metadata to include with download
-            </div>
-          </div>
-          <div class="row q-mt-md">
-            <div class="col-6">
-              <q-checkbox v-model="optionalMetaGroups" label="Groups" />
-            </div>
-            <div class="col-6">
-              <q-checkbox v-model="optionalMetaStations" label="Stations" />
-            </div>
-            <div class="col-6">
-              <q-checkbox v-model="optionalMetaParams" label="Parameters" />
-            </div>
-            <div class="col-6">
-              <q-checkbox
-                v-model="optionalMetaCalibration"
-                label="Calibration Samples"
-              />
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col">
-              Please acknowledge data use prior to download:
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col" style="max-width: 40px">
-              <q-checkbox v-model="dataUseAcknowledgment" />
-            </div>
-            <div class="col q-pt-xs text-caption">
-              I as the data user acknowledge that the data belong to the
-              original data provider and will properly credit the data
-              provider(s) in any product that uses their data.
-            </div>
-          </div>
-
-          <div class="row q-mt-md">
             <div class="col text-center">
-              <q-btn label="Download Data" color="primary" style="width: 90%" />
+              <q-btn
+                label="Download Data"
+                color="primary"
+                style="width: 90%"
+                @click="downloadDialog = true"
+              />
             </div>
           </div>
         </div>
       </div>
+      <q-dialog v-model="downloadDialog" >
+        <q-card style="width: 800px; max-width: 90vw;" bg-grey-9 text-white>
+          <q-card-section>
+            <div class="text-h6">Download</div>
+          </q-card-section>
+
+          <q-separator />
+
+          <q-card-section style="max-height: 80vh;" class="scroll">
+            <p>
+              Your {{selectedDataType}} download will include <span style="font-size: 28px;color: #075C7A;">{{ sampleCount }}</span> samples. The download will consist of all samples:
+              <ul>
+                <li v-show="selectedStates.length > 0"> that were collected in the following states: {{ selectedStates.map(({ value }) => value).join(", ") }}</li>
+                <li v-show="selectedCounties.length > 0">that were collected in the following counties: {{ selectedCounties.map(({ value }) => value).join(", ") }}</li>
+                <li v-show="selectedWatershed.length > 0">that were collected in the following watersheds: {{ selectedWatershed.map(({ value }) => value).join(",") }}</li>
+                <li v-show="selectedSubwatershed.length > 0">that were collected in the following subwatersheds: {{ selectedSubwatershed.map(({ value }) => value).join(", ") }}</li>
+                <li v-show="selectedGroups.length > 0">that were collected by the following groups: {{ selectedGroups.map(({ value }) => value).join(", ") }}</li>
+                <li v-show="selectedStations.length > 0">that were collected at the following stations: {{ selectedStations.map(({ value }) => value).join(", ") }}</li>
+                <li v-show="selectedParams.length > 0">that are associated with the following parameters: {{ selectedParams.map(({ name }) => name).join(", ") }}</li>
+                <li v-show="formattedStartDateMap">that were collected after {{ formattedStartDateMap }}</li>
+                <li v-show="formattedEndDateMap">that were collected before {{ formattedEndDateMap }}</li>
+              </ul>
+            </p>
+            <div class="row q-mt-md">
+              <div class="col">
+                Choose optional metadata to include with download
+              </div>
+            </div>
+            <div class="row q-mt-sm">
+              <div class="col-6">
+                <q-checkbox v-model="optionalMetaGroups" label="Groups" />
+              </div>
+              <div class="col-6">
+                <q-checkbox v-model="optionalMetaStations" label="Stations" />
+              </div>
+              <div class="col-6">
+                <q-checkbox v-model="optionalMetaParams" label="Parameters" />
+              </div>
+              <div class="col-6">
+                <q-checkbox
+                  v-model="optionalMetaCalibration"
+                  label="Calibration Samples"
+                />
+              </div>
+            </div>
+            <q-separator class="q-mt-md"/>
+            <q-card-section>
+              <div style="font-size:20px">Help us learn about you</div>
+              <div class="row q-mt-md">
+                <div class="col">
+                  <!--, val => !!val || 'Email is required']"-->
+                  <q-input v-model="email" label="Email" :dense="dense"
+                    :rules="[(val) => validateEmail(val) || 'Must be a valid email.']"
+                  />
+                  <q-select  v-model="selectedOccupation" :options="occupationOptions" label="Occupation" />
+                  <q-select class="q-mt-md" v-model="selectedPurpose" :options="purposeOptions" label="Purpose" />
+                  <q-input
+                    v-model="comments"
+                    class="q-mt-md"
+                    label="Comments"
+                    type="textarea"
+                  />
+                </div>
+              </div>
+            </q-card-section>
+
+
+            <div class="row q-mt-sm">
+              <div class="col">
+
+              </div>
+            </div>
+
+            <div class="row q-mt-sm">
+              <div class="col">
+                Please acknowledge data use prior to download:
+              </div>
+            </div>
+
+            <div class="row q-mt-sm">
+              <div class="col" style="max-width: 40px">
+                <q-checkbox v-model="dataUseAcknowledgment" />
+              </div>
+              <div class="col q-pt-xs text-caption">
+                I as the data user acknowledge that the data belong to the
+                original data provider and will properly credit the data
+                provider(s) in any product that uses their data.
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-separator />
+
+          <q-card-actions align="right">
+            <q-btn flat label="Decline" color="primary" v-close-popup />
+            <q-btn flat label="Accept" color="primary" v-close-popup :disabled="!dataUseAcknowledgment"/>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
 
       <div class="row q-mt-lg">
         <div class="col">
@@ -452,11 +516,7 @@
           />
         </div>
       </div>
-      <div class="row q-mt-lg">
-        <div class="col">
-          <q-separator />
-        </div>
-      </div>
+
       <!-- selected data details -->
 
       <div
@@ -534,7 +594,7 @@
           <div v-show="showStationDetails">
             <!-- details -->
             <div class="row q-mt-md">
-              <div class="col-3 q-pr-xl">
+              <div class="col-3 q-pr-xl" v-show="selectedDataType=='Water Quality'">
                 <q-select
                   label="Data Type"
                   v-model="selectedParamTypePlot"
@@ -543,7 +603,7 @@
                   bg-color="white"
                 ></q-select>
               </div>
-              <div class="col-3 q-pr-xl q-pl-xl">
+              <div class="col-3 q-pr-xl q-pl-xl" v-show="selectedDataType=='Water Quality'">
                 <q-select
                   :label="
                     selectedParamTypePlot === 'Depth'
@@ -556,7 +616,7 @@
                   bg-color="white"
                 />
               </div>
-              <div class="col-3 q-pr-xl q-pl-xl">
+              <div class="col-3  ">
                 <q-input
                   label="Start Date"
                   v-model="formattedStartDatePlot"
@@ -590,7 +650,7 @@
                   </template>
                 </q-input>
               </div>
-              <div class="col-3 q-pl-xl">
+              <div class="col-3 q-pl-md">
                 <q-input
                   label="End Date"
                   v-model="formattedEndDatePlot"
@@ -644,18 +704,28 @@
                   :plotData="samplesForPlot"
                   :plotIndex="count"
                   :paramType="selectedParamTypePlot"
+                  :dataType="selectedDataType"
                 ></DashboardPlot>
               </div>
             </div>
             <div class="row q-mt-md">
-              <div class="col-10 q-pr-xl"></div>
-              <div class="col-2 q-pr-xl">
+              <div class="col-10"></div>
+              <div class="col-2">
+                <div class="q-pa-md q-gutter-sm">
+
                 <q-btn
-                  label="Add Plot"
+                  round
+                  color="teal"
+                  icon="fas fa-minus"
+                  @click="removePlot"
+                />
+                <q-btn
+                  round
                   color="primary"
-                  icon-right="fas fa-plus"
+                  icon="fas fa-plus"
                   @click="addPlot"
                 />
+              </div>
               </div>
             </div>
           </div>
@@ -731,13 +801,13 @@ const columns = [
     field: "GroupNames",
     sortable: true,
   },
-  {
-    name: "Subwatershed",
-    align: "left",
-    label: "Water Body",
-    field: "Subwatershed",
-    sortable: true,
-  },
+  // {
+  //   name: "Subwatershed",
+  //   align: "left",
+  //   label: "Water Body",
+  //   field: "Subwatershed",
+  //   sortable: true,
+  // },
   {
     name: "formattedStartDate",
     align: "left",
@@ -750,12 +820,12 @@ const columns = [
     label: "Most Recent Sampled",
     field: "formattedEndDate",
   },
-  {
-    name: "status",
-    align: "left",
-    label: "Status",
-    field: "status",
-  },
+  // {
+  //   name: "status",
+  //   align: "left",
+  //   label: "Status",
+  //   field: "status",
+  // },
 ];
 const tableKey = ref(0);
 
@@ -779,6 +849,33 @@ const tableKey = ref(0);
 const dataTypes = ["Water Quality", "Benthic Macroinvertebrates"];
 const paramTypeOptions = ["Depth", "Parameter"];
 const geoTypesOptions = ["Watershed", "Political"];
+const occupationOptions = [
+  "Coastal Resource Manager",
+  "Federal Agency",
+  "State Agency",
+  "Local Government",
+  "Non-Profit",
+  "General Public",
+  "Private Sector",
+  "K-12 Student",
+  "Undergraduate Student",
+  "Graduate Student",
+  "Scientist",
+  "Educator",
+  "Researcher",
+  "Other",
+];
+const purposeOptions = [
+  "Research",
+  "Class Project",
+  "Data Synthesis",
+  "Regulatory",
+  "Consulting",
+  "Resource Management",
+  "Education",
+  "Outreach",
+  "Other",
+];
 const collapsed = ref(false);
 const tableCollapsed = ref(false);
 const showCityState = ref(false);
@@ -792,6 +889,7 @@ const primaryFilterPlot = ref(null);
 const filterOptionsPlot = ref([]);
 const selectedGeoType = ref("Watershed");
 const selectedDataType = ref("Water Quality");
+const selectedDataTypeForLegend = ref("Water Quality");
 const selectedParamTypePlot = ref("Depth");
 const selectedStates = ref([]);
 const selectedStations = ref([]);
@@ -800,6 +898,12 @@ const selectedWatershed = ref([]);
 const selectedSubwatershed = ref([]);
 const selectedGroups = ref([]);
 const selectedParams = ref([]);
+const selectedPurpose = ref("");
+const selectedOccupation = ref("");
+const firstName = ref("");
+const lastName = ref("");
+const email = ref("");
+const comments = ref("");
 const showQueryError = ref(false);
 const stationDetailsContainer = ref();
 const stations = ref(null);
@@ -816,6 +920,8 @@ const STATIONS = "stations";
 const samples = ref([]);
 const samplesForPlot = ref([]);
 const plotCount = ref(1);
+const downloadDialog = ref(false); //show the download modal
+const disabledDownload = ref(true); //disable the download button
 //console.log(JSON.parse(localStorage.getItem(STATIONS)));
 const isJson = (str) => {
   try {
@@ -905,6 +1011,14 @@ const formattedEndDatePlot = ref(
 const addPlot = () => {
   plotCount.value++;
 };
+const removePlot = () => {
+  if (plotCount.value > 1) {
+    plotCount.value--;
+  }
+};
+const validateEmail = (email) => {
+  return /[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.test(email);
+}
 
 const getStationsFromCMC = async (load) => {
   if (!load) {
@@ -913,6 +1027,9 @@ const getStationsFromCMC = async (load) => {
     watershedOptions.value = [];
     subwatershedOptions.value = [];
     paramOptions.value = [];
+  }
+  if(selectedDataType.value !== selectedDataTypeForLegend.value){
+    selectedDataTypeForLegend.value = selectedDataType.value;
   }
   console.log("getStationsFromCMC");
   console.log(selectedWatershed.value);
@@ -1483,12 +1600,47 @@ function getSamples(stationId) {
       console.log(response.data);
       if (response.data.length > 0) {
         samples.value = response.data;
-        getUniqueValues(response.data, selectedParamTypePlot.value);
-        filterSamples(
-          response.data,
-          selectedParamTypePlot.value,
-          primaryFilterPlot.value
-        );
+
+        if(selectedDataType.value === "Water Quality"){
+          getUniqueValues(response.data, selectedParamTypePlot.value);
+          filterSamples(
+            response.data,
+            selectedParamTypePlot.value,
+            primaryFilterPlot.value
+          );
+        }else{
+          //get count of response.data.value for each unique response.sampleDate in response.data and write to new array
+          //get unique sampleDates
+          let uniqueSampleDates = response.data.reduce((acc, sample) => {
+            if (!acc.includes(sample.dateTime)) {
+              acc.push(sample.dateTime);
+            }
+            return acc;
+          }, []);
+          console.log("uniqueSampleDates");
+          console.log(uniqueSampleDates);
+          //sum the value for each unique sampleDate and write to new array
+          let aggSamples = uniqueSampleDates.map((date) => {
+            let sumCount = response.data.reduce((acc, sample) => {
+              if (sample.dateTime === date) {
+                acc += sample.value;
+              }
+              return acc;
+            }, 0);
+            let speciesCount = response.data.reduce((acc, sample) => {
+              console.log("sample",sample);
+              if (sample.dateTime === date) {
+                acc += 1;
+              }
+              return acc;
+            }, 0);
+            return { sampleDate: date, totalCount: sumCount, speciesCount: speciesCount};
+          });
+
+          console.log("aggSamples");
+          console.log(aggSamples);
+          samplesForPlot.value = aggSamples;
+        }
       } else {
         console.log("no samples returned");
       }

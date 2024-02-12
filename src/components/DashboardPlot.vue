@@ -25,11 +25,13 @@
 <script setup>
 import { onMounted, reactive, ref, watch, toRefs } from "vue";
 import Plotly, { filterObject, get } from "plotly.js-dist";
+import { data } from "autoprefixer";
 
-const props = defineProps(["plotData", "plotIndex", "paramType"]);
+const props = defineProps(["plotData", "plotIndex", "paramType", "dataType"]);
 const { plotData } = toRefs(props);
 const { plotIndex } = toRefs(props);
 const { paramType } = toRefs(props);
+const { dataType } = toRefs(props);
 
 //const trace1 = ref([]);
 const selectedParamPlot = ref([]);
@@ -47,6 +49,17 @@ watch(
 // should only be one instance of each parameter code in the new object. selectedParamPlot as the first parameter code in the options array.
 const getUniqueParams = (data) => {
   if (data.length === 0) {
+    return;
+  }
+  console.log("getUniqueParams", data);
+  console.log("dataType", dataType.value);
+
+  if (dataType.value === "Benthic Macroinvertebrates") {
+    paramOptionsPlot.value = [
+      { value: "speciesCount", name: "Number of Species", units: "N/A" },
+      { value: "totalCount", name: "Total Count", units: "N/A" },
+    ];
+    selectedParamPlot.value = paramOptionsPlot.value[0];
     return;
   }
   console.log("getUniqueParams", data);
@@ -100,6 +113,32 @@ watch(
 );
 
 const filterSamples = (param) => {
+  let trace = {};
+  if (typeof param === "undefined") {
+    return;
+  }
+  if (dataType.value === "Benthic Macroinvertebrates") {
+    let y = [];
+    if (param.value == "speciesCount") {
+      y = plotData.value.map((sample) => sample.speciesCount);
+    } else {
+      y = plotData.value.map((sample) => sample.totalCount);
+    }
+    console.log("y", y);
+    console.log("plotData.value", plotData.value);
+    trace = {
+      x: plotData.value.map((sample) =>
+        // format the sample.DateTime as "yyyy-MM-dd HH:mm"
+        new Date(sample.sampleDate).toISOString().slice(0, 16)
+      ),
+      y: y,
+      type: "scatter",
+    };
+    //order trace by x
+    //trace.x.sort();
+    updatePlot(trace, param);
+    return;
+  }
   console.log("filterSamples", param);
   if (typeof param === "undefined") {
     return;
@@ -115,7 +154,7 @@ const filterSamples = (param) => {
     );
   }
   console.log("filteredData", filteredData);
-  const trace = {
+  trace = {
     x: filteredData.map((sample) =>
       // format the sample.DateTime as "yyyy-MM-dd HH:mm"
       new Date(sample.dateTime).toISOString().slice(0, 16)
@@ -136,6 +175,10 @@ const updatePlot = (trace, param) => {
     return;
   }
   console.log("updatePlot");
+  let ylab = param.name + " (" + param.units + ")";
+  if (dataType.value === "Benthic Macroinvertebrates") {
+    ylab = param.name;
+  }
 
   const layout = {
     yaxis: {
