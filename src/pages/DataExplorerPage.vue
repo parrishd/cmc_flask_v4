@@ -450,7 +450,7 @@
 
           <q-card-actions align="right">
             <q-btn flat label="Decline" color="primary" v-close-popup />
-            <q-btn flat label="Accept" color="primary" v-close-popup :disabled="!dataUseAcknowledgment"/>
+            <q-btn flat label="Accept" color="primary" v-close-popup :disabled="!dataUseAcknowledgment" @click="downloadData"/>
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -1020,18 +1020,7 @@ const validateEmail = (email) => {
   return /[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.test(email);
 }
 
-const getStationsFromCMC = async (load) => {
-  if (!load) {
-    stateOptions.value = [];
-    countyOptions.value = [];
-    watershedOptions.value = [];
-    subwatershedOptions.value = [];
-    paramOptions.value = [];
-  }
-  if(selectedDataType.value !== selectedDataTypeForLegend.value){
-    selectedDataTypeForLegend.value = selectedDataType.value;
-  }
-  console.log("getStationsFromCMC");
+const formPayload =  () => {
   console.log(selectedWatershed.value);
   const groupCodesCsv = selectedGroups.value
     .map(({ value }) => value)
@@ -1069,6 +1058,57 @@ const getStationsFromCMC = async (load) => {
     startDate: formattedStartDateMap.value,
     endDate: formattedEndDateMap.value,
   };
+  return payload;
+};
+
+const downloadData = () => {
+  const payload = formPayload();
+  axios
+    .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForDownload", payload)
+    .then((response) => {
+      if (response.data.length > 0) {
+        console.log("getSamplesForDownload");
+        console.log(response.data);
+        //write response.data to csv download and include headers
+
+        //let csv = Object.keys(response.data[0]).join(",") + "\n";
+        const csv = response.data.map((row) =>
+          Object.values(row).join(",")
+        )
+        csv.unshift(Object.keys(response.data[0]).join(","));
+        const csvString = csv.join("\n");
+        console.log('csvString',csvString);
+        const blob = new Blob([csvString], {
+          type: "text/csv",
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "cmc_data.csv";
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+      } else {
+        console.log("getSamplesForDownload error");
+        console.log(error);
+      }
+    })
+    .catch((error) => console.log(error));
+};
+
+const getStationsFromCMC = async (load) => {
+  if (!load) {
+    stateOptions.value = [];
+    countyOptions.value = [];
+    watershedOptions.value = [];
+    subwatershedOptions.value = [];
+    paramOptions.value = [];
+  }
+  if(selectedDataType.value !== selectedDataTypeForLegend.value){
+    selectedDataTypeForLegend.value = selectedDataType.value;
+  }
+  console.log("getStationsFromCMC");
+  const payload = await formPayload();
   console.log("getting stations from CMC");
   console.log("current time1: " + new Date().toLocaleTimeString());
   console.log(payload);
