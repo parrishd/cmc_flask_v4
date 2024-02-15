@@ -49,7 +49,7 @@
 
               <p>
                 <span class="dot-gray"></span>
-                &nbsp;Historic
+                &nbsp;Pre 2021
               </p>
             </div>
             <q-checkbox v-model="showPolygons">
@@ -73,6 +73,8 @@
 
 <script setup>
 import mapboxgl from "mapbox-gl";
+import counties from "../assets/spatial/va_counties_simple.json";
+import huc8 from "../assets/spatial/huc8_simple.json";
 import { onMounted, reactive, ref, watch, toRefs, onUnmounted } from "vue";
 
 // *** Component Props ***
@@ -231,6 +233,7 @@ const createMap = () => {
 
     if (showPolygons.value === true) {
       // re-add polygons in case check box was still on
+      //console.log("skip polygons for now");
       addPolygons();
     }
     // re-add all the markers per whatever data type is selected
@@ -288,16 +291,24 @@ const removePolygons = () => {
 // Add a data source containing GeoJSON data.
 // https://docs.mapbox.com/mapbox-gl-js/example/polygon-popup-on-click/
 const addPolygons = () => {
-  let dataUrl = "/src/assets/spatial/va_counties_simple.json";
+  console.log("addPolygons");
+  console.log("window.location.origin: " + window.location.origin);
+  //console.log(window.location.origin);
+  console.log(counties);
+  console.log(counties.value);
+  console.log(huc8.value);
+
+  let polygons = counties;
+  console.log(polygons);
   if (selectedGeoType.value === "Watershed") {
-    dataUrl = "/src/assets/spatial/huc8_simple.json";
+    polygons = huc8;
   }
   if (map.getSource("polygons")) {
     removePolygons();
   }
   map.addSource("polygons", {
     type: "geojson",
-    data: dataUrl,
+    data: polygons,
   });
 
   // Add a clear layer showing that will be used for on click events

@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   frontend:
-    image: cmc_frontend
+    image: cmc_frontend_production
     build:
       context: .
       target: production-stage

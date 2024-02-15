@@ -323,7 +323,12 @@
                 @click="getStationsFromCMC(false)"
                 color="primary"
                 style="width: 90%"
-              />
+                :loading="filtering">
+                <template v-slot:loading>
+                  <q-spinner-gears /><span class="q-ml-sm">Filtering</span>
+                </template>
+              </q-btn>
+
             </div>
             <div class="col text-center">
               <q-btn
@@ -358,7 +363,22 @@
       <q-dialog v-model="downloadDialog" >
         <q-card style="width: 800px; max-width: 90vw;" bg-grey-9 text-white>
           <q-card-section>
-            <div class="text-h6">Download</div>
+
+            <div class="row">
+              <div class="col">
+                <div class="text-h6">Download</div>
+              </div>
+              <div class="col text-right">
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="close"
+                  class="q-mr-sm"
+                  v-close-popup>
+                </q-btn>
+              </div>
+          </div>
           </q-card-section>
 
           <q-separator />
@@ -450,7 +470,12 @@
 
           <q-card-actions align="right">
             <q-btn flat label="Decline" color="primary" v-close-popup />
-            <q-btn flat label="Accept" color="primary" v-close-popup :disabled="!dataUseAcknowledgment" @click="downloadData"/>
+            <q-btn flat :loading="downloading" label="Accept" color="primary" icon="download" :disabled="!dataUseAcknowledgment" @click="downloadData">
+              <template v-slot:loading>
+                <q-spinner-gears /><span class="q-ml-sm">ACCEPT</span>
+              </template>
+            </q-btn>
+
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -922,6 +947,8 @@ const samplesForPlot = ref([]);
 const plotCount = ref(1);
 const downloadDialog = ref(false); //show the download modal
 const disabledDownload = ref(true); //disable the download button
+const downloading = ref(false); //show the spinner
+const filtering = ref(false); //show the spinner
 //console.log(JSON.parse(localStorage.getItem(STATIONS)));
 const isJson = (str) => {
   try {
@@ -1063,10 +1090,12 @@ const formPayload =  () => {
 
 const downloadData = () => {
   const payload = formPayload();
+  downloading.value = true;
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForDownload", payload)
     .then((response) => {
       if (response.data.length > 0) {
+
         console.log("getSamplesForDownload");
         console.log(response.data);
         //write response.data to csv download and include headers
@@ -1087,13 +1116,15 @@ const downloadData = () => {
         a.download = "cmc_data.csv";
         a.click();
         window.URL.revokeObjectURL(url);
-
+        downloading.value = false;
       } else {
+        downloading.value = false;
         console.log("getSamplesForDownload error");
         console.log(error);
       }
     })
     .catch((error) => console.log(error));
+
 };
 
 const getStationsFromCMC = async (load) => {
@@ -1112,6 +1143,7 @@ const getStationsFromCMC = async (load) => {
   console.log("getting stations from CMC");
   console.log("current time1: " + new Date().toLocaleTimeString());
   console.log(payload);
+  filtering.value = true;
 
   axios
     .post(
@@ -1130,6 +1162,7 @@ const getStationsFromCMC = async (load) => {
       if (load & (res.data.length > 0)) {
         localStorage.setItem(STATIONS, res_str);
       }
+      filtering.value = false;
     })
     .catch((error) => {
       if (load) {
@@ -1137,6 +1170,7 @@ const getStationsFromCMC = async (load) => {
       }
       console.log("getStationsFromCMC error");
       console.log(error);
+      filtering.value = false;
     });
   //const res = await axios.get("/src/assets/spatial/stations.json", payload);
 
@@ -1268,7 +1302,8 @@ const aggregateStations = () => {
     }
   });
   console.log("agg time3: " + new Date().toLocaleTimeString());
-
+  //sort aggregatedStations by StationCode
+  aggregatedStations.sort((a, b) => a.StationCode.localeCompare(b.StationCode));
   filteredStations.value = aggregatedStations;
 };
 
@@ -1289,6 +1324,8 @@ const getUniqueValues = (data, param, reset) => {
       if (!acc.includes(sample.depth)) {
         acc.push(sample.depth);
       }
+      //sort acc
+      acc.sort((a, b) => a - b);
       return acc;
     }, []);
   }

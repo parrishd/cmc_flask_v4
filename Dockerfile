@@ -8,6 +8,7 @@ COPY . .
 
 # build stage
 FROM develop-stage as build-stage
+#WORKDIR /app
 RUN yarn
 RUN quasar build
 
