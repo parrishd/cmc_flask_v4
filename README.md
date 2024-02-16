@@ -121,5 +121,5 @@ docker compose -f docker-compose.prod.yaml up
 # to rebuild production container
 
 ```bash
- docker compose -f docker-compose.prod.yaml up --build
+ docker compose -f docker-compose.prod.yaml up --build --detach
 ```

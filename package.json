@@ -15,11 +15,11 @@
     "@quasar/cli": "^2.3.0",
     "@quasar/extras": "^1.16.9",
     "axios": "^0.21.1",
+    "chart.js": "^4.3.0",
     "mapbox-gl": "^2.10.0",
     "pinia": "^2.0.11",
     "plotly.js-dist": "2.21.0",
-    "chart.js": "^4.3.0",
-    "quasar": "^2.14.3",
+    "quasar": "^2.14.4",
     "vue": "3",
     "vue-router": "4"
   },
