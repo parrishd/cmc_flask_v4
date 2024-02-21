@@ -123,3 +123,6 @@ docker compose -f docker-compose.prod.yaml up
 ```bash
  docker compose -f docker-compose.prod.yaml up --build --detach
 ```
+
+# to open the terminal on the docker container
+docker exec -it mycontainer sh
