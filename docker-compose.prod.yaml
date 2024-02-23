@@ -8,7 +8,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    # volumes:
-    #  - ./:/usr/share/nginx/html
-    #  - /etc/ssl/certs/STAR_vims_edu.crt:/etc/nginx/ssl/STAR_vims_edu.crt
-    #  - /etc/ssl/private/server.key:/etc/nginx/ssl/server.key
+    volumes:
+      - /etc/ssl/certs/STAR_vims_edu.crt:/etc/nginx/ssl/STAR_vims_edu.crt
+      - /etc/ssl/private/server.key:/etc/nginx/ssl/server.key

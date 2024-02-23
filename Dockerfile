@@ -8,7 +8,7 @@ COPY . .
 
 # build stage
 FROM develop-stage as build-stage
-#WORKDIR /app
+WORKDIR /app
 RUN yarn
 RUN quasar build
 
@@ -16,15 +16,9 @@ RUN quasar build
 FROM nginx:1.25.3-alpine as production-stage
 COPY --from=build-stage /app/dist/spa /usr/share/nginx/html
 
-# # Add nginx config
-# COPY nginx.conf /temp/prod.conf
-# RUN envsubst /app < /temp/prod.conf > /etc/nginx/conf.d/default.conf
-
-# remove the default conf
-RUN rm /etc/nginx/conf.d/default.conf
-
-#  copy the nginx.conf in our filesystem into the image filesystem
-COPY nginx.conf /etc/nginx/conf.d
+# Add nginx config
+COPY nginx.conf /temp/prod.conf
+RUN envsubst /app < /temp/prod.conf > /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 EXPOSE 443
