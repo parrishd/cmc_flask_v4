@@ -1276,6 +1276,8 @@ const getStationsFromCMC = async (load) => {
       console.log(response.data);
       if (response.data.length > 0) {
         paramOptions.value = response.data;
+        //order paramOptions by name
+        paramOptions.value.sort((a, b) => a.name.localeCompare(b.name));
         showQueryError.value = false;
       } else {
         showQueryError.value = true;

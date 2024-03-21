@@ -249,7 +249,7 @@ const filterSamples = (param, param2) => {
   console.log("param2", param2);
   let trace = {};
   let trace2 = {};
-  if (typeof param === "undefined") {
+  if (typeof param === "undefined" || param.length === 0) {
     return;
   }
   if (dataType.value === "Benthic Macroinvertebrates") {
@@ -275,14 +275,13 @@ const filterSamples = (param, param2) => {
     updatePlot(trace, param);
     return;
   }
-  if (typeof param === "undefined") {
-    return;
-  }
   let filteredData = [];
   let filteredData2 = [];
   if (paramType.value === "Sample Depth") {
-    console.log("param2", param2);
+    //console.log("param2", param2);
     if (param2 === "" || typeof param2 === "undefined") {
+      console.log("param", param);
+      console.log("param.value", param.value);
       let searchArray = param.value.split(",");
       filteredData = plotData.value.filter((sample) =>
         searchArray.includes(sample.parameterCode)
