@@ -283,15 +283,18 @@ const filterSamples = (param, param2) => {
   if (paramType.value === "Sample Depth") {
     console.log("param2", param2);
     if (param2 === "" || typeof param2 === "undefined") {
-      filteredData = plotData.value.filter(
-        (sample) => sample.parameterCode === param.value
+      let searchArray = param.value.split(",");
+      filteredData = plotData.value.filter((sample) =>
+        searchArray.includes(sample.parameterCode)
       );
     } else {
-      filteredData = plotData.value.filter(
-        (sample) => sample.parameterCode === param.value
+      let searchArray = param.value.split(",");
+      let searchArray2 = param2.value.split(",");
+      filteredData = plotData.value.filter((sample) =>
+        searchArray.includes(sample.parameterCode)
       );
-      filteredData2 = plotData.value.filter(
-        (sample) => sample.parameterCode === param2.value
+      filteredData2 = plotData.value.filter((sample) =>
+        searchArray2.includes(sample.parameterCode)
       );
     }
   } else {
