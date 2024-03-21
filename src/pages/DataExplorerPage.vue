@@ -1608,6 +1608,7 @@ function clearFilters() {
   selectedParams.value = [];
   formattedStartDateMap.value = date.formatDate(loadMinDate.value, dateFormat);
   formattedEndDateMap.value = date.formatDate(loadMaxDate.value, dateFormat);
+  stations.value = JSON.parse(localStorage.getItem(STATIONS));
   getStationsFromCMC(true);
 }
 
