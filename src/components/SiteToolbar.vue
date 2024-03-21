@@ -20,7 +20,7 @@
           <a href="/about">ABOUT</a>
           <a href="/resources">RESOURCES</a>
           <a href="/contact">CONTACT</a>
-          <a href="https://cmc.vims.edu/admin">DATA HUB</a>
+          <a href="https://cmc.vims.edu/admin">MANAGE DATA</a>
 
           <q-btn-dropdown
             v-if="loggedIn"

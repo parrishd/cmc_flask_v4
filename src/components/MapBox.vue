@@ -44,12 +44,12 @@
             <div style="padding-left: 30px; padding-top: 5px">
               <p>
                 <span class="dot-purple"></span>
-                &nbsp;Current
+                &nbsp;Active
               </p>
 
               <p>
                 <span class="dot-gray"></span>
-                &nbsp;Pre 2021
+                &nbsp;Inactive
               </p>
             </div>
             <q-checkbox v-model="showPolygons">

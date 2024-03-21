@@ -2,16 +2,16 @@ version: "3.8"
 services:
  frontend:
   image: cmc_frontend
-  build: 
+  build:
     context: .
     target: "develop-stage"
-  ports: 
+  ports:
     - 8080:8080
-  # volumes:
-  #   - .:/app
-  # command: /bin/sh -c "yarn && quasar upgrade -i && quasar dev"
+  volumes:
+    - .:/app
+  command: /bin/sh -c "yarn && quasar upgrade -i && quasar dev"
 
-  
-      
 
-    
+
+
+

@@ -3,18 +3,22 @@
     <div class="q-px-xl q-mx-xl">
       <!-- stats bar -->
       <div class="row q-mt-lg viewing-stats">
-        <div class="col-2">Currently Viewing:</div>
+        <!--<div class="col-1">Currently Viewing:</div>-->
         <div class="col">
           <q-icon class="fa-solid fa-file-lines q-mr-sm" size="32px" />
-          {{ sampleCount }} Samples
+          <span class='vertical-middle' style="font-size:18px">{{ sampleCount }} Samples</span>
         </div>
-        <div class="col q-ml-md">
-          <q-icon class="fa-solid fa-building q-mr-sm" size="32px" />
-          {{ organizationsCount }} Organizations
+        <div class="col">
+          <q-icon class="fa-solid fa-building  q-mr-sm" size="32px" />
+          <span class='vertical-middle' style="font-size:18px">{{ organizationsCount }} Organizations</span>
         </div>
-        <div class="col q-ml-md">
-          <q-icon class="fa-solid fa-location-dot" size="32px" />
-          {{ stationsCount }} Stations
+        <div class="col">
+          <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" />
+          <span class='vertical-middle' style="font-size:18px">{{ stationsCount }} Total Stations</span>
+        </div>
+        <div class="col">
+          <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" style="color:#20c" />
+          <span class='vertical-middle' style="font-size:18px">{{ activeStationsCount }} Active Stations</span>
         </div>
         <div class="col text-right">
           <q-icon class="fa-solid fa-circle-info" size="18px">
@@ -147,13 +151,18 @@
               <q-select
                 label="States (pick all that apply)"
                 v-model="selectedStates"
-                :options="stateOptions"
+                :options="stateFilteredOptions"
                 option-value="value"
                 option-label="value"
                 multiple
                 outlined
                 dense
+                use-input
+                input-debounce="0"
+                clearable
+                @filter="(val, update, abort) => filterFn(val, update, abort, 'state')"
               ></q-select>
+
             </div>
           </div>
           <div v-if="showCityState" class="row q-mt-md">
@@ -161,12 +170,16 @@
               <q-select
                 label="City/County (pick all that apply)"
                 v-model="selectedCounties"
-                :options="countyOptions"
+                :options="countyFilteredOptions"
                 option-value="value"
                 option-label="value"
                 multiple
                 outlined
                 dense
+                use-input
+                input-debounce="0"
+                clearable
+                @filter="(val, update, abort) => filterFn(val, update, abort, 'county')"
               ></q-select>
             </div>
           </div>
@@ -175,12 +188,16 @@
               <q-select
                 label="Watersheds (pick all that apply)"
                 v-model="selectedWatershed"
-                :options="watershedOptions"
+                :options="watershedFilteredOptions"
                 option-value="value"
                 option-label="value"
                 multiple
                 outlined
                 dense
+                use-input
+                input-debounce="0"
+                clearable
+                @filter="(val, update, abort) => filterFn(val, update, abort, 'watershed')"
               ></q-select>
             </div>
           </div>
@@ -189,12 +206,16 @@
               <q-select
                 label="Subwatersheds (pick all that apply)"
                 v-model="selectedSubwatershed"
-                :options="subwatershedOptions"
+                :options="subwatershedFilteredOptions"
                 option-value="value"
                 option-label="value"
                 multiple
                 outlined
                 dense
+                use-input
+                input-debounce="0"
+                clearable
+                @filter="(val, update, abort) => filterFn(val, update, abort, 'subwatershed')"
               ></q-select>
             </div>
           </div>
@@ -204,12 +225,16 @@
               <q-select
                 label="Groups (pick all that apply)"
                 v-model="selectedGroups"
-                :options="groupOptions"
+                :options="groupFilteredOptions"
                 option-value="value"
                 option-label="name"
                 multiple
                 outlined
                 dense
+                use-input
+                input-debounce="0"
+                clearable
+                @filter="(val, update, abort) => filterFn(val, update, abort, 'group')"
               ></q-select>
             </div>
           </div>
@@ -219,12 +244,16 @@
               <q-select
                 label="Stations (pick all that apply)"
                 v-model="selectedStations"
-                :options="stationIdOptions"
+                :options="stationIdFilteredOptions"
                 option-value="value"
-                option-label="value"
+                option-label="name"
                 multiple
                 outlined
                 dense
+                use-input
+                input-debounce="0"
+                clearable
+                @filter="(val, update, abort) => filterFn(val, update, abort, 'station')"
               ></q-select>
             </div>
           </div>
@@ -234,12 +263,16 @@
               <q-select
                 label="Parameters (pick all that apply)"
                 v-model="selectedParams"
-                :options="paramOptions"
+                :options="paramFilteredOptions"
                 option-value="value"
                 option-label="name"
                 multiple
                 outlined
                 dense
+                use-input
+                input-debounce="0"
+                clearable
+                @filter="(val, update, abort) => filterFn(val, update, abort, 'parameter')"
               ></q-select>
             </div>
           </div>
@@ -854,25 +887,13 @@ const columns = [
 ];
 const tableKey = ref(0);
 
-//const stateOptions = computed(() => {
-//  return [...new Set(filteredStations.value.map((s) => s.State))].sort();
-//});
-//const countyOptions = computed(() => {
-//  return [...new Set(filteredStations.value.map((s) => s.CityCounty))].sort();
-//});
-//const watershedOptions = computed(() => {
-//return watersheds as array sorted
-//  return [...new Set(watersheds.value.map((s) => s.value))].sort();
-//});
-//const subwatershedOptions = computed(() => {
-//  return [...new Set(filteredStations.value.map((s) => s.Subwatershed))].sort();
-//});
+
 
 /****************************
  * Ref/UI Variables
  ***************************/
 const dataTypes = ["Water Quality", "Benthic Macroinvertebrates"];
-const paramTypeOptions = ["Depth", "Parameter"];
+const paramTypeOptions = ["Sample Depth", "Parameter"];
 const geoTypesOptions = ["Watershed", "Political"];
 const occupationOptions = [
   "Coastal Resource Manager",
@@ -915,7 +936,7 @@ const filterOptionsPlot = ref([]);
 const selectedGeoType = ref("Watershed");
 const selectedDataType = ref("Water Quality");
 const selectedDataTypeForLegend = ref("Water Quality");
-const selectedParamTypePlot = ref("Depth");
+const selectedParamTypePlot = ref("Sample Depth");
 const selectedStates = ref([]);
 const selectedStations = ref([]);
 const selectedCounties = ref([]);
@@ -932,14 +953,22 @@ const comments = ref("");
 const showQueryError = ref(false);
 const stationDetailsContainer = ref();
 const stations = ref(null);
-const paramOptions = ref([]);
+
 const paramsForMapFilter = ref([]);
 const loadMaxDate = ref(new Date());
 const loadMinDate = ref(new Date("11/1/1995"));
 const watershedOptions = ref([]);
+const watershedFilteredOptions = ref([]);
 const subwatershedOptions = ref([]);
+const subwatershedFilteredOptions = ref([]);
 const stateOptions = ref([]);
+const stateFilteredOptions = ref([]);
 const countyOptions = ref([]);
+const countyFilteredOptions = ref([]);
+const groupFilteredOptions = ref([]);
+const stationIdFilteredOptions = ref([]);
+const paramOptions = ref([]);
+const paramFilteredOptions = ref([]);
 const dateFormat = "YYYY-MM-DD";
 const STATIONS = "stations";
 const samples = ref([]);
@@ -1029,10 +1058,54 @@ const formattedStartDatePlot = ref(
 const formattedEndDatePlot = ref(
   date.formatDate(new Date(props.endDatePlot), dateFormat)
 );
-
 /****************************
  * Functions
  ***************************/
+
+ const filterFn = (val, update, abort, type) =>{
+  if (val === '') {
+
+    update(() => {
+      if(type === 'watershed'){
+        watershedFilteredOptions.value = watershedOptions.value
+      }else if(type === 'subwatershed'){
+        subwatershedFilteredOptions.value = subwatershedOptions.value
+      }else if(type === 'state'){
+        stateFilteredOptions.value = stateOptions.value
+      }else if(type === 'county'){
+        countyFilteredOptions.value = countyOptions.value
+      }else if(type === 'group'){
+        groupFilteredOptions.value = groupOptions.value
+      }else if(type === 'station'){
+        stationIdFilteredOptions.value = stationIdOptions.value
+      }else if(type === 'parameter'){
+        paramFilteredOptions.value = paramOptions.value
+      }
+
+    })
+    return
+  }
+
+  update(() => {
+    const needle = val.toLowerCase()
+    if(type === 'watershed'){
+      watershedFilteredOptions.value = watershedOptions.value.filter(v => v.value.toLowerCase().indexOf(needle) > -1)
+    }else if(type === 'subwatershed'){
+      subwatershedFilteredOptions.value = subwatershedOptions.value.filter(v => v.value.toLowerCase().indexOf(needle) > -1)
+    }else if(type === 'state'){
+      stateFilteredOptions.value = stateOptions.value.filter(v => v.value.toLowerCase().indexOf(needle) > -1)
+    }else if(type === 'county'){
+      countyFilteredOptions.value = countyOptions.value.filter(v => v.value.toLowerCase().indexOf(needle) > -1)
+    }else if(type === 'group'){
+      groupFilteredOptions.value = groupOptions.value.filter(v => v.name.toLowerCase().indexOf(needle) > -1)
+    }else if(type === 'station'){
+      stationIdFilteredOptions.value = stationIdOptions.value.filter(v => v.name.toLowerCase().indexOf(needle) > -1)
+    }else if(type === 'parameter'){
+      paramFilteredOptions.value = paramOptions.value.filter(v => v.name.toLowerCase().indexOf(needle) > -1)
+    }
+
+  })
+}
 
 //add a plot to the page
 const addPlot = () => {
@@ -1199,7 +1272,8 @@ const getStationsFromCMC = async (load) => {
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchParametersForMap", payload)
     .then((response) => {
-      console.log("paramOptions.value");
+      console.log("paramOptions.value", response.data);
+      console.log(response.data);
       if (response.data.length > 0) {
         paramOptions.value = response.data;
         showQueryError.value = false;
@@ -1319,7 +1393,7 @@ const getUniqueValues = (data, param, reset) => {
       }
       return acc;
     }, []);
-  } else if (param == "Depth") {
+  } else if (param == "Sample Depth") {
     uniqueParams = data.reduce((acc, sample) => {
       if (!acc.includes(sample.depth)) {
         acc.push(sample.depth);
@@ -1381,8 +1455,10 @@ const groupOptions = computed(() => {
 //create stationIdOptions from filteredStations with value and labl as StationCode
 const stationIdOptions = computed(() => {
   if (filteredStations.value !== null && filteredStations.value.length > 0) {
+    console.log("filteredStations.value", filteredStations.value);
     const options = filteredStations.value.map((s) => ({
       value: s.StationCode,
+      name: s.StationCode.split(".")[1] + " (" + s.StationCode.split(".")[0] + ")",
     }));
 
     //sort fi
@@ -1400,23 +1476,6 @@ const showStationDetails = computed(() => {
   return Object.keys(selectedStationDetails.value).length > 0;
 });
 
-// const stationIdOptions = computed(() => {
-//   return [...new Set(filteredStations.value.map((s) => s.StationCode))].sort(
-//     (a, b) => a - b
-//   );
-// });
-
-//const paramOptions = ref(["WT.1", "PH.1", "DO.1"]);
-
-//computed(() => {
-//   const allParameters = filteredStations.value.map((s) =>
-//     s.ParameterCodes.split(",").map((param) => param.trim())
-//   );
-//   const flattenedParamCodes = allParameters.flat();
-
-//   return [...new Set(flattenedParamCodes)].sort();
-// });
-
 const sampleCount = computed(() => {
   const sampleSum = filteredStations.value.reduce((sum, s) => {
     return sum + (s.SamplesCount || 0);
@@ -1430,6 +1489,10 @@ const organizationsCount = computed(() => {
 
 const stationsCount = computed(() => {
   return new Intl.NumberFormat().format(stationIdOptions.value.length);
+});
+
+const activeStationsCount = computed(() => {
+  return new Intl.NumberFormat().format(filteredStations.value.filter(v=>v.Status=="Current").length);
 });
 
 /***************************
@@ -1726,12 +1789,9 @@ function getSamples(stationId) {
 }
 
 function filterSamples(data, paramType, value) {
-  console.log("filterSamples");
-  console.log(data);
-  console.log(value);
   if (paramType == "Parameter") {
     samplesForPlot.value = data.filter((s) => s.parameterCode === value);
-  } else if (paramType == "Depth") {
+  } else if (paramType == "Sample Depth") {
     samplesForPlot.value = data.filter((s) => s.depth === value);
   }
 }
@@ -1785,52 +1845,5 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 @import "src/css/app.scss";
-.viewing-stats {
-  border: 2px solid $vims-medium-blue;
-  padding: 24px;
-  color: $vims-medium-blue;
-  align-items: center;
 
-  div {
-    font-size: 16px;
-    font-weight: bold;
-  }
-}
-
-.results-title {
-  align-items: center;
-}
-.title-font {
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.result-details-container {
-  border: 2px solid $vims-medium-blue;
-  padding: 16px;
-}
-.result-details-header {
-  background-color: $vims-medium-blue;
-  align-items: center;
-  color: white;
-}
-.result-details-header-text-1 {
-  font-size: 24px;
-  font-weight: 600;
-}
-.result-details-header-text-2 {
-  color: #dddddd;
-  font-size: 18px;
-  font-weight: 500;
-}
-
-.tooltip-header {
-  font-size: 24px;
-  font-weight: 500;
-  color: $vims-medium-blue;
-}
-.tooltip-text {
-  font-size: 16px;
-  color: $vims-dark-gray;
-}
 </style>
