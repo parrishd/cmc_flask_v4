@@ -311,6 +311,7 @@ const filterSamples = (param, param2) => {
       type: "scatter",
       name: param.name,
       marker: { size: 12 },
+      showlegend: true,
     };
   }
   if (filteredData2.length > 0) {
@@ -325,6 +326,7 @@ const filterSamples = (param, param2) => {
       name: param2.name,
       yaxis: "y2",
       marker: { size: 12 },
+      showlegend: true,
     };
   }
   console.log("trace", trace);
@@ -398,7 +400,7 @@ const updatePlot = (trace, param, trace2, param2) => {
       t: 15,
       pad: 4,
     },
-    showLegend: true,
+    showlegend: true,
     legend: { y: 1, x: 1.1, bgcolor: "transparent" }, //
   };
   if (showSecondParam.value) {
