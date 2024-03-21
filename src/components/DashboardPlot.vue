@@ -329,7 +329,7 @@ const filterSamples = (param, param2) => {
   }
   console.log("trace", trace);
   if (showSecondParam.value) {
-    updatePlot(trace, param, trace2);
+    updatePlot(trace, param, trace2, param2);
     return;
   } else {
     updatePlot(trace, param);
@@ -337,11 +337,12 @@ const filterSamples = (param, param2) => {
   }
 };
 
-const updatePlot = (trace, param, trace2) => {
-  console.log("updatePlot");
-  console.log("trace", trace);
-  console.log("trace2", trace2);
-  console.log("param", param);
+const updatePlot = (trace, param, trace2, param2) => {
+  //console.log("updatePlot");
+  //console.log("trace", trace);
+  //console.log("trace2", trace2);
+  //console.log("param", param);
+  //console.log("param", param2);
   if (trace.length === 0) {
     return;
   }
@@ -353,7 +354,11 @@ const updatePlot = (trace, param, trace2) => {
   if (dataType.value === "Benthic Macroinvertebrates") {
     ylab = param.name;
   }
-
+  let ylab2 = "";
+  let orientation = "v";
+  if (typeof param2 !== "undefined") {
+    ylab2 = param2.name + " (" + param2.units + ")";
+  }
   const layout = {
     yaxis: {
       title: {
@@ -369,7 +374,7 @@ const updatePlot = (trace, param, trace2) => {
     },
     yaxis2: {
       title: {
-        text: "test2",
+        text: ylab2,
 
         font: {
           size: 20,
@@ -393,6 +398,8 @@ const updatePlot = (trace, param, trace2) => {
       t: 15,
       pad: 4,
     },
+    showLegend: true,
+    legend: { y: 1, x: 1.1, bgcolor: "transparent" }, //
   };
   if (showSecondParam.value) {
     console.log("layout", layout);
