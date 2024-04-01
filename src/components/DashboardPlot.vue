@@ -32,7 +32,7 @@
           </q-tooltip>
         </q-icon>
       </div>
-      <div class="col-3 text-right">
+      <div class="col-4 text-right">
         <q-btn
           color="primary"
           class="full-width"
@@ -76,7 +76,8 @@
           </q-tooltip>
         </q-icon>
       </div>
-      <div class="col-3 text-right">
+
+      <div class="col-4 text-right">
         <q-btn
           color="teal"
           class="full-width"
@@ -90,6 +91,21 @@
     <div class="row q-mt-lg">
       <div class="col-12">
         <div :id="`chart-${plotIndex}`" class="chart"></div>
+      </div>
+    </div>
+    <div class="row q-mt-lg">
+      <div class="col q-ml-xl">
+        <q-btn
+          color="primary"
+          icon="fas fa-download"
+          @click="downloadPlot(`chart-${plotIndex}`)"
+        >
+          <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
+            <div class="q-pa-md" style="max-width: 360px">
+              <div class="q-mt-sm tooltip-text">Download Plot as Image</div>
+            </div>
+          </q-tooltip>
+        </q-btn>
       </div>
     </div>
   </div>
@@ -120,7 +136,14 @@ watch(
     getUniqueParams(newVal);
   }
 );
-
+const downloadPlot = (plot) => {
+  Plotly.downloadImage(plot, {
+    filename: "cmc-plot",
+    format: "png",
+    width: 1000,
+    height: 400,
+  });
+};
 const addParameter = () => {
   showSecondParam.value = !showSecondParam.value;
   console.log("addParameter", showSecondParam.value);
@@ -245,12 +268,42 @@ watch(
   }
 );
 
+function linearRegression(x, y) {
+  var lr = {};
+  var n = y.length;
+  var sum_x = 0;
+  var sum_y = 0;
+  var sum_xy = 0;
+  var sum_xx = 0;
+  var sum_yy = 0;
+
+  for (var i = 0; i < y.length; i++) {
+    sum_x += x[i];
+    sum_y += y[i];
+    sum_xy += x[i] * y[i];
+    sum_xx += x[i] * x[i];
+    sum_yy += y[i] * y[i];
+  }
+
+  lr["sl"] = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x);
+  lr["off"] = (sum_y - lr.sl * sum_x) / n;
+  lr["r2"] = Math.pow(
+    (n * sum_xy - sum_x * sum_y) /
+      Math.sqrt((n * sum_xx - sum_x * sum_x) * (n * sum_yy - sum_y * sum_y)),
+    2
+  );
+
+  return lr;
+}
+
 const filterSamples = (param, param2) => {
   console.log("filterSamples", param);
   console.log("param", param);
   console.log("param2", param2);
   let trace = {};
   let trace2 = {};
+  let fit = {};
+  let fit2 = {};
   if (typeof param === "undefined" || param.length === 0) {
     return;
   }
@@ -299,11 +352,24 @@ const filterSamples = (param, param2) => {
       );
     }
   } else {
-    filteredData = plotData.value.filter(
-      (sample) => sample.depth === param.value
-    );
+    if (param2 === "" || typeof param2 === "undefined") {
+      console.log("param", param);
+      console.log("param.value", param.value);
+      //let searchArray = param.value.split(",");
+      filteredData = plotData.value.filter(
+        (sample) => sample.depth === param.value
+      );
+    } else {
+      //let searchArray = param.value.split(",");
+      //let searchArray2 = param2.value.split(",");
+      filteredData = plotData.value.filter(
+        (sample) => sample.depth === param.value
+      );
+      filteredData2 = plotData.value.filter(
+        (sample) => sample.depth === param2.value
+      );
+    }
   }
-  console.log("filteredData", filteredData);
   if (filteredData.length > 0) {
     trace = {
       x: filteredData.map((sample) =>
@@ -317,6 +383,29 @@ const filterSamples = (param, param2) => {
       marker: { size: 12 },
       showlegend: true,
     };
+    var x_data_64 = filteredData.map((sample) =>
+      // format the sample.DateTime as "yyyy-MM-dd HH:mm"
+      new Date(sample.dateTime).toISOString().slice(0, 16)
+    );
+    // convert x_data to integers
+    x_data_64 = x_data_64.map((x) => new Date(x).getTime());
+    var y_data_64 = trace.y;
+    var lr = linearRegression(x_data_64, y_data_64);
+    //console.log(lr);
+
+    var fit_from = Math.min(...x_data_64);
+    var fit_to = Math.max(...x_data_64);
+
+    fit = {
+      x: [fit_from, fit_to],
+      y: [fit_from * lr.sl + lr.off, fit_to * lr.sl + lr.off],
+      mode: "lines",
+      type: "scatter",
+      name: param.name + " trend", //"R^2 = ".concat((Math.round(lr.r2 * 10000) / 10000).toString()),
+      visible: "legendonly",
+    };
+
+    //console.log(fit);
   }
   if (filteredData2.length > 0) {
     trace2 = {
@@ -332,18 +421,40 @@ const filterSamples = (param, param2) => {
       marker: { size: 12 },
       showlegend: true,
     };
+    var x_data_64 = filteredData2.map((sample) =>
+      // format the sample.DateTime as "yyyy-MM-dd HH:mm"
+      new Date(sample.dateTime).toISOString().slice(0, 16)
+    );
+    // convert x_data to integers
+    x_data_64 = x_data_64.map((x) => new Date(x).getTime());
+    var y_data_64 = trace2.y;
+    var lr = linearRegression(x_data_64, y_data_64);
+    //console.log(lr);
+
+    var fit_from = Math.min(...x_data_64);
+    var fit_to = Math.max(...x_data_64);
+
+    fit2 = {
+      x: [fit_from, fit_to],
+      y: [fit_from * lr.sl + lr.off, fit_to * lr.sl + lr.off],
+      mode: "lines",
+      type: "scatter",
+      yaxis: "y2",
+      name: param2.name + " trend", //"R^2 = ".concat((Math.round(lr.r2 * 10000) / 10000).toString()),
+      visible: "legendonly",
+    };
   }
   console.log("trace", trace);
   if (showSecondParam.value) {
-    updatePlot(trace, param, trace2, param2);
+    updatePlot(trace, param, fit, trace2, param2, fit2);
     return;
   } else {
-    updatePlot(trace, param);
+    updatePlot(trace, param, fit);
     return;
   }
 };
 
-const updatePlot = (trace, param, trace2, param2) => {
+const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
   //console.log("updatePlot");
   //console.log("trace", trace);
   //console.log("trace2", trace2);
@@ -365,26 +476,6 @@ const updatePlot = (trace, param, trace2, param2) => {
   if (typeof param2 !== "undefined") {
     ylab2 = param2.name + " (" + param2.units + ")";
   }
-
-  var updatemenus = [
-    {
-      buttons: [
-        {
-          args: ["type", "surface"],
-          label: "3D Surface",
-          method: "restyle",
-        },
-      ],
-      direction: "left",
-      pad: { r: 1, t: 10 },
-      showactive: true,
-      type: "buttons",
-      x: 1,
-      xanchor: "right",
-      y: 100.1,
-      yanchor: "top",
-    },
-  ];
 
   const layout = {
     yaxis: {
@@ -426,15 +517,26 @@ const updatePlot = (trace, param, trace2, param2) => {
       pad: 4,
     },
     showlegend: true,
-    legend: { y: 1, x: 1.1, bgcolor: "transparent" },
-    updatemenus: updatemenus, //
+    //add padding to top of legend
+    colorway: ["#1f77b4", "#1f77b4", "#ff7f0e", "#ff7f0e"],
+
+    legend: {
+      y: 0.85,
+      x: 1.1,
+      bgcolor: "transparent",
+      //tracegroupgap: 100,
+    },
   };
   if (showSecondParam.value) {
     console.log("layout", layout);
-    Plotly.newPlot("chart-" + plotIndex.value, [trace, trace2], layout);
+    Plotly.newPlot(
+      "chart-" + plotIndex.value,
+      [trace, fit, trace2, fit2],
+      layout
+    );
     return;
   }
-  Plotly.newPlot("chart-" + plotIndex.value, [trace], layout);
+  Plotly.newPlot("chart-" + plotIndex.value, [trace, fit], layout);
 };
 
 onMounted(() => {

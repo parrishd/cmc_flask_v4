@@ -1,27 +1,26 @@
 <template>
   <q-page class="q-px-none q-mx-none">
     <div class="q-px-xl q-mx-xl">
+
       <!-- stats bar -->
       <div class="row q-mt-lg viewing-stats">
         <!--<div class="col-1">Currently Viewing:</div>-->
-        <div class="col">
+        <div class="col-12 col-md-3">
           <q-icon class="fa-solid fa-file-lines q-mr-sm" size="32px" />
-          <span class='vertical-middle' style="font-size:18px">{{ sampleCount }} Samples</span>
+          <span class='vertical-middle' style="font-size:20px">{{ sampleCount }} Samples</span>
         </div>
-        <div class="col">
-          <q-icon class="fa-solid fa-building  q-mr-sm" size="32px" />
-          <span class='vertical-middle' style="font-size:18px">{{ organizationsCount }} Organizations</span>
+        <div class="col-12 col-md-3">
+          <q-icon class="fa-solid fa-building q-mr-sm" size="32px" />
+          <span class='vertical-middle' style="font-size:20px">{{ organizationsCount }} Organizations</span>
         </div>
-        <div class="col">
+        <div class="col-12 col-md-3">
           <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" />
-          <span class='vertical-middle' style="font-size:18px">{{ stationsCount }} Total Stations</span>
+          <span class='vertical-middle' style="font-size:20px">{{ stationsCount }} Total Stations</span>
         </div>
-        <div class="col">
+        <div class="col-12 col-md-3">
           <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" style="color:#20c" />
-          <span class='vertical-middle' style="font-size:18px">{{ activeStationsCount }} Active Stations</span>
-        </div>
-        <div class="col text-right">
-          <q-icon class="fa-solid fa-circle-info" size="18px">
+          <span class='vertical-middle' style="font-size:20px">{{ activeStationsCount }} Active Stations</span>
+          <q-icon class="fa-solid fa-circle-info q-ml-xl" size="22px">
             <q-tooltip
               anchor="bottom left"
               self="top left"
@@ -123,7 +122,11 @@
               </q-icon>
             </div>
           </div>
-
+          <div class="row">
+            <div class="col">
+              <q-label style='color:teal' class="text-h6">Data Layers</q-label>
+            </div>
+          </div>
           <div class="row q-mt-md">
             <div class="col">
               <q-select
@@ -131,6 +134,7 @@
                 v-model="selectedDataType"
                 :options="dataTypes"
                 outlined
+                color="teal"
                 dense
               ></q-select>
             </div>
@@ -142,8 +146,14 @@
                 v-model="selectedGeoType"
                 :options="geoTypesOptions"
                 outlined
+                color="teal"
                 dense
               ></q-select>
+            </div>
+          </div>
+          <div class="row q-mt-md">
+            <div class="col">
+              <q-label style='color:teal' class="text-h6">Filters</q-label>
             </div>
           </div>
           <div v-if="showCityState" class="row q-mt-md">
@@ -152,16 +162,21 @@
                 label="States (pick all that apply)"
                 v-model="selectedStates"
                 :options="stateFilteredOptions"
+                ref="qselectState"
                 option-value="value"
                 option-label="value"
                 multiple
                 outlined
                 dense
                 use-input
+                color="teal"
                 input-debounce="0"
-                clearable
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'state')"
-              ></q-select>
+              >
+                <template v-slot:append>
+                  <q-icon name="close" v-show="selectedStates.length > 0" @click="selectedStates =[]" class="cursor-pointer" />
+                </template>
+            </q-select>
 
             </div>
           </div>
@@ -171,16 +186,22 @@
                 label="City/County (pick all that apply)"
                 v-model="selectedCounties"
                 :options="countyFilteredOptions"
+                ref="qselectCounty"
                 option-value="value"
                 option-label="value"
                 multiple
                 outlined
                 dense
                 use-input
+                color="teal"
                 input-debounce="0"
-                clearable
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'county')"
-              ></q-select>
+              >
+                <template v-slot:append>
+                  <q-icon name="close" v-show="selectedCounties.length > 0" @click="selectedCounties =[]" class="cursor-pointer" />
+                </template>
+              </q-select>
+
             </div>
           </div>
           <div v-if="showWatersheds" class="row q-mt-md">
@@ -189,16 +210,21 @@
                 label="Watersheds (pick all that apply)"
                 v-model="selectedWatershed"
                 :options="watershedFilteredOptions"
+                ref="qselectWatershed"
                 option-value="value"
                 option-label="value"
                 multiple
                 outlined
                 dense
                 use-input
+                color="teal"
                 input-debounce="0"
-                clearable
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'watershed')"
-              ></q-select>
+              >
+                <template v-slot:append>
+                  <q-icon name="close" v-show="selectedWatershed.length > 0" @click="selectedWatershed =[]" class="cursor-pointer" />
+                </template>
+              </q-select>
             </div>
           </div>
           <div v-if="showWatersheds" class="row q-mt-md">
@@ -206,6 +232,7 @@
               <q-select
                 label="Subwatersheds (pick all that apply)"
                 v-model="selectedSubwatershed"
+                ref="qselectSubwatershed"
                 :options="subwatershedFilteredOptions"
                 option-value="value"
                 option-label="value"
@@ -213,10 +240,14 @@
                 outlined
                 dense
                 use-input
+                color="teal"
                 input-debounce="0"
-                clearable
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'subwatershed')"
-              ></q-select>
+              >
+                <template v-slot:append>
+                  <q-icon name="close" v-show="selectedSubwatershed.length > 0" @click="selectedSubwatershed =[]" class="cursor-pointer" />
+                </template>
+            </q-select>
             </div>
           </div>
 
@@ -226,16 +257,21 @@
                 label="Groups (pick all that apply)"
                 v-model="selectedGroups"
                 :options="groupFilteredOptions"
+                ref="qselectGroup"
                 option-value="value"
                 option-label="name"
                 multiple
                 outlined
                 dense
                 use-input
+                color="teal"
                 input-debounce="0"
-                clearable
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'group')"
-              ></q-select>
+              >
+                <template v-slot:append>
+                  <q-icon name="close" v-show="selectedGroups.length > 0" @click="selectedGroups =[]" class="cursor-pointer" />
+                </template>
+            </q-select>
             </div>
           </div>
 
@@ -245,16 +281,21 @@
                 label="Stations (pick all that apply)"
                 v-model="selectedStations"
                 :options="stationIdFilteredOptions"
+                ref="qselectStation"
                 option-value="value"
                 option-label="name"
                 multiple
                 outlined
                 dense
                 use-input
+                color="teal"
                 input-debounce="0"
-                clearable
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'station')"
-              ></q-select>
+              >
+                <template v-slot:append>
+                  <q-icon name="close" v-show="selectedStations.length > 0" @click="selectedStations =[]" class="cursor-pointer" />
+                </template>
+              </q-select>
             </div>
           </div>
 
@@ -264,6 +305,7 @@
                 label="Parameters (pick all that apply)"
                 v-model="selectedParams"
                 :options="paramFilteredOptions"
+                ref="qselectParameter"
                 option-value="value"
                 option-label="name"
                 multiple
@@ -271,9 +313,12 @@
                 dense
                 use-input
                 input-debounce="0"
-                clearable
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'parameter')"
-              ></q-select>
+              >
+                <template v-slot:append>
+                  <q-icon name="close" v-show="selectedParams.length > 0" @click="selectedParams =[]" class="cursor-pointer" />
+                </template>
+              </q-select>
             </div>
           </div>
 
@@ -599,7 +644,7 @@
                 {{ selectedStationDetails.code }}
               </div>
               <div
-                class="result-details-header-text-1"
+                class="result-details-header-text-1 q-mt-lg"
                 v-show="!showStationDetails"
               >
                 Select a station on the map or table above to view details.
@@ -922,6 +967,13 @@ const purposeOptions = [
   "Outreach",
   "Other",
 ];
+const qselectWatershed = ref(null);
+const qselectSubwatershed = ref(null);
+const qselectState = ref(null);
+const qselectCounty = ref(null);
+const qselectGroup = ref(null);
+const qselectStation = ref(null);
+const qselectParameter = ref(null);
 const collapsed = ref(false);
 const tableCollapsed = ref(false);
 const showCityState = ref(false);
@@ -1061,7 +1113,13 @@ const formattedEndDatePlot = ref(
 /****************************
  * Functions
  ***************************/
-
+ //const clearFilter = () => {
+  //console.log('clearFilter',qselect.value)
+  //console.log(qselect.value.modelValue)
+      //if (qselect.value !== void 0) {
+      //  qselect.value.updateInputValue('')
+      //}
+    //}
  const filterFn = (val, update, abort, type) =>{
   if (val === '') {
 
@@ -1091,7 +1149,7 @@ const formattedEndDatePlot = ref(
     if(type === 'watershed'){
       watershedFilteredOptions.value = watershedOptions.value.filter(v => v.value.toLowerCase().indexOf(needle) > -1)
     }else if(type === 'subwatershed'){
-      subwatershedFilteredOptions.value = subwatershedOptions.value.filter(v => v.value.toLowerCase().indexOf(needle) > -1)
+      subwatershedFilteredOptions.value = subwatershedOptions.value.filter(v => v.value.toLowerCase().indexOf(needle) > -1);
     }else if(type === 'state'){
       stateFilteredOptions.value = stateOptions.value.filter(v => v.value.toLowerCase().indexOf(needle) > -1)
     }else if(type === 'county'){
@@ -1142,6 +1200,9 @@ const formPayload =  () => {
   const stationsCsv = selectedStations.value
     .map(({ value }) => value)
     .join(",");
+
+
+
   const subwatershedsCsv = selectedSubwatershed.value
     .map(({ value }) => value)
     .join(",");
@@ -1164,6 +1225,7 @@ const formPayload =  () => {
 const downloadData = () => {
   const payload = formPayload();
   downloading.value = true;
+
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForDownload", payload)
     .then((response) => {
@@ -1189,6 +1251,42 @@ const downloadData = () => {
         a.download = "cmc_data.csv";
         a.click();
         window.URL.revokeObjectURL(url);
+
+        if(optionalMetaParams.value){
+          //get parameterIds from payload
+          const paramIds = {"parameters":payload.parameters};
+          axios
+          .post("https://cmc.vims.edu/DashboardApi/FetchParametersForDashboardDownload", paramIds)
+          .then((response) => {
+            console.log("getParametersForDownload", response.data);
+            if (response.data.length > 0) {
+              //loop through each element in each object in response.data and replace comma with empty string
+
+              let obj= JSON.stringify(response.data);
+              obj= obj.replace(/(?=,(?!"))(,(?!{))/g,"");
+              response.data= JSON.parse(obj)
+
+              //
+              const csv = response.data.map((row) =>
+                Object.values(row).join(",")
+              )
+              console.log('csv-parameters',csv)              //
+              csv.unshift(Object.keys(response.data[0]).join(","));
+              const csvString = csv.join("\n");
+              console.log('csvString',csvString);
+              const blob = new Blob([csvString], {
+                type: "text/csv",
+              });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "cmc_parameters_metadata.csv";
+              a.click();
+              window.URL.revokeObjectURL(url);
+            }
+          })
+        }
+
         downloading.value = false;
       } else {
         downloading.value = false;
@@ -1275,7 +1373,16 @@ const getStationsFromCMC = async (load) => {
       console.log("paramOptions.value", response.data);
       console.log(response.data);
       if (response.data.length > 0) {
+
         paramOptions.value = response.data;
+        //collapse parameters by name and concatenate value with comma delimiter
+        paramOptions.value = _.chain(paramOptions.value)
+          .groupBy("name")
+          .map((value, key) => ({
+            name: key,
+            value: value.map((v) => v.value).join(", "),
+          }))
+          .value();
         //order paramOptions by name
         paramOptions.value.sort((a, b) => a.name.localeCompare(b.name));
         showQueryError.value = false;
@@ -1401,13 +1508,17 @@ const getUniqueValues = (data, param, reset) => {
         acc.push(sample.depth);
       }
       //sort acc
-      acc.sort((a, b) => a - b);
+     // acc.sort((a, b) => a - b);
       return acc;
     }, []);
   }
   console.log("uniqueParams", uniqueParams);
   //sort uniqueParams
-  uniqueParams.sort((a, b) => a.localeCompare(b));
+  if (param == "Parameter") {
+    uniqueParams.sort((a, b) => a.localeCompare(b));
+  }else{
+    uniqueParams.sort((a, b) => a - b);
+  }
   filterOptionsPlot.value = uniqueParams;
   //set the primaryFilterPlot to the first value in the uniqueParams array
   if (
@@ -1510,6 +1621,28 @@ watch(formattedStartDatePlot, (newDateValue) => {
   //convert to iso string
   const updatedDate = newDate.toISOString();
   emit("update:startDatePlot", updatedDate);
+});
+
+watch(selectedWatershed, () => {
+ qselectWatershed.value.updateInputValue('');
+});
+watch(selectedSubwatershed, () => {
+  qselectSubwatershed.value.updateInputValue('');
+});
+watch(selectedStates, () => {
+  qselectState.value.updateInputValue('');
+});
+watch(selectedCounties, () => {
+  qselectCounty.value.updateInputValue('');
+});
+watch(selectedGroups, () => {
+  qselectGroup.value.updateInputValue('');
+});
+watch(selectedStations, () => {
+  qselectStation.value.updateInputValue('');
+});
+watch(selectedParams, () => {
+  qselectParameter.value.updateInputValue('');
 });
 
 watch(formattedEndDatePlot, (newDateValue) => {
