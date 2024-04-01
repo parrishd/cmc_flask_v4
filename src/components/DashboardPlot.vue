@@ -201,6 +201,8 @@ const getUniqueParams = (data) => {
       );
   }
   console.log("uniqueParams", uniqueParams);
+  //sort uniqueParams by name
+  uniqueParams.sort((a, b) => (a.name > b.name ? 1 : -1));
   paramOptionsPlot.value = uniqueParams;
   selectedParamPlot.value = uniqueParams[0];
   selectedParamPlot2.value = uniqueParams[1];
@@ -363,6 +365,27 @@ const updatePlot = (trace, param, trace2, param2) => {
   if (typeof param2 !== "undefined") {
     ylab2 = param2.name + " (" + param2.units + ")";
   }
+
+  var updatemenus = [
+    {
+      buttons: [
+        {
+          args: ["type", "surface"],
+          label: "3D Surface",
+          method: "restyle",
+        },
+      ],
+      direction: "left",
+      pad: { r: 1, t: 10 },
+      showactive: true,
+      type: "buttons",
+      x: 1,
+      xanchor: "right",
+      y: 100.1,
+      yanchor: "top",
+    },
+  ];
+
   const layout = {
     yaxis: {
       title: {
@@ -403,7 +426,8 @@ const updatePlot = (trace, param, trace2, param2) => {
       pad: 4,
     },
     showlegend: true,
-    legend: { y: 1, x: 1.1, bgcolor: "transparent" }, //
+    legend: { y: 1, x: 1.1, bgcolor: "transparent" },
+    updatemenus: updatemenus, //
   };
   if (showSecondParam.value) {
     console.log("layout", layout);

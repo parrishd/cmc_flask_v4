@@ -1406,6 +1406,8 @@ const getUniqueValues = (data, param, reset) => {
     }, []);
   }
   console.log("uniqueParams", uniqueParams);
+  //sort uniqueParams
+  uniqueParams.sort((a, b) => a.localeCompare(b));
   filterOptionsPlot.value = uniqueParams;
   //set the primaryFilterPlot to the first value in the uniqueParams array
   if (
