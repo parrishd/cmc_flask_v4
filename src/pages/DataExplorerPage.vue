@@ -566,7 +566,7 @@
 
       <!-- results -->
       <div class="row q-py-lg q-px-md results-title">
-        <div class="col title-font">Currently Viewing</div>
+        <div style='color:teal'  class="col text-h6">Currently Viewing</div>
         <div class="col-2" style="max-width: 70px">
           <q-icon class="fa-solid fa-circle-info" size="24px" color="primary">
             <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
@@ -715,6 +715,8 @@
                   "
                   v-model="primaryFilterPlot"
                   :options="filterOptionsPlot"
+                  option-value="value"
+                  option-label="name"
                   outlined
                   bg-color="white"
                 />
@@ -792,7 +794,7 @@
               <div class="col-5">
                 <q-btn
                   label="Filter Samples for station"
-                  @click="getSamples(selectedStationDetails.id)"
+                  @click="filterSamples(samples,selectedParamTypePlot,primaryFilterPlot.value);"
                   color="primary"
                 />
               </div>
@@ -853,7 +855,7 @@ import DashboardPlot from "components/DashboardPlot.vue";
 
 //import stations from "/src/assets/cmcV3_stations.json";
 import { date } from "quasar";
-import { EvaluationParameters, get } from "plotly.js-dist";
+import { EvaluationParameters, coerceSelectionMarkerOpacity, get } from "plotly.js-dist";
 
 const emit = defineEmits(["update:endDatePlot", "update:startDatePlot"]);
 
@@ -1419,9 +1421,6 @@ const aggregateStations = () => {
   if (stations.value === null || stations.value.length === 0) {
     return;
   }
-  console.log("aggregate stations");
-  console.log(stations.value);
-  console.log("agg time: " + new Date().toLocaleTimeString());
   let transformedStations = stations.value.map(transformStation);
 
   //define max date as EndDate of the most recent station in transformedStations
@@ -1490,22 +1489,34 @@ const aggregateStations = () => {
   filteredStations.value = aggregatedStations;
 };
 
-const getUniqueValues = (data, param, reset) => {
+const getUniqueValues = (data, param) => {
   console.log("getUniqueParams", data);
   let uniqueParams = [];
   if (param == "Parameter") {
-    //push unique parameterCode in samples to uniqueParams array. Only include one instance of each parameterCode
-    //in the uniqueParams array.
+    //get unique parameter names from samples as label in object and collapse all parameter codes for that parameter name concatenated by comma as value
     uniqueParams = data.reduce((acc, sample) => {
-      if (!acc.includes(sample.parameterCode)) {
-        acc.push(sample.parameterCode);
+      if (!acc.find((s) => s.name === sample.parameterName )) {
+        acc.push({
+          name: sample.parameterName,
+          value: sample.parameterCode,
+        });
+      } else if(acc.find((s) => s.name === sample.parameterName && s.value.split(",").indexOf(sample.parameterCode) < 0)){
+        //find the object with the same name and concatenate the value with a comma
+        acc.find((s) => s.name === sample.parameterName).value += ", " + sample.parameterCode;
       }
+      //sort acc
+      //acc.sort((a, b) => a.name.localeCompare(b.name));
       return acc;
     }, []);
+
+
   } else if (param == "Sample Depth") {
     uniqueParams = data.reduce((acc, sample) => {
-      if (!acc.includes(sample.depth)) {
-        acc.push(sample.depth);
+      if (!acc.find((s) => s.name === String(sample.depth))) {
+        acc.push({
+          name: String(sample.depth),
+          value: sample.depth,
+        });
       }
       //sort acc
      // acc.sort((a, b) => a - b);
@@ -1513,21 +1524,11 @@ const getUniqueValues = (data, param, reset) => {
     }, []);
   }
   console.log("uniqueParams", uniqueParams);
-  //sort uniqueParams
-  if (param == "Parameter") {
-    uniqueParams.sort((a, b) => a.localeCompare(b));
-  }else{
-    uniqueParams.sort((a, b) => a - b);
-  }
+  //sort uniqueParams by name
+  uniqueParams.sort((a, b) => a.name.localeCompare(b.name));
+
   filterOptionsPlot.value = uniqueParams;
-  //set the primaryFilterPlot to the first value in the uniqueParams array
-  if (
-    primaryFilterPlot.value == null ||
-    primaryFilterPlot.value == "" ||
-    reset
-  ) {
-    primaryFilterPlot.value = uniqueParams[0];
-  }
+
 };
 
 /****************************
@@ -1623,6 +1624,16 @@ watch(formattedStartDatePlot, (newDateValue) => {
   emit("update:startDatePlot", updatedDate);
 });
 
+//set the primaryFilterPlot to the first value in the uniqueParams array
+
+watch(filterOptionsPlot, () => {
+  primaryFilterPlot.value = filterOptionsPlot.value[0];
+  filterSamples(
+            samples.value,
+            selectedParamTypePlot.value,
+            primaryFilterPlot.value.value
+          );
+});
 watch(selectedWatershed, () => {
  qselectWatershed.value.updateInputValue('');
 });
@@ -1655,10 +1666,9 @@ watch(formattedEndDatePlot, (newDateValue) => {
 
 watch(selectedParamTypePlot, () => {
   console.log("selectedParamTypePlot changed");
-  console.log(selectedParamTypePlot.value);
   //if the selectedParamTypePlot is Depth, then filter the filterOptionsPlot to only include unique depths from samples.
   //the unique depth should only include one instance of each depth value.
-  getUniqueValues(samples.value, selectedParamTypePlot.value, true);
+  getUniqueValues(samples.value, selectedParamTypePlot.value);
 });
 
 watch(selectedGeoType, () => {
@@ -1880,12 +1890,8 @@ function getSamples(stationId) {
         samples.value = response.data;
 
         if(selectedDataType.value === "Water Quality"){
+
           getUniqueValues(response.data, selectedParamTypePlot.value);
-          filterSamples(
-            response.data,
-            selectedParamTypePlot.value,
-            primaryFilterPlot.value
-          );
         }else{
           //get count of response.data.value for each unique response.sampleDate in response.data and write to new array
           //get unique sampleDates
@@ -1927,8 +1933,15 @@ function getSamples(stationId) {
 }
 
 function filterSamples(data, paramType, value) {
+  console.log("filterSamples",data);
+  console.log("paramType",paramType);
+  console.log("value",value);
   if (paramType == "Parameter") {
-    samplesForPlot.value = data.filter((s) => s.parameterCode === value);
+
+    console.log(value.split(","));
+
+    samplesForPlot.value = data.filter((s) => value.split(",").includes(s.parameterCode));
+    console.log("samplesForPlot!!!!!!!",samplesForPlot.value);
   } else if (paramType == "Sample Depth") {
     samplesForPlot.value = data.filter((s) => s.depth === value);
   }

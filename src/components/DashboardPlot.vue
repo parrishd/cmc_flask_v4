@@ -1,7 +1,7 @@
 <template>
   <div class="plot-container">
     <div class="row q-mt-lg">
-      <div class="col-4">
+      <div class="col-4" v-show="paramType !== 'Parameter'">
         <q-select
           label-color="primary"
           :label="paramLabel"
@@ -13,7 +13,8 @@
           dense
         ></q-select>
       </div>
-      <div class="col q-ml-sm">
+
+      <div class="col q-ml-sm" v-show="paramType !== 'Parameter'">
         <q-icon
           class="fa-solid fa-circle-info q-mt-sm"
           size="24px"
@@ -38,6 +39,7 @@
           class="full-width"
           icon="fas fa-plus q-mr-sm"
           @click="addParameter"
+          v-show="paramType !== 'Parameter'"
         >
           Add Second Parameter to Plot
         </q-btn>
@@ -89,12 +91,7 @@
       </div>
     </div>
     <div class="row q-mt-lg">
-      <div class="col-12">
-        <div :id="`chart-${plotIndex}`" class="chart"></div>
-      </div>
-    </div>
-    <div class="row q-mt-lg">
-      <div class="col q-ml-xl">
+      <div class="col">
         <q-btn
           color="primary"
           icon="fas fa-download"
@@ -105,7 +102,13 @@
               <div class="q-mt-sm tooltip-text">Download Plot as Image</div>
             </div>
           </q-tooltip>
+          &nbsp; Downlod Plot as Image
         </q-btn>
+      </div>
+    </div>
+    <div class="row q-mt-lg">
+      <div class="col-12">
+        <div :id="`chart-${plotIndex}`" class="chart"></div>
       </div>
     </div>
   </div>
@@ -113,7 +116,7 @@
 
 <script setup>
 import { onMounted, reactive, ref, watch, toRefs } from "vue";
-import Plotly, { filterObject, get } from "plotly.js-dist";
+import Plotly, { filterObject, get, plot } from "plotly.js-dist";
 import { data } from "autoprefixer";
 
 const props = defineProps(["plotData", "plotIndex", "paramType", "dataType"]);
@@ -352,25 +355,72 @@ const filterSamples = (param, param2) => {
       );
     }
   } else {
-    if (param2 === "" || typeof param2 === "undefined") {
-      console.log("param", param);
-      console.log("param.value", param.value);
-      //let searchArray = param.value.split(",");
-      filteredData = plotData.value.filter(
-        (sample) => sample.depth === param.value
-      );
-    } else {
-      //let searchArray = param.value.split(",");
-      //let searchArray2 = param2.value.split(",");
-      filteredData = plotData.value.filter(
-        (sample) => sample.depth === param.value
-      );
-      filteredData2 = plotData.value.filter(
-        (sample) => sample.depth === param2.value
-      );
-    }
+    //let searchArray = param.value.split(",");
+    console.log("plotData.value", plotData.value);
+    filteredData = plotData.value;
+    param = {
+      value: plotData.value[0].parameterCode,
+      name: plotData.value[0].parameterName,
+      units: plotData.value[0].parameterUnits,
+    };
   }
+  let data = [];
   if (filteredData.length > 0) {
+    if (paramType.value === "Parameter") {
+      //add trace for each unique depth value in filteredData
+      console.log("filteredData", filteredData);
+      //get unique parameter names from samples as label in object and collapse all parameter codes for that parameter name concatenated by comma as value
+      let uniqueDepths = filteredData.reduce((acc, sample) => {
+        if (!acc.find((s) => s === sample.depth)) {
+          acc.push(sample.depth);
+        }
+        return acc;
+      }, []);
+
+      console.log("uniqueDepths", uniqueDepths);
+      //sort uniqueDepths
+      uniqueDepths.sort((a, b) => (a > b ? 1 : -1));
+      uniqueDepths.forEach((depth) => {
+        console.log("depth", depth);
+        let depthData = filteredData.filter((sample) => sample.depth === depth);
+        console.log("depthData", depthData);
+        trace = {
+          x: depthData.map((sample) =>
+            // format the sample.DateTime as "yyyy-MM-dd HH:mm"
+            new Date(sample.dateTime).toISOString().slice(0, 16)
+          ),
+          y: depthData.map((sample) => sample.value),
+          mode: "markers",
+          type: "scatter",
+          name: depth + " m",
+          marker: { size: 12 },
+          showlegend: true,
+        };
+        var x_data_64 = depthData.map((sample) =>
+          // format the sample.DateTime as "yyyy-MM-dd HH:mm"
+          new Date(sample.dateTime).toISOString().slice(0, 16)
+        );
+        // convert x_data to integers
+        x_data_64 = x_data_64.map((x) => new Date(x).getTime());
+        var y_data_64 = trace.y;
+        var lr = linearRegression(x_data_64, y_data_64);
+        //console.log(lr);
+        var fit_from = Math.min(...x_data_64);
+        var fit_to = Math.max(...x_data_64);
+
+        fit = {
+          x: [fit_from, fit_to],
+          y: [fit_from * lr.sl + lr.off, fit_to * lr.sl + lr.off],
+          mode: "lines",
+          type: "scatter",
+          name: param.name + " trend", //"R^2 = ".concat((Math.round(lr.r2 * 10000) / 10000).toString()),
+          visible: "legendonly",
+        };
+        data.push(trace);
+        data.push(fit);
+      });
+      console.log("data", data);
+    }
     trace = {
       x: filteredData.map((sample) =>
         // format the sample.DateTime as "yyyy-MM-dd HH:mm"
@@ -449,8 +499,13 @@ const filterSamples = (param, param2) => {
     updatePlot(trace, param, fit, trace2, param2, fit2);
     return;
   } else {
-    updatePlot(trace, param, fit);
-    return;
+    if (paramType.value === "Parameter") {
+      updatePlot(data, param);
+      return;
+    } else {
+      updatePlot(trace, param, fit);
+      return;
+    }
   }
 };
 
@@ -460,6 +515,7 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
   //console.log("trace2", trace2);
   //console.log("param", param);
   //console.log("param", param2);
+
   if (trace.length === 0) {
     return;
   }
@@ -476,7 +532,39 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
   if (typeof param2 !== "undefined") {
     ylab2 = param2.name + " (" + param2.units + ")";
   }
-
+  let colorway = [];
+  if (paramType.value === "Sample Depth") {
+    colorway = ["#1f77b4", "#1f77b4", "#ff7f0e", "#ff7f0e"];
+  } else {
+    //create 25 length array of unique, nice hex colors for colorway array
+    colorway = [
+      "#1f77b4",
+      "#ff7f0e",
+      "#2ca02c",
+      "#d62728",
+      "#9467bd",
+      "#8c564b",
+      "#e377c2",
+      "#7f7f7f",
+      "#bcbd22",
+      "#17becf",
+      "#1f77b4",
+      "#ff7f0e",
+      "#2ca02c",
+      "#d62728",
+      "#9467bd",
+      "#8c564b",
+      "#e377c2",
+      "#7f7f7f",
+      "#bcbd22",
+      "#17becf",
+      "#1f77b4",
+      "#ff7f0e",
+      "#2ca02c",
+      "#d62728",
+      "#9467bd",
+    ];
+  }
   const layout = {
     yaxis: {
       title: {
@@ -518,7 +606,7 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
     },
     showlegend: true,
     //add padding to top of legend
-    colorway: ["#1f77b4", "#1f77b4", "#ff7f0e", "#ff7f0e"],
+    colorway: colorway,
 
     legend: {
       y: 0.85,
@@ -536,7 +624,14 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
     );
     return;
   }
-  Plotly.newPlot("chart-" + plotIndex.value, [trace, fit], layout);
+  if (paramType.value === "Parameter") {
+    console.log("layout", layout);
+    Plotly.newPlot("chart-" + plotIndex.value, trace, layout);
+    return;
+  } else {
+    Plotly.newPlot("chart-" + plotIndex.value, [trace, fit], layout);
+    return;
+  }
 };
 
 onMounted(() => {
