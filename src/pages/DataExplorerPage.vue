@@ -1715,6 +1715,10 @@ watch(filteredStations, () => {
   console.log(rows);
 });
 
+watch(selectedDataType, () => {
+  getStationsFromCMC(true);
+});
+
 const filterRefs = [
   selectedGeoType,
   selectedStates,
@@ -1933,9 +1937,6 @@ function getSamples(stationId) {
 }
 
 function filterSamples(data, paramType, value) {
-  console.log("filterSamples",data);
-  console.log("paramType",paramType);
-  console.log("value",value);
   if (paramType == "Parameter") {
 
     console.log(value.split(","));
@@ -1945,6 +1946,13 @@ function filterSamples(data, paramType, value) {
   } else if (paramType == "Sample Depth") {
     samplesForPlot.value = data.filter((s) => s.depth === value);
   }
+  //filter samples by startDate and endDate
+  samplesForPlot.value = samplesForPlot.value.filter((s) => {
+    const sampleDate = new Date(s.dateTime);
+    const startDate = new Date(formattedStartDatePlot.value);
+    const endDate = new Date(formattedEndDatePlot.value);
+    return sampleDate >= startDate && sampleDate <= endDate;
+  });
 }
 
 function transformParameter(param) {

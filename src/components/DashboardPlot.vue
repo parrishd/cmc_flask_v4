@@ -183,7 +183,7 @@ const getUniqueParams = (data) => {
       .map((sample) => {
         return {
           value: sample.parameterCode,
-          name: sample.parameterName,
+          name: sample.parameterName + " (" + sample.parameterUnits + ")",
           units: sample.parameterUnits,
           equipment: sample.parameterEquipment,
         };
@@ -568,7 +568,7 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
   const layout = {
     yaxis: {
       title: {
-        text: param.name + " (" + param.units + ")",
+        text: param.name,
 
         font: {
           size: 20,
