@@ -39,7 +39,7 @@
           class="full-width"
           icon="fas fa-plus q-mr-sm"
           @click="addParameter"
-          v-show="paramType !== 'Parameter'"
+          v-show="paramType !== 'Parameter' && dataType === 'Water Quality'"
         >
           Add Second Parameter to Plot
         </q-btn>
@@ -102,7 +102,7 @@
               <div class="q-mt-sm tooltip-text">Download Plot as Image</div>
             </div>
           </q-tooltip>
-          &nbsp; Downlod Plot as Image
+          &nbsp; Download Plot as Image
         </q-btn>
       </div>
     </div>
@@ -153,6 +153,17 @@ const addParameter = () => {
   console.log("showSecondParam", showSecondParam.value);
   console.log("selectedParamPlot", selectedParamPlot.value);
   console.log("selectedParamPlot", selectedParamPlot2.value);
+  if (selectedParamPlot2.value === selectedParamPlot.value) {
+    //set selectedParamPlot2 to the next parameter in the paramOptionsPlot array
+    let index = paramOptionsPlot.value.findIndex(
+      (p) => p.value === selectedParamPlot.value
+    );
+    if (index === paramOptionsPlot.value.length - 1) {
+      selectedParamPlot2.value = paramOptionsPlot.value[0];
+    } else {
+      selectedParamPlot2.value = paramOptionsPlot.value[index + 1];
+    }
+  }
   filterSamples(selectedParamPlot.value, selectedParamPlot2.value);
 };
 const removeParameter = () => {
@@ -167,12 +178,14 @@ const getUniqueParams = (data) => {
   }
 
   if (dataType.value === "Benthic Macroinvertebrates") {
+    console.log("benthic_options");
     paramOptionsPlot.value = [
       { value: "speciesCount", name: "Number of Species", units: "N/A" },
       { value: "totalCount", name: "Total Count", units: "N/A" },
     ];
     selectedParamPlot.value = paramOptionsPlot.value[0];
-    selectedParamPlot2.value = paramOptionsPlot2.value[1];
+    selectedParamPlot2.value = paramOptionsPlot.value[1];
+    console.log("paramOptionsPlot", paramOptionsPlot.value);
     return;
   }
   console.log("getUniqueParams", data);
@@ -325,9 +338,13 @@ const filterSamples = (param, param2) => {
         new Date(sample.sampleDate).toISOString().slice(0, 16)
       ),
       y: y,
+      mode: "markers",
       type: "scatter",
+      name: param.name,
+      marker: { size: 12 },
+      showlegend: true,
     };
-
+    console.log(trace);
     //order trace by x
     //trace.x.sort();
     updatePlot(trace, param);
@@ -510,10 +527,10 @@ const filterSamples = (param, param2) => {
 };
 
 const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
-  //console.log("updatePlot");
-  //console.log("trace", trace);
+  console.log("updatePlot");
+  console.log("trace", trace);
   //console.log("trace2", trace2);
-  //console.log("param", param);
+  console.log("param", param);
   //console.log("param", param2);
 
   if (trace.length === 0) {
@@ -524,13 +541,11 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
   }
   console.log("updatePlot");
   //let ylab = param.name + " (" + param.units + ")";
-  if (dataType.value === "Benthic Macroinvertebrates") {
-    ylab = param.name;
-  }
+
   let ylab2 = "";
   let orientation = "v";
   if (typeof param2 !== "undefined") {
-    ylab2 = param2.name + " (" + param2.units + ")";
+    ylab2 = param2.name;
   }
   let colorway = [];
   if (paramType.value === "Sample Depth") {
@@ -615,6 +630,12 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
       //tracegroupgap: 100,
     },
   };
+  if (dataType.value === "Benthic Macroinvertebrates") {
+    console.log("layout", layout);
+
+    Plotly.newPlot("chart-" + plotIndex.value, [trace], layout);
+    return;
+  }
   if (showSecondParam.value) {
     console.log("layout", layout);
     Plotly.newPlot(

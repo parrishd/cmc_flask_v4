@@ -4,7 +4,7 @@
       <div class="col sponsor-container">
         <a href="https://www.vims.edu/cbnerr/" target="_blank">
           <q-img
-            style="width: 180px"
+            style="width: 200px"
             src="images/sponsors/CBNERR_logo_white.png"
             fit="contain"
           />
@@ -12,13 +12,15 @@
         <a href="https://www.vims.edu" target="_blank">
           <q-img
             style="width: 180px"
+            class="q-mt-md"
             src="images/sponsors/vims_logo_white.png"
             fit="contain"
           />
         </a>
         <a href="https://www.chesapeakemonitoringcoop.org" target="_blank">
           <q-img
-            style="width: 180px"
+            style="width: 140px"
+            class="q-mt-sm"
             src="images/sponsors/cmc_logo_white.png"
             fit="contain"
           />
@@ -26,20 +28,30 @@
       </div>
     </div>
 
-    <div class="row q-my-lg">
+    <!-- <div class="row q-my-lg">
       <div class="col social-container">
-        <a href="https://www.facebook.com/fbvims" target="_blank"><i class="fa-brands fa-facebook" /></a>
-        <a href="https://twitter.com/VIMS_News" target="_blank"><i class="fa-brands fa-twitter"></i></a>
-        <a href="https://www.linkedin.com/school/virginia-institute-of-marine-science/" target="_blank">
+        <a href="https://www.facebook.com/fbvims" target="_blank"
+          ><i class="fa-brands fa-facebook"
+        /></a>
+        <a href="https://twitter.com/VIMS_News" target="_blank"
+          ><i class="fa-brands fa-twitter"></i
+        ></a>
+        <a
+          href="https://www.linkedin.com/school/virginia-institute-of-marine-science/"
+          target="_blank"
+        >
           <i class="fa-brands fa-linkedin"></i>
         </a>
-        <a href="https://www.youtube.com/@VAInstituteofMarineScience" target="_blank">
+        <a
+          href="https://www.youtube.com/@VAInstituteofMarineScience"
+          target="_blank"
+        >
           <i class="fa-brands fa-youtube"></i>
         </a>
       </div>
-    </div>
+    </div>-->
 
-    <div class="row">
+    <div class="row q-mt-xl">
       <div class="col text-center footer-links">
         <a href="/about">ABOUT</a>
         <a href="/contact">CONTACT</a>
@@ -120,6 +132,7 @@
 }
 
 .sponsor-container {
+  margin-left: -40px;
   display: flex;
   gap: 80px;
   justify-content: center;
