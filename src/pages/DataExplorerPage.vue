@@ -1066,7 +1066,7 @@ const stations = ref(null);
 
 const paramsForMapFilter = ref([]);
 const loadMaxDate = ref(new Date());
-const loadMinDate = ref(new Date("11/1/1995"));
+const loadMinDate = ref(new Date("1/1/1901"));
 const watershedOptions = ref([]);
 const watershedFilteredOptions = ref([]);
 const subwatershedOptions = ref([]);
