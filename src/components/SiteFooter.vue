@@ -132,7 +132,7 @@
 }
 
 .sponsor-container {
-  margin-left: -40px;
+  margin-left: -50px;
   display: flex;
   gap: 80px;
   justify-content: center;

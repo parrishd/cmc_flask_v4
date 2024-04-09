@@ -125,7 +125,7 @@
           </div>
           <div class="row">
             <div class="col">
-              <q-label style='color:teal' class="text-h6">Data Layers</q-label>
+              <q-label style='color:teal' class="text-h6">Map Data Layers</q-label>
             </div>
           </div>
           <div class="row">
@@ -190,7 +190,7 @@
           </div>-->
           <div class="row">
             <div class="col">
-              <q-label style='color:teal' class="text-h6">Filters</q-label>
+              <q-label style='color:teal' class="text-h6">Station Filters</q-label>
             </div>
           </div>
           <div v-if="showCityState" class="row q-mt-md">
@@ -741,7 +741,7 @@
           <div v-show="showStationDetails">
             <!-- details -->
             <div class="row q-mt-md">
-              <div class="col-3 q-pr-xl" v-show="selectedDataType=='Water Quality'">
+              <!--<div class="col-3 q-pr-xl" v-show="selectedDataType=='Water Quality'">
                 <q-select
                   label="Data Type"
                   v-model="selectedParamTypePlot"
@@ -749,29 +749,27 @@
                   outlined
                   bg-color="white"
                 ></q-select>
-              </div>
-              <div class="col-3 q-pr-xl q-pl-xl" v-show="selectedDataType=='Water Quality'">
+              </div>-->
+              <div class="col-4" >
                 <q-select
-                  :label="
-                    selectedParamTypePlot === 'Depth'
-                      ? 'Depth (m)'
-                      : 'Parameter'
-                  "
+                  label="Sample Depth"
                   v-model="primaryFilterPlot"
                   :options="filterOptionsPlot"
                   option-value="value"
                   option-label="name"
                   outlined
                   bg-color="white"
+                  style="width: 90%"
                 />
               </div>
-              <div class="col-3  ">
+              <div class="col-4">
                 <q-input
                   label="Start Date"
                   v-model="formattedStartDatePlot"
                   :mask="dateMask"
                   id="date-input"
                   outlined
+                  style="width: 90%"
                 >
                   <template v-slot:prepend>
                     <q-icon name="event" class="cursor-pointer">
@@ -799,13 +797,14 @@
                   </template>
                 </q-input>
               </div>
-              <div class="col-3 q-pl-md">
+              <div class="col-4">
                 <q-input
                   label="End Date"
                   v-model="formattedEndDatePlot"
                   :mask="dateMask"
                   id="date-input"
                   outlined
+                  style="width: 90%"
                 >
                   <template v-slot:prepend>
                     <q-icon name="event" class="cursor-pointer">
@@ -834,7 +833,7 @@
                 </q-input>
               </div>
             </div>
-            <div class="row q-mt-md">
+            <!--<div class="row q-mt-md">
               <div class="col-5">
                 <q-btn
                   label="Filter Samples for station"
@@ -842,7 +841,7 @@
                   color="primary"
                 />
               </div>
-            </div>
+            </div>-->
             <div class="row q-mt-md">
               <div
                 class="col-12 q-pr-xl"
@@ -1463,7 +1462,7 @@ const getStationsFromCMC = async (load) => {
       }
     })
     .catch((error) => console.log(error));
-  if(dataTypes.value === 'Water Quality'){
+  if(selectedDataType.value === 'Water Quality'){
     axios
     .post("https://cmc.vims.edu/DashboardApi/FetchParametersForMap", payload)
     .then((response) => {
@@ -1730,6 +1729,27 @@ watch(filterOptionsPlot, () => {
             primaryFilterPlot.value.value
           );
 });
+watch(primaryFilterPlot, () => {
+  filterSamples(
+            samples.value,
+            selectedParamTypePlot.value,
+            primaryFilterPlot.value.value
+          );
+});
+watch(formattedEndDatePlot, () => {
+  filterSamples(
+            samples.value,
+            selectedParamTypePlot.value,
+            primaryFilterPlot.value.value
+          );
+});
+watch(formattedStartDatePlot, () => {
+  filterSamples(
+            samples.value,
+            selectedParamTypePlot.value,
+            primaryFilterPlot.value.value
+          );
+});
 watch(selectedWatershed, () => {
  qselectWatershed.value.updateInputValue('');
 });
@@ -1819,6 +1839,8 @@ watch(selectedDataType, () => {
   selectedSubwatershed.value = [];
   selectedGroups.value = [];
   selectedParams.value = [];
+  formattedStartDateMap.value = new Date(loadMinDate.value).toISOString().substring(0, 10);
+  formattedEndDateMap.value = new Date(loadMaxDate.value).toISOString().substring(0, 10);
   getStationsFromCMC(true);
 });
 

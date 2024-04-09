@@ -449,6 +449,7 @@ const filterSamples = (param, param2) => {
       name: param.name,
       marker: { size: 12 },
       showlegend: true,
+      nticks: 5,
     };
     var x_data_64 = filteredData.map((sample) =>
       // format the sample.DateTime as "yyyy-MM-dd HH:mm"
@@ -470,6 +471,7 @@ const filterSamples = (param, param2) => {
       type: "scatter",
       name: param.name + " trend", //"R^2 = ".concat((Math.round(lr.r2 * 10000) / 10000).toString()),
       visible: "legendonly",
+      nticks: 5,
     };
 
     //console.log(fit);
@@ -580,6 +582,7 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
       "#9467bd",
     ];
   }
+
   const layout = {
     yaxis: {
       title: {
@@ -589,6 +592,7 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
           size: 20,
         },
       },
+      nticks: 5,
       tickfont: {
         size: 16, // Set the desired size for x-axis tick values
       },
@@ -605,6 +609,7 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
         size: 16, // Set the desired size for x-axis tick values
       },
       overlaying: "y",
+      tickmode: "sync",
       side: "right",
     },
     xaxis: {
@@ -617,7 +622,7 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
       r: 0,
       b: 50,
       t: 15,
-      pad: 4,
+      pad: 0,
     },
     showlegend: true,
     //add padding to top of legend
@@ -625,9 +630,8 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
 
     legend: {
       y: 0.85,
-      x: 1.1,
+      x: 1.15,
       bgcolor: "transparent",
-      //tracegroupgap: 100,
     },
   };
   if (dataType.value === "Benthic Macroinvertebrates") {
