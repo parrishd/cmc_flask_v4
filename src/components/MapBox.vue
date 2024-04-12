@@ -43,18 +43,32 @@
             <!--add padding to left of this div-->
             <div style="padding-left: 30px; padding-top: 5px">
               <p>
-                <span class="dot-purple"></span>
-                &nbsp;Active
+                <span
+                  :class="{
+                    'dot-purple': selectedDataType == 'Water Quality',
+                    'dot-orange': selectedDataType != 'Water Quality',
+                  }"
+                ></span>
+                &nbsp;Active Sites
               </p>
 
               <p>
                 <span class="dot-gray"></span>
-                &nbsp;Inactive
+                &nbsp;Inactive Sites
               </p>
             </div>
-            <q-checkbox v-model="showPolygons">
-              {{ selectedGeoType }}</q-checkbox
-            >
+            <div class="row" v-show="selectedGeoType == 'Watershed'">
+              <q-checkbox v-model="showPolygon1"> Watersheds</q-checkbox>
+            </div>
+            <div class="row" v-show="selectedGeoType == 'Watershed'">
+              <q-checkbox v-model="showPolygon2"> SubWatersheds</q-checkbox>
+            </div>
+            <div class="row" v-show="selectedGeoType !== 'Watershed'">
+              <q-checkbox v-model="showPolygon1"> States</q-checkbox>
+            </div>
+            <div class="row" v-show="selectedGeoType !== 'Watershed'">
+              <q-checkbox v-model="showPolygon2"> Counties</q-checkbox>
+            </div>
           </q-card-section>
           <q-card-section>
             <div style="font-size: 16px" large>Basemap</div>
@@ -73,9 +87,12 @@
 
 <script setup>
 import mapboxgl from "mapbox-gl";
-import counties from "../assets/spatial/va_counties_simple.json";
+import counties from "../assets/spatial/counties_simple.json";
+import states from "../assets/spatial/states_simple.json";
 import huc8 from "../assets/spatial/huc8_simple.json";
+import huc12 from "../assets/spatial/huc12_simple.json";
 import { onMounted, reactive, ref, watch, toRefs, onUnmounted } from "vue";
+import { data } from "autoprefixer";
 
 // *** Component Props ***
 const props = defineProps([
@@ -101,7 +118,8 @@ const emit = defineEmits(["selectedStation"]);
 let map = reactive({});
 
 // shows hides polygons that represent 50 states per foo geojson file
-let showPolygons = ref(true);
+let showPolygon1 = ref(true);
+let showPolygon2 = ref(false);
 let showStations = ref(true);
 
 // used to persist the polygons layer pop up in case we toggle data type
@@ -144,9 +162,14 @@ if (showLegend.value === true) {
   });
 }
 
-watch(showPolygons, () => {
-  console.log("showPolygons: " + showPolygons.value);
-  togglePolygons();
+watch(showPolygon1, () => {
+  console.log("showpolygon1: " + showPolygon1.value);
+  togglePolygon1();
+});
+
+watch(showPolygon2, () => {
+  console.log("showpolygon2: " + showPolygon2.value);
+  togglePolygon2();
 });
 
 watch(showStations, () => {
@@ -156,7 +179,8 @@ watch(showStations, () => {
 
 watch(selectedGeoType, () => {
   console.log("geoType: " + selectedGeoType.value);
-  togglePolygons();
+  togglePolygon1();
+  togglePolygon2();
 });
 watch(selectedDataType, () => {
   console.log("geoType: " + selectedGeoType.value);
@@ -231,25 +255,40 @@ const createMap = () => {
   map.on("style.load", () => {
     console.log("A styledata event occurred.");
 
-    if (showPolygons.value === true) {
+    if (showPolygon1.value === true) {
       // re-add polygons in case check box was still on
       //console.log("skip polygons for now");
-      addPolygons();
+      addPolygon1();
+    }
+    if (showPolygon2.value === true) {
+      // re-add polygons in case check box was still on
+      //console.log("skip polygons for now");
+      addPolygon2();
     }
     // re-add all the markers per whatever data type is selected
     updateMarkersOnMap();
   });
 };
 
-const togglePolygons = () => {
+const togglePolygon1 = () => {
   removePopUps();
-  if (showPolygons.value === true) {
-    console.log("should be showing the polygons for states");
-    addPolygons();
+  if (showPolygon1.value === true) {
+    addPolygon1();
     updateMarkersOnMap();
   } else {
     console.log("should be hiding the polygons");
-    removePolygons();
+    removePolygon1();
+    removePopUps();
+  }
+};
+const togglePolygon2 = () => {
+  removePopUps();
+  if (showPolygon2.value === true) {
+    addPolygon2();
+    updateMarkersOnMap();
+  } else {
+    console.log("should be hiding the polygons");
+    removePolygon2();
     removePopUps();
   }
 };
@@ -265,18 +304,17 @@ const toggleStations = () => {
 };
 
 // removes the layers associated with geojsons states polygons and removes source after
-const removePolygons = () => {
-  if (map.getSource("polygons")) {
-    const layerForPolygon = "polygons-layer";
-    const layerForPolygonOutline = "polygons-layer-outline";
+const removePolygon1 = () => {
+  if (map.getSource("polygon1")) {
+    const layer = "polygon1";
+    const layerForPolygon = "polygon1-layer";
+    const layerForPolygonOutline = "polygon1-layer-outline";
 
     if (map.getLayer(layerForPolygonOutline)) {
-      console.log("removing layer for layerForPolygonOutline");
       map.removeLayer(layerForPolygonOutline);
     }
 
     if (map.getLayer(layerForPolygon)) {
-      console.log("removing layer for layerForPolygon");
       // map.off('click', 'states-layer', onClickPolygon);
       // map.off('mouseenter', 'states-layer')
       // map.off('mouseleave', 'states-layer')
@@ -284,67 +322,167 @@ const removePolygons = () => {
     }
 
     // finally remove the source after removing layers and callbacks
-    map.removeSource("polygons");
+    map.removeSource(layer);
+  }
+};
+
+// removes the layers associated with geojsons states polygons and removes source after
+const removePolygon2 = () => {
+  if (map.getSource("polygon2")) {
+    const layer = "polygon2";
+    const layerForPolygon = "polygon2-layer";
+    const layerForPolygonOutline = "polygon2-layer-outline";
+
+    if (map.getLayer(layerForPolygonOutline)) {
+      map.removeLayer(layerForPolygonOutline);
+    }
+
+    if (map.getLayer(layerForPolygon)) {
+      // map.off('click', 'states-layer', onClickPolygon);
+      // map.off('mouseenter', 'states-layer')
+      // map.off('mouseleave', 'states-layer')
+      map.removeLayer(layerForPolygon);
+    }
+
+    // finally remove the source after removing layers and callbacks
+    map.removeSource(layer);
   }
 };
 
 // Add a data source containing GeoJSON data.
 // https://docs.mapbox.com/mapbox-gl-js/example/polygon-popup-on-click/
-const addPolygons = () => {
-  console.log("addPolygons");
+const addPolygon1 = () => {
+  console.log("addPolygon1");
   console.log("window.location.origin: " + window.location.origin);
   //console.log(window.location.origin);
-  console.log(counties);
-  console.log(counties.value);
-  console.log(huc8.value);
+  //console.log(counties);
+  //console.log(counties.value);
+  //console.log(huc8.value);
 
-  let polygons = counties;
-  console.log(polygons);
+  let polygons = states;
   if (selectedGeoType.value === "Watershed") {
     polygons = huc8;
   }
-  if (map.getSource("polygons")) {
-    removePolygons();
+  if (map.getSource("polygon1")) {
+    removePolygon1();
   }
-  map.addSource("polygons", {
+  map.addSource("polygon1", {
     type: "geojson",
     data: polygons,
   });
 
   // Add a clear layer showing that will be used for on click events
   map.addLayer({
-    id: "polygons-layer",
+    id: "polygon1-layer",
     type: "fill",
-    source: "polygons",
+    source: "polygon1",
     paint: {
       "fill-color": "rgba(0, 0, 0, 0.0)",
       // 'fill-outline-color': 'rgba(200, 100, 240, 1)',
     },
   });
+
   // Add an outline layer that will be visible and will outline geojson states polygons
   map.addLayer({
-    id: "polygons-layer-outline",
+    id: "polygon1-layer-outline",
     type: "line",
-    source: "polygons",
+    source: "polygon1",
     paint: {
-      "line-color": "rgba(200, 100, 0, 0.9)",
+      "line-color": "rgba(7, 153, 153, 0.9)",
       "line-width": 3,
+    },
+  });
+  // When a click event occurs on a feature in the states layer,
+  // open a popup at the location of the click, with description
+  // HTML from the click event's properties.
+  map.on("mouseenter", "polygon1-layer", onMouseEnterEvent);
+  map.on("mouseleave", "polygon1-layer", onMouseLeaveEvent);
+  map.on("click", "polygon1-layer", (e) => {
+    map.fire("closeAllStationsPopups");
+    console.log("On click polygon event");
+    console.log(e);
+    console.log(e.features[0]);
+    let polyName = e.features[0].properties.STATE_NAME;
+    if (selectedGeoType.value === "Watershed") {
+      polyName = e.features[0].properties.ACTNAME;
+    }
+    const popup = new mapboxgl.Popup()
+      .setLngLat(e.lngLat)
+      .setHTML(polyName)
+      .addTo(map);
+
+    // flag used to persist this pop up if data type changes as those pop ups need to be removed.
+    // isShowingPolygonPopUp.value = true;
+    // popup.on("close", () => {
+    //   console.log("Why tho here? we set it false on close..");
+    //   isShowingPolygonPopUp.value = false;
+    // });
+    map.on("closeAllPolygonPopups", () => {
+      popup.remove();
+    });
+    //map.fire("closeAllPolygonPopups");
+  });
+};
+// Add a data source containing GeoJSON data.
+// https://docs.mapbox.com/mapbox-gl-js/example/polygon-popup-on-click/
+const addPolygon2 = () => {
+  console.log("addPolygon2");
+  console.log("window.location.origin: " + window.location.origin);
+  //console.log(window.location.origin);
+  //console.log(counties);
+  //console.log(counties.value);
+  //console.log(huc8.value);
+
+  let polygons = counties;
+  if (selectedGeoType.value === "Watershed") {
+    polygons = huc12;
+  }
+  console.log("addPolygon2");
+  console.log(map.getSource("polygon2"));
+  if (map.getSource("polygon2")) {
+    ("removing polygon2 layer and source");
+    removePolygon2();
+  }
+  map.addSource("polygon2", {
+    type: "geojson",
+    data: polygons,
+  });
+
+  // Add a clear layer showing that will be used for on click events
+  map.addLayer({
+    id: "polygon2-layer",
+    type: "fill",
+    source: "polygon2",
+    paint: {
+      "fill-color": "rgba(0, 0, 0, 0.0)",
+      // 'fill-outline-color': 'rgba(200, 100, 240, 1)',
+    },
+  });
+
+  // Add an outline layer that will be visible and will outline geojson states polygons
+  map.addLayer({
+    id: "polygon2-layer-outline",
+    type: "line",
+    source: "polygon2",
+    paint: {
+      "line-color": "rgba(7, 153, 153, 0.9)",
+      "line-width": 1,
     },
   });
 
   // When a click event occurs on a feature in the states layer,
   // open a popup at the location of the click, with description
   // HTML from the click event's properties.
-  map.on("mouseenter", "polygons-layer", onMouseEnterEvent);
-  map.on("mouseleave", "polygons-layer", onMouseLeaveEvent);
-  map.on("click", "polygons-layer", (e) => {
+  map.on("mouseenter", "polygon2-layer", onMouseEnterEvent);
+  map.on("mouseleave", "polygon2-layer", onMouseLeaveEvent);
+  map.on("click", "polygon2-layer", (e) => {
     map.fire("closeAllStationsPopups");
     console.log("On click polygon event");
     console.log(e);
     console.log(e.features[0]);
-    let polyName = e.features[0].properties.NAMELSAD;
+    let polyName = e.features[0].properties.NAME;
     if (selectedGeoType.value === "Watershed") {
-      polyName = e.features[0].properties.ACTNAME;
+      polyName = e.features[0].properties.NAME;
     }
     const popup = new mapboxgl.Popup()
       .setLngLat(e.lngLat)
@@ -457,6 +595,10 @@ const setupStationsOnMap = () => {
   let centerCoordinates = { lng: centerLong, lat: centerLat };
   map.setCenter(centerCoordinates);
   console.log("centerCoordinates: " + centerLat + " " + centerLong);
+  let locColor = "#990799";
+  if (selectedDataType.value === "Benthic Macroinvertebrates") {
+    locColor = "#8b6508";
+  }
   map.addLayer({
     id: "places",
     type: "circle",
@@ -469,7 +611,7 @@ const setupStationsOnMap = () => {
         "Historic",
         "#5A5A5A", // if 'GP' then yellow
         "Current",
-        "#20c", // if 'XX' then black
+        locColor, // if 'XX' then black
         "white",
       ], // white otherwise
       "circle-radius": [
@@ -650,6 +792,14 @@ onUnmounted(() => {
   display: inline-block;
   vertical-align: middle;
 }
+.dot-blue-green {
+  height: 15px;
+  width: 15px;
+  background-color: #0c9482;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+}
 
 .dot-yellow {
   height: 15px;
@@ -660,10 +810,19 @@ onUnmounted(() => {
   vertical-align: middle;
 }
 
+.dot-orange {
+  height: 15px;
+  width: 15px;
+  background-color: #8b6508;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .dot-purple {
   height: 15px;
   width: 15px;
-  background-color: #20c;
+  background-color: #990799;
   border-radius: 50%;
   display: inline-block;
   vertical-align: middle;

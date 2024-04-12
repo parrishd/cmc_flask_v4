@@ -23,11 +23,12 @@
           <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
             <div class="q-pa-md" style="max-width: 360px">
               <div class="tooltip-header">
-                {{ selectedParamPlot.name }} Metadata
+                {{ selectedParamPlot.name }}
               </div>
               <div class="q-mt-sm tooltip-text">
                 <li>Code: {{ selectedParamPlot.value }}</li>
                 <li>Equipment: {{ selectedParamPlot.equipment }}</li>
+                <li>Tier: {{ selectedParamPlot.tier }}</li>
               </div>
             </div>
           </q-tooltip>
@@ -68,7 +69,7 @@
           <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
             <div class="q-pa-md" style="max-width: 360px">
               <div class="tooltip-header">
-                {{ selectedParamPlot2.name }} Metadata
+                {{ selectedParamPlot2.name }}
               </div>
               <div class="q-mt-sm tooltip-text">
                 <li>Code: {{ selectedParamPlot2.value }}</li>
@@ -91,10 +92,10 @@
       </div>
     </div>
     <div class="row q-mt-lg">
-      <div class="col">
+      <div class="col-12">
         <q-btn
           color="primary"
-          icon="fas fa-download"
+          icon="fas fa-camera"
           @click="downloadPlot(`chart-${plotIndex}`)"
         >
           <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
@@ -104,11 +105,46 @@
           </q-tooltip>
           &nbsp; Download Plot as Image
         </q-btn>
+        <q-btn
+          color="primary"
+          icon="fas fa-download"
+          @click="downloadPlotData(`chart-${plotIndex}`)"
+          class="q-ml-md"
+        >
+          <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
+            <div class="q-pa-md" style="max-width: 360px">
+              <div class="q-mt-sm tooltip-text">
+                Download data shown in plot as .csv file.
+              </div>
+            </div>
+          </q-tooltip>
+          &nbsp; Download Data Shown in Plot
+        </q-btn>
       </div>
     </div>
-    <div class="row q-mt-lg">
+
+    <div class="row">
       <div class="col-12">
         <div :id="`chart-${plotIndex}`" class="chart"></div>
+      </div>
+    </div>
+    <div class="row q-mt-lg" v-if="plotStats.length > 0">
+      <div class="col-12">
+        <q-icon
+          class="fa-solid fa-calculator q-mr-lg q-mt-xs float-left"
+          size="24px"
+          color="teal"
+        ></q-icon>
+        <div class="text-h5" style="color: teal">Plot Summary Statistics</div>
+        <li v-for="(stat, index) in plotStats" :key="stat" class="q-mt-sm">
+          <span
+            class="vertical-middle text-h6"
+            :style="{ color: index > 0 ? '#ff7f0e' : '#075c7a' }"
+          >
+            {{ stat.name }}: Min: {{ stat.min }}, Max: {{ stat.max }}, Mean:
+            {{ (stat.sum / stat.count).toFixed(2) }}
+          </span>
+        </li>
       </div>
     </div>
   </div>
@@ -116,14 +152,21 @@
 
 <script setup>
 import { onMounted, reactive, ref, watch, toRefs } from "vue";
-import Plotly, { filterObject, get, plot } from "plotly.js-dist";
+import Plotly, { filterObject, get, list, plot } from "plotly.js-dist";
 import { data } from "autoprefixer";
 
-const props = defineProps(["plotData", "plotIndex", "paramType", "dataType"]);
+const props = defineProps([
+  "plotData",
+  "plotIndex",
+  "paramType",
+  "dataType",
+  "stationName",
+]);
 const { plotData } = toRefs(props);
 const { plotIndex } = toRefs(props);
 const { paramType } = toRefs(props);
 const { dataType } = toRefs(props);
+const { stationName } = toRefs(props);
 
 //const trace1 = ref([]);
 const selectedParamPlot = ref([]);
@@ -131,6 +174,8 @@ const selectedParamPlot2 = ref([]);
 const paramOptionsPlot = ref([]);
 const paramLabel = ref("Select Parameter(s)");
 const showSecondParam = ref(false);
+const plotStats = ref([]);
+const dataOnPlot = ref([]);
 
 watch(
   () => plotData.value,
@@ -140,12 +185,84 @@ watch(
   }
 );
 const downloadPlot = (plot) => {
+  //update plot title
+  let update = {
+    title: stationName.value,
+  };
+
+  Plotly.relayout(plot, update);
+
   Plotly.downloadImage(plot, {
     filename: "cmc-plot",
     format: "png",
     width: 1000,
     height: 400,
   });
+  update = {
+    title: "",
+  };
+
+  Plotly.relayout(plot, update);
+};
+
+const downloadPlotData = (plot) => {
+  let data = dataOnPlot.value;
+  //create new array pivotData with x as datetime and additional properties for each unique name value
+  let pivotData = [];
+  data.forEach((d) => {
+    let index = pivotData.findIndex((p) => p.x === d.x);
+    if (index === -1) {
+      pivotData.push({
+        x: d.x,
+        [d.name]: d.y,
+      });
+    } else {
+      pivotData[index][d.name] = d.y;
+    }
+  });
+  console.log(pivotData);
+  //format datetime in pivotData as "yyyy-MM-dd HH:mm:ss"
+  pivotData.forEach((d) => {
+    console.log(d);
+    d.x =
+      new Date(d.x).toISOString().slice(0, 10) +
+      " " +
+      new Date(d.x).toISOString().slice(11, 16);
+    console.log(d.x);
+  });
+
+  //dowload pivotData as csv file
+  let csv = "data:text/csv;charset=utf-8,";
+  let header = "DateTime,";
+  let names = [];
+  pivotData.forEach((d) => {
+    for (const [key, value] of Object.entries(d)) {
+      if (key !== "x") {
+        if (!names.includes(key)) {
+          names.push(key);
+          header += key + ",";
+        }
+      }
+    }
+  });
+  csv += header + "\n";
+  pivotData.forEach((d) => {
+    let row = d.x + ",";
+    names.forEach((name) => {
+      if (d[name]) {
+        row += d[name] + ",";
+      } else {
+        row += ",";
+      }
+    });
+    csv += row + "\n";
+  });
+  var encodedUri = encodeURI(csv);
+  var link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "cmc-plot-data.csv");
+  document.body.appendChild(link); // Required for FF
+  link.click();
 };
 const addParameter = () => {
   showSecondParam.value = !showSecondParam.value;
@@ -198,6 +315,7 @@ const getUniqueParams = (data) => {
           value: sample.parameterCode,
           name: sample.parameterName + " (" + sample.parameterUnits + ")",
           units: sample.parameterUnits,
+          tier: sample.parameterTier,
           equipment: sample.parameterEquipment,
         };
       })
@@ -621,12 +739,14 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
       l: 70,
       r: 0,
       b: 50,
-      t: 15,
+      t: 50,
       pad: 0,
     },
     showlegend: true,
     //add padding to top of legend
     colorway: colorway,
+    //add title to plot
+    title: "",
 
     legend: {
       y: 0.85,
@@ -634,29 +754,104 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
       bgcolor: "transparent",
     },
   };
+  const chartId = "chart-" + plotIndex.value;
   if (dataType.value === "Benthic Macroinvertebrates") {
     console.log("layout", layout);
 
     Plotly.newPlot("chart-" + plotIndex.value, [trace], layout);
+    calcStats(chartId);
+    listenPlotZoom(chartId);
     return;
   }
   if (showSecondParam.value) {
     console.log("layout", layout);
-    Plotly.newPlot(
-      "chart-" + plotIndex.value,
-      [trace, fit, trace2, fit2],
-      layout
-    );
+    Plotly.newPlot(chartId, [trace, fit, trace2, fit2], layout);
+    calcStats(chartId);
+    listenPlotZoom(chartId);
     return;
   }
   if (paramType.value === "Parameter") {
     console.log("layout", layout);
-    Plotly.newPlot("chart-" + plotIndex.value, trace, layout);
+    Plotly.newPlot(chartId, trace, layout);
+    calcStats(chartId);
+    listenPlotZoom(chartId);
+
     return;
   } else {
     Plotly.newPlot("chart-" + plotIndex.value, [trace, fit], layout);
+    calcStats(chartId);
+    listenPlotZoom(chartId);
     return;
   }
+};
+const listenPlotZoom = (chartId) => {
+  let plotDiv = document.getElementById(chartId);
+  plotDiv.on("plotly_relayout", function (eventdata) {
+    console.log(eventdata);
+    calcStats(chartId);
+  });
+};
+const calcStats = (chartId) => {
+  let x_range = document.getElementById(chartId).layout.xaxis.range;
+  let y_range = document.getElementById(chartId).layout.yaxis.range;
+  let y_range2 = [];
+  if (typeof document.getElementById(chartId).layout.yaxis2 !== "undefined") {
+    y_range2 = document.getElementById(chartId).layout.yaxis2.range;
+  }
+
+  let plotData = document.getElementById(chartId).data;
+  let data = [];
+  //loop through plotData and filter only data that has mode = "markers"
+  let count = 0;
+  plotData.forEach((trace) => {
+    if (trace.mode === "markers") {
+      let y_range_trace = y_range;
+      if (count === 1) {
+        y_range_trace = y_range2;
+      }
+      trace.x.forEach((x, index) => {
+        if (x >= x_range[0] && x <= x_range[1]) {
+          if (
+            trace.y[index] >= y_range_trace[0] &&
+            trace.y[index] <= y_range_trace[1]
+          ) {
+            data.push({
+              x: x,
+              y: trace.y[index],
+              name: trace.name,
+            });
+          }
+        }
+      });
+      count += 1;
+    }
+  });
+  dataOnPlot.value = data;
+  //calculate mean, min and max for each parameter
+  let stats = [];
+  data.forEach((d) => {
+    let index = stats.findIndex((s) => s.name === d.name);
+    if (index === -1) {
+      stats.push({
+        name: d.name,
+        count: 1,
+        sum: d.y,
+        min: d.y,
+        max: d.y,
+      });
+    } else {
+      stats[index].count += 1;
+      stats[index].sum += d.y;
+      if (d.y < stats[index].min) {
+        stats[index].min = d.y;
+      }
+      if (d.y > stats[index].max) {
+        stats[index].max = d.y;
+      }
+    }
+  });
+  console.log("stats", stats);
+  plotStats.value = stats;
 };
 
 onMounted(() => {

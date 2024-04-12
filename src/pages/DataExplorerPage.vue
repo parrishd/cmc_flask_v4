@@ -18,7 +18,7 @@
           <span class='vertical-middle' style="font-size:20px">{{ stationsCount }} Total Stations</span>
         </div>
         <div class="col-12 col-md-3">
-          <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" style="color:#20c" />
+          <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" style="color:#990799" />
           <span class='vertical-middle' style="font-size:20px">{{ activeStationsCount }} Active Stations</span>
           <q-icon class="fa-solid fa-circle-info q-ml-xl" size="22px">
             <q-tooltip
@@ -534,10 +534,12 @@
               <div class="col-6">
                 <q-checkbox v-model="optionalMetaParams" label="Parameters" />
               </div>
-              <div class="col-6">
+              <div class="col-6" >
+
                 <q-checkbox
                   v-model="optionalMetaCalibration"
                   label="Calibration Samples"
+                  v-show="selectedDataType == 'Water Quality'"
                 />
               </div>
             </div>
@@ -842,7 +844,13 @@
                 />
               </div>
             </div>-->
-            <div class="row q-mt-md">
+            <div class="row q-mt-lg">
+              <div class="col">
+                <q-separator />
+              </div>
+            </div>
+
+            <div class="row q-mt-sm">
               <div
                 class="col-12 q-pr-xl"
                 v-for="count in plotCount"
@@ -850,6 +858,7 @@
               >
                 <DashboardPlot
                   :plotData="samplesForPlot"
+                  :stationName="selectedStationDetails.code"
                   :plotIndex="count"
                   :paramType="selectedParamTypePlot"
                   :dataType="selectedDataType"
@@ -1313,7 +1322,7 @@ const addDayToDate = (oldDate) => {
 
 const downloadData = () => {
   const payload = formPayload();
-  if (payload.endDate !== '' && payload.endDate !== null && typeof payload.endDate !== 'undefined' && !load) {
+  if (payload.endDate !== '' && payload.endDate !== null && typeof payload.endDate !== 'undefined') {
 
     payload.endDate = addDayToDate(payload.endDate);
   }
@@ -1325,13 +1334,14 @@ const downloadData = () => {
 
         console.log("getSamplesForDownload");
         console.log(response.data);
+        const samplesForDownload = response.data;
         //write response.data to csv download and include headers
 
         //let csv = Object.keys(response.data[0]).join(",") + "\n";
-        const csv = response.data.map((row) =>
+        const csv = samplesForDownload.map((row) =>
           Object.values(row).join(",")
         )
-        csv.unshift(Object.keys(response.data[0]).join(","));
+        csv.unshift(Object.keys(samplesForDownload[0]).join(","));
         const csvString = csv.join("\n");
         console.log('csvString',csvString);
         const blob = new Blob([csvString], {
@@ -1343,14 +1353,43 @@ const downloadData = () => {
         a.download = "cmc_data.csv";
         a.click();
         window.URL.revokeObjectURL(url);
-
+        console.log("getParametersForDownload", samplesForDownload);
+        //get unique parameter codes as comma separated string from samplesForDownload
+        let paramCodes = [];
+        let groupCodes = [];
+        let stationCodes = [];
+        samplesForDownload.forEach((sample) => {
+          if (!paramCodes.includes(sample.ParameterCode)) {
+            paramCodes.push(sample.ParameterCode);
+          }
+          if (!groupCodes.includes(sample.GroupCode)) {
+            groupCodes.push(sample.GroupCode);
+          }
+          if (!stationCodes.includes(sample.StationCode)) {
+            stationCodes.push(sample.StationCode);
+          }
+        });
+        //change paramCodes into comma separated string
+        paramCodes = paramCodes.join(",");
+        paramCodes = {"parameters":paramCodes};
+        groupCodes = groupCodes.join(",");
+        groupCodes = {"groups":groupCodes};
+        stationCodes = stationCodes.join(",");
+        stationCodes = {"stations":stationCodes};
+        console.log("paramCodes", paramCodes);
+        console.log("groupCodes", groupCodes);
+        console.log("optionalMetaParams", optionalMetaParams.value);
+        console.log("optionalMetaGroups", optionalMetaGroups.value);
         if(optionalMetaParams.value){
-          //get parameterIds from payload
-          const paramIds = {"parameters":payload.parameters};
+
+
+
           axios
-          .post("https://cmc.vims.edu/DashboardApi/FetchParametersForDashboardDownload", paramIds)
+          .post("https://cmc.vims.edu/DashboardApi/FetchParametersForDashboardDownload", paramCodes)
           .then((response) => {
+
             console.log("getParametersForDownload", response.data);
+
             if (response.data.length > 0) {
               //loop through each element in each object in response.data and replace comma with empty string
 
@@ -1378,7 +1417,108 @@ const downloadData = () => {
             }
           })
         }
+        if(optionalMetaGroups.value){
+          //get parameterIds from payload
+          console.log("getGroupsForDownload", groupCodes);
+          axios
+          .post("https://cmc.vims.edu/DashboardApi/FetchGroupsForDashboardDownload", groupCodes)
+          .then((response) => {
+            console.log("getGroupsForDownload", response.data);
+            if (response.data.length > 0) {
+              //loop through each element in each object in response.data and replace comma with empty string
 
+              let obj= JSON.stringify(response.data);
+              obj= obj.replace(/(?=,(?!"))(,(?!{))/g,"");
+              response.data= JSON.parse(obj)
+
+              //
+              const csv = response.data.map((row) =>
+                Object.values(row).join(",")
+              )
+              console.log('csv-groups',csv)              //
+              csv.unshift(Object.keys(response.data[0]).join(","));
+              const csvString = csv.join("\n");
+              console.log('csvString',csvString);
+              const blob = new Blob([csvString], {
+                type: "text/csv",
+              });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "cmc_groups_metadata.csv";
+              a.click();
+              window.URL.revokeObjectURL(url);
+            }
+          })
+        }
+        if(optionalMetaStations.value){
+          //get parameterIds from payload
+          console.log("getStationsForDownload", stationCodes);
+          axios
+          .post("https://cmc.vims.edu/DashboardApi/FetchStationsForDashboardDownload", stationCodes)
+          .then((response) => {
+            console.log("getStationsForDownload", response.data);
+            if (response.data.length > 0) {
+              //loop through each element in each object in response.data and replace comma with empty string
+
+              let obj= JSON.stringify(response.data);
+              obj= obj.replace(/(?=,(?!"))(,(?!{))/g,"");
+              response.data= JSON.parse(obj)
+
+              //
+              const csv = response.data.map((row) =>
+                Object.values(row).join(",")
+              )
+              console.log('csv-stations',csv)              //
+              csv.unshift(Object.keys(response.data[0]).join(","));
+              const csvString = csv.join("\n");
+              console.log('csvString',csvString);
+              const blob = new Blob([csvString], {
+                type: "text/csv",
+              });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "cmc_stations_metadata.csv";
+              a.click();
+              window.URL.revokeObjectURL(url);
+            }
+          })
+        }
+        if(optionalMetaCalibration.value){
+          //get parameterIds from payload
+          console.log("getCalibrationForDownload", payload);
+          axios
+          .post("https://cmc.vims.edu/DashboardApi/FetchCalibrationForDashboardDownload", payload)
+          .then((response) => {
+            console.log("getCalibrationForDownload", response.data);
+            if (response.data.length > 0) {
+              //loop through each element in each object in response.data and replace comma with empty string
+
+              let obj= JSON.stringify(response.data);
+              obj= obj.replace(/(?=,(?!"))(,(?!{))/g,"");
+              response.data= JSON.parse(obj)
+
+              //
+              const csv = response.data.map((row) =>
+                Object.values(row).join(",")
+              )
+              console.log('csv-calibration',csv)              //
+              csv.unshift(Object.keys(response.data[0]).join(","));
+              const csvString = csv.join("\n");
+              console.log('csvString',csvString);
+              const blob = new Blob([csvString], {
+                type: "text/csv",
+              });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "cmc_calibration_metadata.csv";
+              a.click();
+              window.URL.revokeObjectURL(url);
+            }
+          })
+        }
         downloading.value = false;
       } else {
         downloading.value = false;
@@ -1669,7 +1809,7 @@ const stationIdOptions = computed(() => {
     console.log("filteredStations.value", filteredStations.value);
     const options = filteredStations.value.map((s) => ({
       value: s.StationCode,
-      name: s.StationCode.split(".")[1] + " (" + s.StationCode.split(".")[0] + ")",
+      name: s.StationCode.substring(s.StationCode.indexOf('.')+1) + " (" + s.StationCode.split(".")[0] + ")",
     }));
 
     //sort fi
@@ -1757,10 +1897,14 @@ watch(selectedSubwatershed, () => {
   qselectSubwatershed.value.updateInputValue('');
 });
 watch(selectedStates, () => {
-  qselectState.value.updateInputValue('');
+  if(qselectState.value !== null){
+    qselectState.value.updateInputValue('');
+  }
 });
 watch(selectedCounties, () => {
-  qselectCounty.value.updateInputValue('');
+  if(qselectState.value !== null){
+    qselectCounty.value.updateInputValue('');
+  }
 });
 watch(selectedGroups, () => {
   qselectGroup.value.updateInputValue('');
