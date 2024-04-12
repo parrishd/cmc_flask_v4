@@ -2,6 +2,8 @@
 FROM node:18-alpine as develop-stage
 RUN apk add --no-cache git
 WORKDIR /app
+# 4GB value (in MB)
+ENV NODE_OPTIONS=--max_old_space_size=4096   
 COPY package*.json ./
 RUN yarn global add @quasar/cli
 COPY . .
