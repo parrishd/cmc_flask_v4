@@ -74,6 +74,7 @@
               <div class="q-mt-sm tooltip-text">
                 <li>Code: {{ selectedParamPlot2.value }}</li>
                 <li>Equipment: {{ selectedParamPlot2.equipment }}</li>
+                <li>Tier: {{ selectedParamPlot2.tier }}</li>
               </div>
             </div>
           </q-tooltip>

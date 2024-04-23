@@ -18,8 +18,12 @@
           <span class='vertical-middle' style="font-size:20px">{{ stationsCount }} Total Stations</span>
         </div>
         <div class="col-12 col-md-3">
-          <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" style="color:#990799" />
-          <span class='vertical-middle' style="font-size:20px">{{ activeStationsCount }} Active Stations</span>
+          <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" :class="{
+                    'dot-purple': selectedDataType == 'Water Quality',
+                    'dot-orange': selectedDataType != 'Water Quality',
+                  }" />
+          <span class='vertical-middle' style="font-size:20px"
+                >{{ activeStationsCount }} Active Stations</span>
           <q-icon class="fa-solid fa-circle-info q-ml-xl" size="22px">
             <q-tooltip
               anchor="bottom left"
@@ -662,7 +666,21 @@
             flat
             bordered
             @row-click="onRowClick"
-          />
+
+          >
+            <template v-slot:header="props">
+              <q-tr :props="props">
+                <q-th
+                  v-for="col in props.cols"
+                  :key="col.name"
+                  :props="props"
+                  style="font-size:16px; color:teal; font-weight: bold;"
+                >
+                  {{ col.label }}
+                </q-th>
+              </q-tr>
+            </template>
+          </q-table>
         </div>
       </div>
 
@@ -849,7 +867,6 @@
                 <q-separator />
               </div>
             </div>
-
             <div class="row q-mt-sm">
               <div
                 class="col-12 q-pr-xl"
@@ -858,7 +875,7 @@
               >
                 <DashboardPlot
                   :plotData="samplesForPlot"
-                  :stationName="selectedStationDetails.code"
+                  :stationName="selectedStationDetails.name"
                   :plotIndex="count"
                   :paramType="selectedParamTypePlot"
                   :dataType="selectedDataType"
@@ -980,7 +997,7 @@ const columns = [
   {
     name: "SamplesCount",
     align: "left",
-    label: "Samples",
+    label: "Number of Samples",
     field: "SamplesCount",
   },
   // {
@@ -2269,6 +2286,7 @@ function receiveEmit(station) {
   console.log(station);
 
   selectedStationDetails.value = station;
+  selectedStationDetails.value.name= station.code.substring(station.code.indexOf('.')+1)
 
   console.log("selectedStationDetails");
   console.log(selectedStationDetails);
@@ -2296,5 +2314,13 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+  .dot-orange {
 
+    color: #8b6508;
+  }
+
+  .dot-purple {
+
+    color: #990799;
+  }
 </style>
