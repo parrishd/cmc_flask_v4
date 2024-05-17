@@ -1366,14 +1366,12 @@ const formPayload =  () => {
   const stationsCsv = selectedStations.value
     .map(({ value }) => value)
     .join(",");
-
-
+  console.log("stationsCsv");
+  console.log(stationsCsv);
 
   const subwatershedsCsv = selectedSubwatershed.value
     .map(({ value }) => value)
     .join(",");
-
-
 
 
   const payload = {
@@ -1388,6 +1386,7 @@ const formPayload =  () => {
     startDate: formattedStartDateMap.value,
     endDate: formattedEndDateMap.value,
   };
+  console.log("payload",payload);
   return payload;
 };
 
@@ -1500,7 +1499,6 @@ const downloadData = () => {
         }
         if(optionalMetaGroups.value){
           //get parameterIds from payload
-          console.log("getGroupsForDownload", groupCodes);
           axios
           .post("https://cmc.vims.edu/DashboardApi/FetchGroupsForDashboardDownload", groupCodes)
           .then((response) => {
@@ -1639,8 +1637,7 @@ const getStationsFromCMC = async (load) => {
     .then((res) => {
       console.log("current time2: " + new Date().toLocaleTimeString());
       const res_str = JSON.stringify(res.data);
-      console.log("res_str");
-      console.log(res_str);
+
       stations.value = res.data;
 
       if (load & (res.data.length > 0)) {
@@ -1906,13 +1903,16 @@ const stationIdOptions = computed(() => {
   if (filteredStations.value !== null && filteredStations.value.length > 0) {
     console.log("filteredStations.value", filteredStations.value);
     const options = filteredStations.value.map((s) => ({
-      value: s.StationCode,
-      name: s.StationCode.substring(s.StationCode.indexOf('.')+1) + " (" + s.StationCode.split(".")[0] + ")",
+      value: s.StationId.toString(), //as string,
+      name: s.StationCode.substring(s.StationCode.indexOf('.')+1).replace(',','') + " (" + s.StationCode.split(".")[0].replace(',','') + ")",
     }));
 
-    //sort fi
+    console.log("options");
+    console.log(options);
+
+    //sort options by value
     const sortedOptions = [...options].sort((a, b) =>
-      a.value.localeCompare(b.value)
+      a.name.localeCompare(b.name)
     );
 
     return [...sortedOptions];
