@@ -198,7 +198,7 @@
             </div>
           </div>
           <div v-if="showCityState" class="row q-mt-md">
-            <div class="col">
+            <div class="col-11">
               <q-select
                 label="States (pick all that apply)"
                 v-model="selectedStates"
@@ -213,16 +213,23 @@
                 color="teal"
                 input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'state')"
-              >
-                <template v-slot:append>
-                  <q-icon name="close" v-show="selectedStates.length > 0" @click="selectedStates =[]" class="cursor-pointer" />
-                </template>
-            </q-select>
+                >
 
+              </q-select>
+            </div>
+            <div class="col-1">
+              <q-btn
+                icon="close"
+                name="close" v-show="selectedStates.length > 0"
+                @click="selectedStates =[]"
+                class="cursor-pointer"
+                color="primary"
+                flat
+              />
             </div>
           </div>
           <div v-if="showCityState" class="row q-mt-md">
-            <div class="col">
+            <div class="col-11">
               <q-select
                 label="City/County (pick all that apply)"
                 v-model="selectedCounties"
@@ -238,15 +245,21 @@
                 input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'county')"
               >
-                <template v-slot:append>
-                  <q-icon name="close" v-show="selectedCounties.length > 0" @click="selectedCounties =[]" class="cursor-pointer" />
-                </template>
               </q-select>
-
+            </div>
+            <div class="col-1">
+              <q-btn
+                icon="close"
+                name="close" v-show="selectedCounties.length > 0"
+                @click="selectedCounties =[]"
+                class="cursor-pointer"
+                color="primary"
+                flat
+              />
             </div>
           </div>
           <div v-if="showWatersheds" class="row q-mt-md">
-            <div class="col">
+            <div class="col-11">
               <q-select
                 label="Watersheds (pick all that apply)"
                 v-model="selectedWatershed"
@@ -262,14 +275,21 @@
                 input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'watershed')"
               >
-                <template v-slot:append>
-                  <q-icon name="close" v-show="selectedWatershed.length > 0" @click="selectedWatershed =[]" class="cursor-pointer" />
-                </template>
               </q-select>
+            </div>
+            <div class="col-1">
+              <q-btn
+                icon="close"
+                name="close" v-show="selectedWatershed.length > 0"
+                @click="selectedWatershed =[]"
+                class="cursor-pointer"
+                color="red"
+                flat
+              />
             </div>
           </div>
           <div v-if="showWatersheds" class="row q-mt-md">
-            <div class="col">
+            <div class="col-11">
               <q-select
                 label="Subwatersheds (pick all that apply)"
                 v-model="selectedSubwatershed"
@@ -285,15 +305,22 @@
                 input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'subwatershed')"
               >
-                <template v-slot:append>
-                  <q-icon name="close" v-show="selectedSubwatershed.length > 0" @click="selectedSubwatershed =[]" class="cursor-pointer" />
-                </template>
-            </q-select>
+              </q-select>
+            </div>
+            <div class="col-1">
+              <q-btn
+                icon="close"
+                name="close" v-show="selectedSubwatershed.length > 0"
+                @click="selectedSubwatershed =[]"
+                class="cursor-pointer"
+                color="red"
+                flat
+              />
             </div>
           </div>
 
           <div class="row q-mt-md">
-            <div class="col">
+            <div class="col-11">
               <q-select
                 label="Groups (pick all that apply)"
                 v-model="selectedGroups"
@@ -309,15 +336,22 @@
                 input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'group')"
               >
-                <template v-slot:append>
-                  <q-icon name="close" v-show="selectedGroups.length > 0" @click="selectedGroups =[]" class="cursor-pointer" />
-                </template>
-            </q-select>
+              </q-select>
+            </div>
+            <div class="col-1">
+              <q-btn
+                icon="close"
+                name="close" v-show="selectedGroups.length > 0"
+                @click="selectedGroups =[]"
+                class="cursor-pointer"
+                color="red"
+                flat
+              />
             </div>
           </div>
 
           <div class="row q-mt-md">
-            <div class="col">
+            <div class="col-11">
               <q-select
                 label="Stations (pick all that apply)"
                 v-model="selectedStations"
@@ -333,15 +367,22 @@
                 input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'station')"
               >
-                <template v-slot:append>
-                  <q-icon name="close" v-show="selectedStations.length > 0" @click="selectedStations =[]" class="cursor-pointer" />
-                </template>
               </q-select>
+            </div>
+            <div class="col-1">
+              <q-btn
+                icon="close"
+                name="close" v-show="selectedStations.length > 0"
+                @click="selectedStations =[]"
+                class="cursor-pointer"
+                color="red"
+                flat
+              />
             </div>
           </div>
 
           <div class="row q-mt-md">
-            <div class="col">
+            <div class="col-11">
               <q-select
                 label="Parameters (pick all that apply)"
                 v-model="selectedParams"
@@ -357,15 +398,22 @@
                 v-show="selectedDataType == 'Water Quality'"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'parameter')"
               >
-                <template v-slot:append>
-                  <q-icon name="close" v-show="selectedParams.length > 0" @click="selectedParams =[]" class="cursor-pointer" />
-                </template>
               </q-select>
+            </div>
+            <div class="col-1">
+              <q-btn
+                icon="close"
+                name="close" v-show="selectedParams.length > 0"
+                @click="selectedParams =[]"
+                class="cursor-pointer"
+                color="red"
+                flat
+              />
             </div>
           </div>
 
           <div class="row q-mt-md">
-            <div class="col-6 q-pr-xs">
+            <div class="col-5 q-pr-xs">
               <!--              <q-select label="Start Date" outlined dense></q-select>-->
               <q-input
                 label="Start Date"
@@ -390,7 +438,7 @@
                           <q-btn
                             v-close-popup
                             label="Close"
-                            color="primary"
+                            color="red"
                             flat
                           />
                         </div>
@@ -400,7 +448,8 @@
                 </template>
               </q-input>
             </div>
-            <div class="col-6 q-pl-xs">
+            <div class="col-1 q-pr-xs"></div>
+            <div class="col-5 q-pl-xs">
               <!--              <q-select label="End Date" outlined dense></q-select>-->
               <q-input
                 label="End Date"
@@ -435,13 +484,23 @@
                 </template>
               </q-input>
             </div>
+            <div class="col-1">
+              <q-btn
+                icon="close"
+                name="close" v-show="formattedEndDateMap != formattedLoadEndDate && formattedStartDateMap != formattedLoadStartDate && showDateClose"
+                @click="formattedEndDateMap = formattedLoadEndDate; formattedStartDateMap = formattedLoadStartDate;"
+                class="cursor-pointer"
+                color="red"
+                flat
+              />
+            </div>
           </div>
           <div class="row q-mt-lg">
             <div class="col text-center">
               <q-btn
                 label="Filter Map"
                 @click="getStationsFromCMC(false)"
-                color="primary"
+                color="teal"
                 style="width: 90%"
                 :loading="filtering"
                 icon="fas fa-filter"
@@ -456,7 +515,7 @@
               <q-btn
                 label="Clear Filters"
                 @click="clearFilters"
-                color="primary"
+                color="red"
                 style="width: 90%"
                 icon="fas fa-eraser"
               >
@@ -1182,11 +1241,17 @@ const filteredStations = ref([]);
 
 //Make a mask for the q-input in the form of ####-##-##
 const dateMask = dateFormat.replace(/[DMY]/g, "#");
-
+const showDateClose = ref(false);
 const formattedStartDateMap = ref(
   new Date(loadMinDate.value).toISOString().substring(0, 10)
 );
+const formattedLoadStartDate = ref(
+  new Date(loadMinDate.value).toISOString().substring(0, 10)
+);
 const formattedEndDateMap = ref(
+  new Date(loadMaxDate.value).toISOString().substring(0, 10)
+);
+const formattedLoadEndDate = ref(
   new Date(loadMaxDate.value).toISOString().substring(0, 10)
 );
 //Format the date for display in the q-input.
@@ -1340,7 +1405,6 @@ const addDayToDate = (oldDate) => {
 const downloadData = () => {
   const payload = formPayload();
   if (payload.endDate !== '' && payload.endDate !== null && typeof payload.endDate !== 'undefined') {
-
     payload.endDate = addDayToDate(payload.endDate);
   }
 
@@ -1564,7 +1628,6 @@ const getStationsFromCMC = async (load) => {
   filtering.value = true;
 
   if (payload.endDate !== '' && payload.endDate !== null && typeof payload.endDate !== 'undefined' && !load) {
-
     payload.endDate = addDayToDate(payload.endDate);
   }
   axios
@@ -1579,10 +1642,28 @@ const getStationsFromCMC = async (load) => {
       console.log("res_str");
       console.log(res_str);
       stations.value = res.data;
-      console.log(res.data.length);
-      console.log(res.data);
+
       if (load & (res.data.length > 0)) {
         localStorage.setItem(STATIONS, res_str);
+        // get min date as StartDate of the oldest station in transformedStations. exclude nulls
+        loadMinDate.value = new Date(
+          Math.min.apply(
+            null,
+            res.data.map((s) => new Date(s.StartDate))
+          )
+        );
+        formattedLoadStartDate.value = new Date(loadMinDate.value).toISOString().substring(0, 10)
+
+        // get max date as EndDate of the most recent station in transformedStations
+        loadMaxDate.value = new Date(
+          Math.max.apply(
+            null,
+            res.data.map((s) => new Date(s.EndDate))
+          )
+        );
+        formattedLoadEndDate.value = new Date(loadMaxDate.value).toISOString().substring(0, 10)
+        showDateClose.value = true;
+
       }
       filtering.value = false;
     })
