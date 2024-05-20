@@ -223,7 +223,7 @@
                 name="close" v-show="selectedStates.length > 0"
                 @click="selectedStates =[]"
                 class="cursor-pointer"
-                color="primary"
+                color="red"
                 flat
               />
             </div>
@@ -241,7 +241,7 @@
                 outlined
                 dense
                 use-input
-                color="teal"
+                color="red"
                 input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'county')"
               >
@@ -253,7 +253,7 @@
                 name="close" v-show="selectedCounties.length > 0"
                 @click="selectedCounties =[]"
                 class="cursor-pointer"
-                color="primary"
+                color="red"
                 flat
               />
             </div>
@@ -271,7 +271,7 @@
                 outlined
                 dense
                 use-input
-                color="teal"
+                color="red"
                 input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'watershed')"
               >
@@ -301,7 +301,7 @@
                 outlined
                 dense
                 use-input
-                color="teal"
+                color="red"
                 input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'subwatershed')"
               >
@@ -332,7 +332,7 @@
                 outlined
                 dense
                 use-input
-                color="teal"
+                color="red"
                 input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'group')"
               >
@@ -363,7 +363,7 @@
                 outlined
                 dense
                 use-input
-                color="teal"
+                color="red"
                 input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'station')"
               >
