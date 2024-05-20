@@ -973,7 +973,7 @@
 /*****************************
  * Imports
  ****************************/
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, resolveComponent, watch } from "vue";
 import axios from "axios";
 import _ from "lodash";
 
@@ -1407,208 +1407,140 @@ const downloadData = () => {
     payload.endDate = addDayToDate(payload.endDate);
   }
 
-  axios
-    .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForDownload", payload)
-    .then((response) => {
-      if (response.data.length > 0) {
+    axios
+      .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForDownload", payload)
+      .then((response) => {
+        if (response.data.length > 0) {
 
-        console.log("getSamplesForDownload");
-        console.log(response.data);
-        const samplesForDownload = response.data;
-        //write response.data to csv download and include headers
+          console.log("getSamplesForDownload");
+          console.log(response.data);
+          const samplesForDownload = response.data;
+          //write response.data to csv download and include headers
 
-        //let csv = Object.keys(response.data[0]).join(",") + "\n";
-        const csv = samplesForDownload.map((row) =>
-          Object.values(row).join(",")
-        )
-        csv.unshift(Object.keys(samplesForDownload[0]).join(","));
-        const csvString = csv.join("\n");
-        console.log('csvString',csvString);
-        const blob = new Blob([csvString], {
-          type: "text/csv",
-        });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "cmc_data.csv";
-        a.click();
-        window.URL.revokeObjectURL(url);
-        console.log("getParametersForDownload", samplesForDownload);
-        //get unique parameter codes as comma separated string from samplesForDownload
-        let paramCodes = [];
-        let groupCodes = [];
-        let stationCodes = [];
-        samplesForDownload.forEach((sample) => {
-          if (!paramCodes.includes(sample.ParameterCode)) {
-            paramCodes.push(sample.ParameterCode);
+          //let csv = Object.keys(response.data[0]).join(",") + "\n";
+          const csv = samplesForDownload.map((row) =>
+            Object.values(row).join(",")
+          )
+          csv.unshift(Object.keys(samplesForDownload[0]).join(","));
+          const csvString = csv.join("\n");
+          console.log('csvString',csvString);
+          const blob = new Blob([csvString], {
+            type: "text/csv",
+          });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "cmc_data.csv";
+          a.click();
+          window.URL.revokeObjectURL(url);
+          console.log("getParametersForDownload", samplesForDownload);
+          //get unique parameter codes as comma separated string from samplesForDownload
+          let paramCodes = [];
+          let groupCodes = [];
+          let stationCodes = [];
+          samplesForDownload.forEach((sample) => {
+            if (!paramCodes.includes(sample.ParameterCode)) {
+              paramCodes.push(sample.ParameterCode);
+            }
+            if (!groupCodes.includes(sample.GroupCode)) {
+              groupCodes.push(sample.GroupCode);
+            }
+            if (!stationCodes.includes(sample.StationId)) {
+              stationCodes.push(sample.StationId);
+            }
+          });
+          //change paramCodes into comma separated string
+          paramCodes = paramCodes.join(",");
+          paramCodes = {"parameters":paramCodes};
+          groupCodes = groupCodes.join(",");
+          groupCodes = {"groups":groupCodes};
+          stationCodes = stationCodes.join(",");
+          stationCodes = {"stations":stationCodes};
+
+          const requests = [];
+          if(optionalMetaParams.value){
+              requests.push(
+                axios
+                .post("https://cmc.vims.edu/DashboardApi/FetchParametersForDashboardDownload", paramCodes)
+              )
           }
-          if (!groupCodes.includes(sample.GroupCode)) {
-            groupCodes.push(sample.GroupCode);
+
+          if(optionalMetaGroups.value){
+            requests.push(
+              axios
+              .post("https://cmc.vims.edu/DashboardApi/FetchGroupsForDashboardDownload", groupCodes)
+            )
           }
-          if (!stationCodes.includes(sample.StationCode)) {
-            stationCodes.push(sample.StationCode);
+
+          if(optionalMetaStations.value){
+            requests.push(
+              axios
+              .post("https://cmc.vims.edu/DashboardApi/FetchStationsForDashboardDownload", stationCodes)
+            )
           }
-        });
-        //change paramCodes into comma separated string
-        paramCodes = paramCodes.join(",");
-        paramCodes = {"parameters":paramCodes};
-        groupCodes = groupCodes.join(",");
-        groupCodes = {"groups":groupCodes};
-        stationCodes = stationCodes.join(",");
-        stationCodes = {"stations":stationCodes};
-        console.log("paramCodes", paramCodes);
-        console.log("groupCodes", groupCodes);
-        console.log("optionalMetaParams", optionalMetaParams.value);
-        console.log("optionalMetaGroups", optionalMetaGroups.value);
-        if(optionalMetaParams.value){
 
+          if(optionalMetaCalibration.value && selectedDataType.value === 'Water Quality'){
+            requests.push(
+              axios
+              .post("https://cmc.vims.edu/DashboardApi/FetchCalibrationForDashboardDownload", payload)
+            )
+          }
+          Promise.all(requests).then(function(values) {
+            for (let i = 0; i < values.length; i++) {
+              let filename = values[i].config.url.split("/")[4];
+              let response = values[i];
 
+              if (response.data.length > 0) {
+                console.log(i.toString());
+                //loop through each element in each object in response.data and replace comma with empty string
 
-          axios
-          .post("https://cmc.vims.edu/DashboardApi/FetchParametersForDashboardDownload", paramCodes)
-          .then((response) => {
+                let obj= JSON.stringify(response.data);
 
-            console.log("getParametersForDownload", response.data);
+                obj= obj.replace(/(?=,(?!"))(,(?!{))/g,"");
+                let json = JSON.parse(obj)
 
-            if (response.data.length > 0) {
-              //loop through each element in each object in response.data and replace comma with empty string
+                //
+                const csv = json.map((row) =>
+                  Object.values(row).join(",")
+                )
+                console.log('csv-groups',csv)              //
+                csv.unshift(Object.keys(json[0]).join(","));
+                const csvString = csv.join("\n");
+                console.log('csvString',csvString);
+                const blob = new Blob([csvString], {
+                  type: "text/csv",
+                });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.setAttribute("id", "btn"+i.toString());
+                a.class="download-btn";
+                a.href = url;
+                a.download = filename+ ".csv";
+                console.log("a",a);
+                document.body.appendChild(a);
+              }
 
-              let obj= JSON.stringify(response.data);
-              obj= obj.replace(/(?=,(?!"))(,(?!{))/g,"");
-              response.data= JSON.parse(obj)
-
-              //
-              const csv = response.data.map((row) =>
-                Object.values(row).join(",")
-              )
-              console.log('csv-parameters',csv)              //
-              csv.unshift(Object.keys(response.data[0]).join(","));
-              const csvString = csv.join("\n");
-              console.log('csvString',csvString);
-              const blob = new Blob([csvString], {
-                type: "text/csv",
-              });
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = "cmc_parameters_metadata.csv";
-              a.click();
-              window.URL.revokeObjectURL(url);
             }
-          })
-        }
-        if(optionalMetaGroups.value){
-          //get parameterIds from payload
-          axios
-          .post("https://cmc.vims.edu/DashboardApi/FetchGroupsForDashboardDownload", groupCodes)
-          .then((response) => {
-            console.log("getGroupsForDownload", response.data);
-            if (response.data.length > 0) {
-              //loop through each element in each object in response.data and replace comma with empty string
-
-              let obj= JSON.stringify(response.data);
-              obj= obj.replace(/(?=,(?!"))(,(?!{))/g,"");
-              response.data= JSON.parse(obj)
-
-              //
-              const csv = response.data.map((row) =>
-                Object.values(row).join(",")
-              )
-              console.log('csv-groups',csv)              //
-              csv.unshift(Object.keys(response.data[0]).join(","));
-              const csvString = csv.join("\n");
-              console.log('csvString',csvString);
-              const blob = new Blob([csvString], {
-                type: "text/csv",
-              });
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = "cmc_groups_metadata.csv";
-              a.click();
-              window.URL.revokeObjectURL(url);
+            for (let i = 0; i < values.length; i++) {
+              setTimeout(function(){
+                let a = document.getElementById("btn"+i.toString());
+                a.click();
+                console.log("a",a.href);
+                // window.URL.revokeObjectURL(a.href);
+              },i*100);
             }
-          })
+          });
+
+
+        } else {
+          downloading.value = false;
+          console.log("getSamplesForDownload error");
+          console.log(error);
         }
-        if(optionalMetaStations.value){
-          //get parameterIds from payload
-          console.log("getStationsForDownload", stationCodes);
-          axios
-          .post("https://cmc.vims.edu/DashboardApi/FetchStationsForDashboardDownload", stationCodes)
-          .then((response) => {
-            console.log("getStationsForDownload", response.data);
-            if (response.data.length > 0) {
-              //loop through each element in each object in response.data and replace comma with empty string
-
-              let obj= JSON.stringify(response.data);
-              obj= obj.replace(/(?=,(?!"))(,(?!{))/g,"");
-              response.data= JSON.parse(obj)
-
-              //
-              const csv = response.data.map((row) =>
-                Object.values(row).join(",")
-              )
-              console.log('csv-stations',csv)              //
-              csv.unshift(Object.keys(response.data[0]).join(","));
-              const csvString = csv.join("\n");
-              console.log('csvString',csvString);
-              const blob = new Blob([csvString], {
-                type: "text/csv",
-              });
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = "cmc_stations_metadata.csv";
-              a.click();
-              window.URL.revokeObjectURL(url);
-            }
-          })
-        }
-        if(optionalMetaCalibration.value){
-          //get parameterIds from payload
-          console.log("getCalibrationForDownload", payload);
-          axios
-          .post("https://cmc.vims.edu/DashboardApi/FetchCalibrationForDashboardDownload", payload)
-          .then((response) => {
-            console.log("getCalibrationForDownload", response.data);
-            if (response.data.length > 0) {
-              //loop through each element in each object in response.data and replace comma with empty string
-
-              let obj= JSON.stringify(response.data);
-              obj= obj.replace(/(?=,(?!"))(,(?!{))/g,"");
-              response.data= JSON.parse(obj)
-
-              //
-              const csv = response.data.map((row) =>
-                Object.values(row).join(",")
-              )
-              console.log('csv-calibration',csv)              //
-              csv.unshift(Object.keys(response.data[0]).join(","));
-              const csvString = csv.join("\n");
-              console.log('csvString',csvString);
-              const blob = new Blob([csvString], {
-                type: "text/csv",
-              });
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = "cmc_calibration_metadata.csv";
-              a.click();
-              window.URL.revokeObjectURL(url);
-            }
-          })
-        }
-        downloading.value = false;
-      } else {
-        downloading.value = false;
-        console.log("getSamplesForDownload error");
-        console.log(error);
-      }
-    })
-    .catch((error) => console.log(error));
+      })
+      .catch((error) => console.log(error));
 
 };
-
 const getStationsFromCMC = async (load) => {
   if (!load) {
     stateOptions.value = [];
