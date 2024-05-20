@@ -655,7 +655,7 @@
           <q-separator />
 
           <q-card-actions align="right">
-            <q-btn flat label="Decline" color="primary" v-close-popup />
+            <!--<q-btn flat label="Decline" color="primary" v-close-popup />-->
             <q-btn flat :loading="downloading" label="Accept" color="primary" icon="download" :disabled="!dataUseAcknowledgment" @click="downloadData">
               <template v-slot:loading>
                 <q-spinner-gears /><span class="q-ml-sm">ACCEPT</span>
@@ -942,23 +942,27 @@
               </div>
             </div>
             <div class="row q-mt-md">
-              <div class="col-10"></div>
+              <div class="col-8"></div>
               <div class="col-2">
-                <div class="q-pa-md q-gutter-sm">
-
                 <q-btn
-                  round
+                  style="width: 90%"
                   color="teal"
                   icon="fas fa-minus"
                   @click="removePlot"
+                  v-show="plotCount > 1"
+                  label="Remove Plot"
                 />
+
+              </div>
+              <div class="col-2">
+
                 <q-btn
-                  round
+                  style="width: 90%"
                   color="primary"
                   icon="fas fa-plus"
                   @click="addPlot"
+                  label="Add Plot"
                 />
-              </div>
               </div>
             </div>
           </div>
