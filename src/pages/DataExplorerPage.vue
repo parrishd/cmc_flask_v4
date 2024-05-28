@@ -3,48 +3,61 @@
     <div class="q-px-xl q-mx-xl">
 
       <!-- stats bar -->
-      <div class="row q-mt-lg viewing-stats">
-        <!--<div class="col-1">Currently Viewing:</div>-->
-        <div class="col-12 col-md-3">
-          <q-icon class="fa-solid fa-file-lines q-mr-sm" size="32px" />
-          <span class='vertical-middle' style="font-size:20px">{{ sampleCount }} Samples</span>
-        </div>
-        <div class="col-12 col-md-3">
-          <q-icon class="fa-solid fa-building q-mr-sm" size="32px" />
-          <span class='vertical-middle' style="font-size:20px">{{ organizationsCount }} Organizations</span>
-        </div>
-        <div class="col-12 col-md-3">
-          <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" />
-          <span class='vertical-middle' style="font-size:20px">{{ stationsCount }} Total Stations</span>
-        </div>
-        <div class="col-12 col-md-3">
-          <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" :class="{
-                    'dot-purple': selectedDataType == 'Water Quality',
-                    'dot-orange': selectedDataType != 'Water Quality',
-                  }" />
-          <span class='vertical-middle' style="font-size:20px"
-                >{{ activeStationsCount }} Active Stations</span>
-          <q-icon class="fa-solid fa-circle-info q-ml-xl" size="22px">
-            <q-tooltip
-              anchor="bottom left"
-              self="top left"
-              class="bg-grey-2"
-              :offset="[360, 10]"
-            >
-              <div class="q-pa-md" style="max-width: 360px">
-                <div class="tooltip-header">Data Explorer Information</div>
-                <div class="q-mt-sm tooltip-text">
-                  The Data Explorer is a tool for storing and sharing data
-                  collected by a network of water quality and benthic
-                  macroinvertebrate monitors working with the Chesapeake
-                  Monitoring Cooperative. These data are publicly accessible and
-                  are shared directly with the Chesapeake Bay Program and other
-                  data users. The statistics above the map reflect the stations and
-                  associated data currently being viewed on the map and in the table below. Active stations are those that have been sampled in the last 5 years.
+      <div class="viewing-stats q-mt-lg">
+        <div class="row">
+          <div class="col-11"></div>
+          <div class="col-1">
+            <q-icon class="fa-solid fa-circle-info q-ml-xl" size="22px">
+              <q-tooltip
+                anchor="bottom left"
+                self="top left"
+                class="bg-grey-2"
+                :offset="[360, 10]"
+              >
+                <div class="q-pa-md" style="max-width: 360px">
+                  <div class="tooltip-header">Data Explorer Information</div>
+                  <div class="q-mt-sm tooltip-text">
+                    The Data Explorer is a tool for storing and sharing data
+                    collected by a network of water quality and benthic
+                    macroinvertebrate monitors working with the Chesapeake
+                    Monitoring Cooperative. These data are publicly accessible and
+                    are shared directly with the Chesapeake Bay Program and other
+                    data users. The statistics above the map reflect the stations and
+                    associated data currently being viewed on the map and in the table below. Active stations are those that have been sampled in the last 5 years.
+                  </div>
                 </div>
-              </div>
-            </q-tooltip>
-          </q-icon>
+              </q-tooltip>
+            </q-icon>
+          </div>
+        </div>
+        <div class="row q-mt-md">
+          <!--<div class="col-1">Currently Viewing:</div>-->
+            <div class="col">
+              <q-icon class="fa-solid fa-file-lines q-mr-sm" size="32px" />
+              <span class='vertical-middle' style="font-size:20px">{{ sampleCount }} Samples</span>
+            </div>
+            <div class="col">
+              <q-icon class="fa-solid fa-building q-mr-sm" size="32px" />
+              <span class='vertical-middle' style="font-size:20px">{{ organizationsCount }} Organizations</span>
+            </div>
+            <div class="col">
+              <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" />
+              <span class='vertical-middle' style="font-size:20px">{{ stationsCount }} Total Stations</span>
+            </div>
+            <div class="col">
+              <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" :class="{
+                        'dot-purple': selectedDataType == 'Water Quality',
+                        'dot-orange': selectedDataType != 'Water Quality',
+                      }" />
+              <span class='vertical-middle' style="font-size:20px"
+                    >{{ activeStationsCount }} Active Stations</span>
+
+
+            </div>
+            <div class="col ">
+              <q-icon class="fa-solid fa-calendar q-mr-sm" size="32px" />
+              <span class='vertical-middle' style="font-size:20px">{{ formattedStartDateStats }} - {{formattedEndDateStats}}</span>
+            </div>
         </div>
       </div>
 
@@ -192,9 +205,19 @@
               ></q-select>
             </div>
           </div>-->
-          <div class="row">
+          <div class="row q-mt-lg">
             <div class="col">
-              <q-label style='color:teal' class="text-h6">Station Filters</q-label>
+              <q-label style='color:teal' class="text-h6">Data Filters</q-label>
+            </div>
+            <div class="col text-center">
+              <q-btn
+                label="Clear Filters"
+                @click="clearFilters"
+                color="red"
+                style="width: 90%"
+                icon="fas fa-eraser"
+              >
+              </q-btn>
             </div>
           </div>
           <div v-if="showCityState" class="row q-mt-md">
@@ -432,7 +455,7 @@
                       <q-date
                         v-model="formattedStartDateMap"
                         :mask="dateFormat"
-                        today-btn
+                        :options="dateOptionsFn"
                       >
                         <div class="row items-center justify-end">
                           <q-btn
@@ -468,7 +491,8 @@
                       <q-date
                         v-model="formattedEndDateMap"
                         :mask="dateFormat"
-                        today-btn
+                        :options="dateOptionsFn"
+
                       >
                         <div class="row items-center justify-end">
                           <q-btn
@@ -487,46 +511,37 @@
             <div class="col-1">
               <q-btn
                 icon="close"
-                name="close" v-show="formattedEndDateMap != formattedLoadEndDate && formattedStartDateMap != formattedLoadStartDate && showDateClose"
-                @click="formattedEndDateMap = formattedLoadEndDate; formattedStartDateMap = formattedLoadStartDate;"
+                name="close" v-show="formattedEndDateMap != '' && formattedStartDateMap != '' && showDateClose"
+                @click="formattedEndDateMap = ''; formattedStartDateMap = '';"
                 class="cursor-pointer"
                 color="red"
                 flat
               />
             </div>
           </div>
-          <div class="row q-mt-lg">
+          <div class="row q-mt-xl">
             <div class="col text-center">
               <q-btn
-                label="Filter Map"
+                label="&nbsp Filter Map"
                 @click="getStationsFromCMC(false)"
                 color="teal"
-                style="width: 90%"
+                style="width:100%;height:60px;font-size:20px;"
                 :loading="filtering"
                 icon="fas fa-filter"
                 >
+
                 <template v-slot:loading>
-                  <q-spinner-gears /><span class="q-ml-sm">Filtering</span>
+                  <q-spinner-gears /><span class="q-ml-md">Filtering</span>
                 </template>
               </q-btn>
 
             </div>
-            <div class="col text-center">
-              <q-btn
-                label="Clear Filters"
-                @click="clearFilters"
-                color="red"
-                style="width: 90%"
-                icon="fas fa-eraser"
-              >
-              </q-btn>
-            </div>
+
           </div>
           <div class="row q-mt-sm">
             <div class="col">
-              <div v-show="showQueryError" style="color: red">
-                The filters you selected returned no stations. Clicking "Filter
-                Map" after selecting each new filter may help.
+              <div v-show="showQueryError" style="color: red; font-size:20px;">
+                There are no data that match the filters you selected. Click "Filter Map" after selecting each new filter to help your search.
               </div>
             </div>
           </div>
@@ -536,8 +551,8 @@
               <q-btn
                 label="Download Data"
                 color="primary"
-                style="width: 90%"
-                @click="downloadDialog = true"
+                style="width: 100%;font-size:16px;"
+                @click="getStationsFromCMC(false,true);"
                 icon="fas fa-download"
               />
             </div>
@@ -545,7 +560,7 @@
         </div>
       </div>
       <q-dialog v-model="downloadDialog" >
-        <q-card style="width: 800px; max-width: 90vw;" bg-grey-9 text-white>
+        <q-card style="width: 800px; max-width: 90vw; height: 95vh;" bg-grey-9 text-white>
           <q-card-section>
 
             <div class="row">
@@ -567,27 +582,47 @@
 
           <q-separator />
 
-          <q-card-section style="max-height: 80vh;" class="scroll">
-            <p>
-              Your {{selectedDataType}} download will include <span style="font-size: 28px;color: #075C7A;">{{ sampleCount }}</span> samples. The download will consist of all samples:
+          <q-card-section style="height:200px" class="scroll">
+
+            <p style = 'font-size: 20px;'>
+               Your <span style="color: #075C7A;">{{selectedDataType}}</span> download from <span style="color: #075C7A;">{{ formattedStartDateStats }}</span> to <span style="color: #075C7A;">{{formattedEndDateStats}}</span> will include:
               <ul>
-                <li v-show="selectedStates.length > 0"> that were collected in the following states: {{ selectedStates.map(({ value }) => value).join(", ") }}</li>
-                <li v-show="selectedCounties.length > 0">that were collected in the following counties: {{ selectedCounties.map(({ value }) => value).join(", ") }}</li>
-                <li v-show="selectedWatershed.length > 0">that were collected in the following watersheds: {{ selectedWatershed.map(({ value }) => value).join(",") }}</li>
-                <li v-show="selectedSubwatershed.length > 0">that were collected in the following subwatersheds: {{ selectedSubwatershed.map(({ value }) => value).join(", ") }}</li>
-                <li v-show="selectedGroups.length > 0">that were collected by the following groups: {{ selectedGroups.map(({ value }) => value).join(", ") }}</li>
-                <li v-show="selectedStations.length > 0">that were collected at the following stations: {{ selectedStations.map(({ value }) => value).join(", ") }}</li>
-                <li v-show="selectedParams.length > 0">that are associated with the following parameters: {{ selectedParams.map(({ name }) => name).join(", ") }}</li>
+                <li><span style="color: #075C7A;">{{ sampleCount }}</span> samples</li>
+                <li><span style="color: #075C7A;">{{ organizationsCount }}</span> organizations</li>
+                <li><span style="color: #075C7A;">{{ stationsCount }}</span> stations</li>
+                <li><span style="color: #075C7A;">Parameter List</span>: {{ listParameters() }}</li>
+              </ul>
+
+              <ul>
                 <li v-show="formattedStartDateMap">that were collected after {{ formattedStartDateMap }}</li>
                 <li v-show="formattedEndDateMap">that were collected before {{ formattedEndDateMap }}</li>
               </ul>
             </p>
+          </q-card-section>
+
+          <q-card-section>
             <div class="row q-mt-md">
-              <div class="col">
+              <div class="col-11" style="font-size:20px">
                 Choose optional metadata to include with download
               </div>
+              <div class = "col-1">
+                <q-icon class="fa-solid fa-circle-info" size="24px" color="primary">
+                  <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
+                    <div class="q-pa-md" style="max-width: 360px">
+                      <div class="tooltip-header">Metadata</div>
+                      <div class="q-mt-sm tooltip-text">
+                        Clicking the select boxes in this section will allow you to download a separate file with
+                        metadata associated with the samples you are downloading. These metadata include
+                        additional information about the groups, stations, and parameters. Selecting calibration parameters will include
+                        available calibration samples as a separate file as well.
+                      </div>
+                    </div>
+                  </q-tooltip>
+                </q-icon>
+              </div>
             </div>
-            <div class="row q-mt-sm">
+
+            <div class="row q-mt-md">
               <div class="col-6">
                 <q-checkbox v-model="optionalMetaGroups" label="Groups" />
               </div>
@@ -606,45 +641,65 @@
                 />
               </div>
             </div>
-            <q-separator class="q-mt-md"/>
-            <q-card-section>
-              <div style="font-size:20px">Help us learn about you</div>
-              <div class="row q-mt-md">
-                <div class="col">
-                  <!--, val => !!val || 'Email is required']"-->
-                  <q-input v-model="email" label="Email" :dense="dense"
-                    :rules="[(val) => validateEmail(val) || 'Must be a valid email.']"
-                  />
-                  <q-select  v-model="selectedOccupation" :options="occupationOptions" label="Occupation" />
-                  <q-select class="q-mt-md" v-model="selectedPurpose" :options="purposeOptions" label="Purpose" />
-                  <q-input
-                    v-model="comments"
-                    class="q-mt-md"
-                    label="Comments"
-                    type="textarea"
-                  />
-                </div>
+          </q-card-section>
+
+          <q-card-section>
+            <div class='row q-mt-md'>
+              <div class='col-11 '>
+                <div style="font-size:20px">Help us learn about you</div>
               </div>
-            </q-card-section>
+              <div class = "col-1">
+                <q-icon class="fa-solid fa-circle-info" size="24px" color="primary">
+                  <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
+                    <div class="q-pa-md" style="max-width: 360px">
+                      <div class="tooltip-header">Metadata</div>
+                      <div class="q-mt-sm tooltip-text">
+                        This is an optional section. We would like to learn more about the users of the CMC Data Explorer.
+                        Please provide your email address, role, and the purpose of your data download. This information will help us understand who is using the data and how it is being used. We will not share your email address with any third parties.
+                      </div>
+                    </div>
+                  </q-tooltip>
+                </q-icon>
+              </div>
+            </div>
+            <div class="row q-mt-md">
+              <div class="col">
+                <!--, val => !!val || 'Email is required']"-->
+                <q-input v-model="email" label="Email" :dense="dense"
+                  :rules="[(val) => validateEmail(val) || 'Must be a valid email.']"
+                />
+                <q-select  v-model="selectedRole" :options="roleOptions" label="Role" />
+                <q-select class="q-mt-md" v-model="selectedPurpose" :options="purposeOptions" label="Purpose" />
+                <q-input
+                  v-model="comments"
+                  class="q-mt-md"
+                  label="Comments"
+                  type="textarea"
+                />
+              </div>
+            </div>
+          </q-card-section>
 
 
+          <q-card-section>
             <div class="row q-mt-sm">
               <div class="col">
 
               </div>
             </div>
 
-            <div class="row q-mt-sm">
-              <div class="col">
-                Please acknowledge data use prior to download:
+            <div class="row q-mt-md">
+              <div class="col" style="font-size:20px">
+                Please acknowledge data use prior to download
               </div>
             </div>
 
-            <div class="row q-mt-sm">
+
+            <div class="row q-mt-md">
               <div class="col" style="max-width: 40px">
                 <q-checkbox v-model="dataUseAcknowledgment" />
               </div>
-              <div class="col q-pt-xs text-caption">
+              <div class="col ">
                 I as the data user acknowledge that the data belong to the
                 original data provider and will properly credit the data
                 provider(s) in any product that uses their data.
@@ -656,12 +711,12 @@
 
           <q-card-actions align="right">
             <!--<q-btn flat label="Decline" color="primary" v-close-popup />-->
-            <q-btn flat :loading="downloading" label="Accept" color="primary" icon="download" :disabled="!dataUseAcknowledgment" @click="downloadData">
+            <q-btn flat :loading="downloading" label="Accept" color="primary" icon="download"
+                    :disabled="!dataUseAcknowledgment" @click="downloadData">
               <template v-slot:loading>
                 <q-spinner-gears /><span class="q-ml-sm">ACCEPT</span>
               </template>
             </q-btn>
-
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -1085,7 +1140,7 @@ const dataTypes = [
 const paramTypeOptions = ["Sample Depth", "Parameter"];
 const geoTypesOptions = [{ label: "Watershed", value: "Watershed" },
 { label: "Political", value: "Political" }];
-const occupationOptions = [
+const roleOptions = [
   "Coastal Resource Manager",
   "Federal Agency",
   "State Agency",
@@ -1144,7 +1199,7 @@ const selectedSubwatershed = ref([]);
 const selectedGroups = ref([]);
 const selectedParams = ref([]);
 const selectedPurpose = ref("");
-const selectedOccupation = ref("");
+const selectedRole= ref("");
 const firstName = ref("");
 const lastName = ref("");
 const email = ref("");
@@ -1246,15 +1301,29 @@ const filteredStations = ref([]);
 //Make a mask for the q-input in the form of ####-##-##
 const dateMask = dateFormat.replace(/[DMY]/g, "#");
 const showDateClose = ref(false);
-const formattedStartDateMap = ref(
-  new Date(loadMinDate.value).toISOString().substring(0, 10)
-);
+
+const formattedStartDateStats = ref(
+
+  new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date(loadMinDate.value)));
+
+const formattedStartDateMap = ref('');
 const formattedLoadStartDate = ref(
   new Date(loadMinDate.value).toISOString().substring(0, 10)
 );
-const formattedEndDateMap = ref(
+const formattedEndDateStats = ref(
   new Date(loadMaxDate.value).toISOString().substring(0, 10)
 );
+const formattedStartDateLimit = ref(
+  new Date(loadMinDate.value).toISOString().substring(0, 10)
+);
+const formattedEndDateLimit = ref(
+  new Date(loadMaxDate.value).toISOString().substring(0, 10)
+);
+const formattedEndDateMap = ref('');
 const formattedLoadEndDate = ref(
   new Date(loadMaxDate.value).toISOString().substring(0, 10)
 );
@@ -1290,6 +1359,49 @@ const formattedEndDatePlot = ref(
   };
   receiveEmit(station);
  });
+ const dateOptionsFn = (date) => {
+    let startDate = '1901-01-01';
+    let endDate = new Date().toISOString().substring(0, 10);
+    if (formattedStartDateLimit.value !== '' && formattedStartDateLimit.value !== null && formattedStartDateLimit.value !== 'undefined') {
+      startDate = formattedStartDateLimit.value;
+    }
+    if (formattedEndDateLimit.value !== '' && formattedEndDateLimit.value !== null && formattedEndDateLimit.value !== 'undefined') {
+      endDate = formattedEndDateLimit.value;
+    }
+    //format startDate and endDate to be in the format of "YYYY/MM/DD"
+    startDate = startDate.split('-')
+    startDate = startDate[0] + '/' + startDate[1] + '/' + startDate[2]
+    endDate = endDate.split('-')
+    endDate = endDate[0] + '/' + endDate[1] + '/' + endDate[2]
+    return date >= startDate && date <= endDate;
+ };
+ const listParameters = () => {
+  console.log('listParameters')
+  console.log(selectedParams.value);
+  console.log(paramFilteredOptions.value);
+  console.log(paramFilteredOptions.value.length)
+  console.log(paramOptions.value);
+
+  if(paramFilteredOptions.value.length < 1 & selectedParams.value.length === 0){
+    let params = '';
+    console.log('test')
+
+    paramOptions.value.forEach((param) => {
+      console.log(param)
+      if(params.split(',').includes(param.name)){
+        return;
+      }else{
+        params += param.name + ', ';
+      }
+
+    })
+    return params;
+  }
+  if(selectedParams.value.length === 0){
+    return paramFilteredOptions.value.map(({name}) => name).join(", ")
+  }
+  return selectedParams.value.map(({name}) => name).join(", ");
+ };
  const filterFn = (val, update, abort, type) =>{
   if (val === '') {
 
@@ -1313,6 +1425,7 @@ const formattedEndDatePlot = ref(
     })
     return
   }
+
 
   update(() => {
     const needle = val.toLowerCase()
@@ -1377,6 +1490,15 @@ const formPayload =  () => {
     .map(({ value }) => value)
     .join(",");
 
+  let formattedStartDateMapString = formattedStartDateMap.value;
+  if(formattedStartDateMapString == ''){
+    formattedStartDateMapString = new Date('1901-01-01').toISOString().substring(0, 10);
+  }
+  let formattedEndDateMapString = formattedEndDateMap.value;
+  if(formattedEndDateMapString == ''){
+    formattedEndDateMapString = new Date().toISOString().substring(0, 10);
+  }
+
 
   const payload = {
     dataType: selectedDataType.value,
@@ -1387,8 +1509,8 @@ const formPayload =  () => {
     watersheds: watershedsCsv,
     subwatersheds: subwatershedsCsv,
     parameters: paramIdsCsv,
-    startDate: formattedStartDateMap.value,
-    endDate: formattedEndDateMap.value,
+    startDate: formattedStartDateMapString,
+    endDate: formattedEndDateMapString,
   };
   console.log("payload",payload);
   return payload;
@@ -1545,7 +1667,7 @@ const downloadData = () => {
       .catch((error) => console.log(error));
 
 };
-const getStationsFromCMC = async (load) => {
+const getStationsFromCMC = async (load,download) => {
   if (!load) {
     stateOptions.value = [];
     groupOptions.value = [];
@@ -1599,6 +1721,10 @@ const getStationsFromCMC = async (load) => {
 
       }
       filtering.value = false;
+      if(download){
+        downloadDialog.value = true
+      }
+
     })
     .catch((error) => {
       if (load) {
@@ -1706,8 +1832,21 @@ const aggregateStations = () => {
   );
   console.log("AGG time2: " + new Date().toLocaleTimeString());
 
-  formattedStartDateMap.value = new Date(minDate).toISOString().substring(0, 10);
-  formattedEndDateMap.value = new Date(maxDate).toISOString().substring(0, 10);
+  formattedStartDateStats.value = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date(minDate));
+
+  formattedEndDateStats.value = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date(maxDate));
+
+  formattedStartDateLimit.value = new Date(minDate).toISOString().substring(0, 10);
+  formattedEndDateLimit.value = new Date(maxDate).toISOString().substring(0, 10);
+
   let aggregatedStations = [];
 
   //this will aggregate stations with the same station id and concatenate group names and
@@ -2017,8 +2156,8 @@ watch(selectedDataType, () => {
   selectedSubwatershed.value = [];
   selectedGroups.value = [];
   selectedParams.value = [];
-  formattedStartDateMap.value = new Date(loadMinDate.value).toISOString().substring(0, 10);
-  formattedEndDateMap.value = new Date(loadMaxDate.value).toISOString().substring(0, 10);
+  formattedStartDateMap.value = '';
+  formattedEndDateMap.value = '';
   getStationsFromCMC(true);
 });
 
@@ -2060,8 +2199,8 @@ function clearFilters() {
   selectedSubwatershed.value = [];
   selectedGroups.value = [];
   selectedParams.value = [];
-  formattedStartDateMap.value = new Date(loadMinDate.value).toISOString().substring(0, 10);
-  formattedEndDateMap.value = new Date(loadMaxDate.value).toISOString().substring(0, 10);
+  formattedStartDateMap.value = '';
+  formattedEndDateMap.value = '';
   stations.value = JSON.parse(localStorage.getItem(STATIONS));
   getStationsFromCMC(true);
 }

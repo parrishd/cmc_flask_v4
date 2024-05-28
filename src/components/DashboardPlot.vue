@@ -225,20 +225,19 @@ const downloadPlotData = (plot) => {
   //format datetime in pivotData as "yyyy-MM-dd HH:mm:ss"
   pivotData.forEach((d) => {
     console.log(d);
-    d.x =
-      new Date(d.x).toISOString().slice(0, 10) +
-      " " +
-      new Date(d.x).toISOString().slice(11, 16);
-    console.log(d.x);
+    d.date = new Date(d.x).toISOString().slice(0, 10);
+    d.time = new Date(d.x).toISOString().slice(11, 16);
+    console.log(d.date);
+    console.log(d.time);
   });
 
   //dowload pivotData as csv file
   let csv = "data:text/csv;charset=utf-8,";
-  let header = "DateTime,";
+  let header = "Date,Time,";
   let names = [];
   pivotData.forEach((d) => {
     for (const [key, value] of Object.entries(d)) {
-      if (key !== "x") {
+      if ((key !== "x") & (key !== "date") & (key !== "time")) {
         if (!names.includes(key)) {
           names.push(key);
           header += key + ",";
@@ -248,7 +247,7 @@ const downloadPlotData = (plot) => {
   });
   csv += header + "\n";
   pivotData.forEach((d) => {
-    let row = d.x + ",";
+    let row = d.date + "," + d.time + ",";
     names.forEach((name) => {
       if (d[name]) {
         row += d[name] + ",";

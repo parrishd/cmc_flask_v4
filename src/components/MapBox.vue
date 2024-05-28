@@ -399,6 +399,7 @@ const addPolygon1 = () => {
   map.on("mouseleave", "polygon1-layer", onMouseLeaveEvent);
   map.on("click", "polygon1-layer", (e) => {
     map.fire("closeAllStationsPopups");
+    map.fire("closeAllPolygonPopups");
     console.log("On click polygon event");
     console.log(e);
     console.log(e.features[0]);
@@ -477,10 +478,11 @@ const addPolygon2 = () => {
   map.on("mouseleave", "polygon2-layer", onMouseLeaveEvent);
   map.on("click", "polygon2-layer", (e) => {
     map.fire("closeAllStationsPopups");
+    map.fire("closeAllPolygonPopups");
     console.log("On click polygon event");
     console.log(e);
     console.log(e.features[0]);
-    let polyName = e.features[0].properties.NAME;
+    let polyName = e.features[0].properties.NAMELSAD20;
     if (selectedGeoType.value === "Watershed") {
       polyName = e.features[0].properties.NAME;
     }
@@ -631,6 +633,7 @@ const setupStationsOnMap = () => {
   map.on("click", "places", (e) => {
     // Copy coordinates array.
     map.fire("closeAllPolygonPopups");
+    map.fire("closeAllStationPopups");
     console.log(e);
     console.log(e.features[0].properties.groupnames);
     const coordinates = e.features[0].geometry.coordinates.slice();
