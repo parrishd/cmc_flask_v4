@@ -655,9 +655,10 @@
                       <div class="tooltip-header">Data Use Information</div>
                       <div class="q-mt-sm tooltip-text">
                         We would like to learn more about how these data are used.
-                        We require that you provide your email address, role, and the purpose of your data download prior to retrieving the requested data.
+                        We require that you provide your email address, role, the purpose for the requested data, and
+                        an acknowledgement of the proper data citation requirements prior to retrieving the requested data.
                         This information will help us understand who is using the data and how it is being used.
-                        We will not share your email address with any third parties.
+                        We will not share your email address or any other information with any third parties.
                       </div>
                     </div>
                   </q-tooltip>
