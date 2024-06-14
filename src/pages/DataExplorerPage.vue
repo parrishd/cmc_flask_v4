@@ -712,8 +712,8 @@
           <q-separator />
 
           <q-card-actions align="right">
-            <!--:disabled="!dataUseAcknowledgment || email =='' || selectedRole == '' || selectedPurpose == ''"-->
-            <q-btn flat :loading="downloading" label="Accept" color="primary" icon="download"
+            <!---->
+            <q-btn flat :disabled="!dataUseAcknowledgment || email =='' || selectedRole == '' || selectedPurpose == ''" :loading="downloading" label="Accept" color="primary" icon="download"
                      @click="downloadData">
               <template v-slot:loading>
                 <q-spinner-gears /><span class="q-ml-sm">ACCEPT</span>
