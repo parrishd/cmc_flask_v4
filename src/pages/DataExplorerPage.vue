@@ -584,7 +584,7 @@
 
           <q-card-section style="height:200px" class="scroll">
 
-            <p style = 'font-size: 20px;'>
+            <p style = 'font-size: 16px;'>
                Your <span style="color: #075C7A;">{{selectedDataType}}</span> download from <span style="color: #075C7A;">{{ formattedStartDateStats }}</span> to <span style="color: #075C7A;">{{formattedEndDateStats}}</span> will include:
               <ul>
                 <li><span style="color: #075C7A;">{{ sampleCount }}</span> samples</li>
@@ -652,10 +652,12 @@
                 <q-icon class="fa-solid fa-circle-info" size="24px" color="primary">
                   <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
                     <div class="q-pa-md" style="max-width: 360px">
-                      <div class="tooltip-header">Metadata</div>
+                      <div class="tooltip-header">Data Use Information</div>
                       <div class="q-mt-sm tooltip-text">
-                        This is an optional section. We would like to learn more about the users of the CMC Data Explorer.
-                        Please provide your email address, role, and the purpose of your data download. This information will help us understand who is using the data and how it is being used. We will not share your email address with any third parties.
+                        We would like to learn more about how these data are used.
+                        We require that you provide your email address, role, and the purpose of your data download prior to retrieving the requested data.
+                        This information will help us understand who is using the data and how it is being used.
+                        We will not share your email address with any third parties.
                       </div>
                     </div>
                   </q-tooltip>
@@ -665,11 +667,11 @@
             <div class="row q-mt-md">
               <div class="col">
                 <!--, val => !!val || 'Email is required']"-->
-                <q-input v-model="email" label="Email" :dense="dense"
-                  :rules="[(val) => validateEmail(val) || 'Must be a valid email.']"
+                <q-input v-model="email" label="Email *" :dense="dense"
+                  :rules="[(val) => validateEmail(val) || 'Must be a valid email.', val => !!val || 'Field is required']"
                 />
-                <q-select  v-model="selectedRole" :options="roleOptions" label="Role" />
-                <q-select class="q-mt-md" v-model="selectedPurpose" :options="purposeOptions" label="Purpose" />
+                <q-select  v-model="selectedRole" :options="roleOptions" label="Role *" :rules="[val => !!val || 'Field is required']" />
+                <q-select class="q-mt-md" v-model="selectedPurpose" :options="purposeOptions" label="Purpose *" :rules="[val => !!val || 'Field is required']" />
                 <q-input
                   v-model="comments"
                   class="q-mt-md"
@@ -710,9 +712,9 @@
           <q-separator />
 
           <q-card-actions align="right">
-            <!--<q-btn flat label="Decline" color="primary" v-close-popup />-->
+            <!--:disabled="!dataUseAcknowledgment || email =='' || selectedRole == '' || selectedPurpose == ''"-->
             <q-btn flat :loading="downloading" label="Accept" color="primary" icon="download"
-                    :disabled="!dataUseAcknowledgment" @click="downloadData">
+                     @click="downloadData">
               <template v-slot:loading>
                 <q-spinner-gears /><span class="q-ml-sm">ACCEPT</span>
               </template>
@@ -1042,7 +1044,7 @@ import DashboardPlot from "components/DashboardPlot.vue";
 
 //import stations from "/src/assets/cmcV3_stations.json";
 import { date } from "quasar";
-import { EvaluationParameters, coerceSelectionMarkerOpacity, format, get, lengthToDegrees } from "plotly.js-dist";
+import { EvaluationParameters, coerceSelectionMarkerOpacity, format, get, lengthToDegrees, write } from "plotly.js-dist";
 
 const emit = defineEmits(["update:endDatePlot", "update:startDatePlot"]);
 
@@ -1526,12 +1528,229 @@ const addDayToDate = (oldDate) => {
   return newDate;
 };
 
+const writeCSV = (data,pivot,payload) => {
+  if(!pivot){
+    const csv = data.map((row) =>
+      Object.values(row).join(",")
+    )
+    csv.unshift(Object.keys(data[0]).join(","));
+    const csvString = csv.join("\n");
+    //console.log('csvString',csvString);
+    const blob = new Blob([csvString], {
+      type: "text/csv",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cmc_data.csv";
+    a.click();
+    window.URL.revokeObjectURL(url);
+    console.log('unpivot done',new Date().toLocaleTimeString());
+  }else{
+    axios.post("https://cmc.vims.edu/DashboardApi/FetchConditionsForDownload", payload)
+      .then((response) => {
+        console.log("getSamplesForDownload");
+        console.log(response.data);
+        const conditions = response.data;
+
+
+        // loop through the data and pivot by creating a new object for each unique StationCode,GroupCode,DateTime,SampleDepth, and SampleId.
+        // Each object will have the ParameterCode as the key and the value as the parameter value.
+        // Concatenate the ParameterCode and '_Problem' as another key with the value as the Problem value.
+        // Concatenate the QualifierCode and '_Qualifier' as another key with the value as the Problem value.
+        // So, each object will have the following keys: StationCode,GroupCode,DateTime,SampleDepth,SampleId,ParameterCode1,ParameterCode2,...,ParameterCodeN,ParameterCode1_Problem,ParameterCode2_Problem,...,ParameterCodeN_Problem,ParameterCode1_Qualifier,ParameterCode2_Qualifier,...,ParameterCodeN_Qualifier
+        // Then, loop through the objects and create a csv string with the keys as the header and the values as the rows.
+        // Write the csv string to a csv file and download it.
+        let csv = [];
+        let headers = [];
+        let header = '';
+        let csvString = '';
+        let csvRow = '';
+        let csvRowArray = [];
+        console.log('data',data);
+
+        data.forEach((row) => {
+          let newRow = {};
+          //check if combination of the following keys exists in the csv array: StationCode,GroupCode,DateTime,SampleDepth,SampleId
+          let exists = false;
+          csv.forEach((csvRow) => {
+            if(csvRow.StationCode === row.StationCode && csvRow.GroupCode === row.GroupCode && csvRow.DateTime === row.DateTime &&
+              csvRow.SampleDepth === row.SampleDepth && csvRow.SampleId === row.SampleId && csvRow.Comments === row.Comments){
+              exists = true;
+            }
+          });
+          if(!exists){
+            newRow['StationCode'] = row.StationCode;
+            newRow['GroupCode'] = row.GroupCode;
+            newRow['DateTime'] = row.DateTime;
+            newRow['SampleDepth'] = row.SampleDepth;
+            newRow['SampleId'] = row.SampleId;
+            newRow['Comments'] = row.Comments;
+            if(!headers.includes('StationCode')){
+              headers.push('StationCode');
+              headers.push('GroupCode');
+              headers.push('DateTime');
+              headers.push('SampleDepth');
+              headers.push('SampleId');
+              headers.push('Comments');
+            }
+            csv.push(newRow);
+          }
+          //find the index of the object in the csv array that has the same StationCode,GroupCode,DateTime,SampleDepth,SampleId
+          let index = csv.findIndex((csvRow) => {
+            return csvRow.StationCode === row.StationCode && csvRow.GroupCode === row.GroupCode && csvRow.DateTime === row.DateTime &&
+                    csvRow.SampleDepth === row.SampleDepth && csvRow.SampleId === row.SampleId && row.Comments === csvRow.Comments;
+          });
+
+          //if the object exists, add the ParameterCode, Problem, and Qualifier to the object
+          if(index > -1){
+            //check if the Value is undefined and set it to an empty string if it is
+            if(row.Value === undefined){
+              row.Value = '';
+            }
+            if(row.ProblemCode === undefined){
+              row.ProblemCode = '';
+            }
+            if(row.QualifierCode === undefined){
+              row.QualifierCode = '';
+            }
+            csv[index][row.ParameterCode] = row.Value;
+            csv[index][row.ParameterCode + '_Problem'] = row.ProblemCode;
+            csv[index][row.ParameterCode + '_Qualifier'] = row.QualifierCode;
+            if(!headers.includes(row.ParameterCode)){
+              headers.push(row.ParameterCode);
+              headers.push(row.ParameterCode + '_Problem');
+              headers.push(row.ParameterCode + '_Qualifier');
+            }
+          }
+
+
+        });
+        // do the same for the conditions data except no need for problem and qualifier
+        conditions.forEach((row) => {
+          // let newRow = {};
+          // //check if combination of the following keys exists in the csv array: StationCode,GroupCode,DateTime,SampleDepth,SampleId
+          // let exists = false;
+          // csv.forEach((csvRow) => {
+          //   if(csvRow.StationCode === row.StationCode && csvRow.GroupCode === row.GroupCode && csvRow.DateTime === row.DateTime &&
+          //      csvRow.Comments === row.Comments){
+          //     exists = true;
+          //   }
+          // });
+          // if(!exists){
+          //   newRow['StationCode'] = row.StationCode;
+          //   newRow['GroupCode'] = row.GroupCode;
+          //   newRow['DateTime'] = row.DateTime;
+          //   newRow['SampleDepth'] = row.SampleDepth;
+          //   newRow['Comments'] = row.Comments;
+          //   if(!headers.includes('StationCode')){
+          //     headers.push('StationCode');
+          //     headers.push('GroupCode');
+          //     headers.push('DateTime');
+          //     headers.push('SampleDepth');
+          //     headers.push('Comments');
+          //   }
+          //   csv.push(newRow);
+          // }
+          //find the index of the object in the csv array that has the same StationCode,GroupCode,DateTime,SampleDepth,SampleId
+
+
+          // let index = csv.findIndex((csvRow) => {
+          //   return csvRow.StationCode === row.StationCode && csvRow.GroupCode === row.GroupCode && csvRow.DateTime === row.DateTime ;
+          // });
+
+          //find all the indexes of the object in the csv array that has the same StationCode,GroupCode,DateTime,SampleDepth,SampleId
+          let indexes = csv.reduce((acc, e, i) => {
+            if (e.StationCode === row.StationCode && e.GroupCode === row.GroupCode && e.DateTime === row.DateTime) {
+              acc.push(i);
+            }
+            return acc;
+          }, []);
+
+          //check all indexes, if the object exists, add the ParameterCode as and Value  as value to the object
+          indexes.forEach((index) => {
+            if(index > -1){
+              //check if the Value is undefined and set it to an empty string if it is
+              if(row.Value === undefined){
+                row.Value = '';
+              }
+              csv[index][row.ParameterCode] = row.Value;
+              if(!headers.includes(row.ParameterCode)){
+                headers.push(row.ParameterCode);
+              }
+            }
+          });
+
+
+          // //if the object exists, add the ParameterCode, Problem, and Qualifier to the object
+          // if(index > -1){
+          //   //check if the Value is undefined and set it to an empty string if it is
+          //   if(row.Value === undefined){
+          //     row.Value = '';
+          //   }
+          //   csv[index][row.ParameterCode] = row.Value;
+          //   if(!headers.includes(row.ParameterCode)){
+          //     headers.push(row.ParameterCode);
+          //   }
+          // }
+
+
+        });
+
+
+
+        //headers = headers.sort();
+        // move comments to the end of the headers array
+        let commentsIndex = headers.indexOf('Comments');
+        headers.splice(commentsIndex,1);
+        headers.push('Comments');
+        headers.forEach((header) => {
+          csvRow += header + ',';
+        });
+        csvRow = csvRow.slice(0,-1);
+        csvString += csvRow + '\n';
+        csv.forEach((row) => {
+          //check if undefined values exist and set them to empty strings
+          headers.forEach((header) => {
+            if(row[header] === undefined){
+              row[header] = '';
+            }
+          });
+          csvRow = '';
+          headers.forEach((header) => {
+            csvRow += row[header] + ',';
+          });
+          csvRow = csvRow.slice(0,-1);
+          csvString += csvRow + '\n';
+        });
+        const blob = new Blob([csvString], {
+          type: "text/csv",
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement
+        ("a");
+        a.href = url;
+        a.download = "cmc_data_pivot.csv";
+        a.click();
+        window.URL.revokeObjectURL(url);
+        console.log('pivot done',new Date().toLocaleTimeString());
+      });
+
+
+  }
+
+  if(!optionalMetaParams.value && !optionalMetaCalibration.value && !optionalMetaGroups.value && !optionalMetaStations.value){
+    downloading.value = false;
+  }
+};
 
 const downloadData = () => {
+  downloading.value = true;
   const payload = formPayload();
   if (payload.endDate !== '' && payload.endDate !== null && typeof payload.endDate !== 'undefined') {
     payload.endDate = addDayToDate(payload.endDate);
   }
+  console.log('getting data',new Date().toLocaleTimeString());
 
     axios
       .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForDownload", payload)
@@ -1544,22 +1763,14 @@ const downloadData = () => {
           //write response.data to csv download and include headers
 
           //let csv = Object.keys(response.data[0]).join(",") + "\n";
-          const csv = samplesForDownload.map((row) =>
-            Object.values(row).join(",")
-          )
-          csv.unshift(Object.keys(samplesForDownload[0]).join(","));
-          const csvString = csv.join("\n");
-          console.log('csvString',csvString);
-          const blob = new Blob([csvString], {
-            type: "text/csv",
-          });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "cmc_data.csv";
-          a.click();
-          window.URL.revokeObjectURL(url);
-          console.log("getParametersForDownload", samplesForDownload);
+          //writeCSV(samplesForDownload,false);
+          if(selectedDataType.value === 'Water Quality'){
+            writeCSV(samplesForDownload,true,payload);
+          }else{
+            writeCSV(samplesForDownload,false);
+          }
+
+
           //get unique parameter codes as comma separated string from samplesForDownload
           let paramCodes = [];
           let groupCodes = [];
