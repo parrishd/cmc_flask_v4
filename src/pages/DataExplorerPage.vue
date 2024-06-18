@@ -17,13 +17,7 @@
                 <div class="q-pa-md" style="max-width: 360px">
                   <div class="tooltip-header">Data Explorer Information</div>
                   <div class="q-mt-sm tooltip-text">
-                    The Data Explorer is a tool for storing and sharing data
-                    collected by a network of water quality and benthic
-                    macroinvertebrate monitors working with the Chesapeake
-                    Monitoring Cooperative. These data are publicly accessible and
-                    are shared directly with the Chesapeake Bay Program and other
-                    data users. The statistics above the map reflect the stations and
-                    associated data currently being viewed on the map and in the table below. Active stations are those that have been sampled in the last 5 years.
+                    The CMC Data Explorer is a tool for storing, sharing, and visualizing data collected by the network of water quality and benthic macroinvertebrate monitoring programs working with the Chesapeake Monitoring Cooperative. The statistics above the map reflect the stations and associated data currently being viewed on the map. Active stations are those that have been sampled in the last 5 years.
                   </div>
                 </div>
               </q-tooltip>
@@ -107,7 +101,13 @@
                 color="primary"
               />
             </div>
-            <div class="col text-right">
+
+          </div>
+          <div class="row">
+            <div class="col-md-11">
+              <q-label style='color:teal' class="text-h6">Map Data Layers</q-label>
+            </div>
+            <div class="col-md-1 text-right q-mt-sm">
               <q-icon
                 class="fa-solid fa-circle-info"
                 size="22px"
@@ -120,29 +120,13 @@
                   :offset="[360, 10]"
                 >
                   <div class="q-pa-md" style="max-width: 360px">
-                    <div class="tooltip-header">Data Query Form</div>
+                    <div class="tooltip-header">Map Data Layers</div>
                     <div class="q-mt-sm tooltip-text">
-                      On this page you can download data from the CMC Data
-                      Explorer database. Use the form below to build a query
-                      that will identify the specific data you want to download.
-                      As you step through the form, each selection will narrow
-                      down the possible options in the other form items. At the
-                      bottom of the form, use the check boxes to select the
-                      associated metadata you would like to include with your
-                      download. When you are finished making your selection,
-                      click Get Results to request queried dataset. Selections
-                      made in this form will immediately update the stations
-                      shown on the map and stations table based on the
-                      selections in the form.
+                      On this page you can view and download data stored in the CMC Data Explorer database. Use the Map Data Layers to select the layers visible on the map. You can choose between Water Quality or Benthic Macroinvertebrate data and Watershed or Political boundaries to help refine your search. The legend within the map will update based on these selections, where you can turn on and off individual layers.
                     </div>
                   </div>
                 </q-tooltip>
               </q-icon>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">
-              <q-label style='color:teal' class="text-h6">Map Data Layers</q-label>
             </div>
           </div>
           <div class="row">
@@ -206,18 +190,40 @@
             </div>
           </div>-->
           <div class="row q-mt-lg">
-            <div class="col">
+            <div class="col-md-6">
               <q-label style='color:teal' class="text-h6">Data Filters</q-label>
             </div>
-            <div class="col text-center">
+            <div class="col-md-5 text-center">
               <q-btn
                 label="Clear Filters"
                 @click="clearFilters"
                 color="red"
-                style="width: 90%"
+                style="width: 90%; "
                 icon="fas fa-eraser"
               >
               </q-btn>
+            </div>
+            <div class="col-1 text-right  q-mt-sm">
+              <q-icon
+                class="fa-solid fa-circle-info"
+                size="22px"
+                color="primary"
+              >
+                <q-tooltip
+                  anchor="bottom left"
+                  self="top left"
+                  class="bg-grey-2"
+                  :offset="[360, 10]"
+                >
+                  <div class="q-pa-md" style="max-width: 360px">
+                    <div class="tooltip-header">Map Data Layers</div>
+                    <div class="q-mt-sm tooltip-text">
+                      <p>Use the form below to build a search that will select the specific data you want to view or download. You can select as many filters as you want and as many options within each filter as you want. However, if you click “Filter Map” after each new selection, this will update the map and possible options available in the other filters and help you refine your search. Each filter acts as AND statements and multiple selections within each filter act as OR statements. For example if you select the James River Watershed and the parameters: bacteria and water temperature, you will see stations within the James River watershed that monitor bacteria OR water temperature.</p>
+                      <p>Click “Clear Filters” to remove all selections or click the X on a specific filter and then Filter Map to remove just that filter.</p>
+                    </div>
+                  </div>
+                </q-tooltip>
+              </q-icon>
             </div>
           </div>
           <div v-if="showCityState" class="row q-mt-md">
@@ -557,6 +563,13 @@
               />
             </div>
           </div>
+          <div class="row q-mt-sm">
+            <div class="col">
+              <div v-show="showDownloadError" style="color: red; font-size:20px;">
+                Your download request is too large ({{ sampleCount }} samples). Please use additional filters to request less than 100,000 samples.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <q-dialog v-model="downloadDialog" >
@@ -564,10 +577,32 @@
           <q-card-section>
 
             <div class="row">
-              <div class="col">
+              <div class="col-md-10">
                 <div class="text-h6">Download</div>
               </div>
-              <div class="col text-right">
+              <div class="col-md-1 text-right q-mt-sm">
+              <q-icon
+                class="fa-solid fa-circle-info"
+                size="22px"
+                color="primary"
+              >
+                <q-tooltip
+                  anchor="bottom left"
+                  self="top left"
+                  class="bg-grey-2"
+                  :offset="[360, 10]"
+                >
+                  <div class="q-pa-md" style="max-width: 360px">
+                    <div class="tooltip-header">Map Data Layers</div>
+                    <div class="q-mt-sm tooltip-text">
+                      The filters used on the map will select the data downloaded. The summary at the top of this page shows you basic statistics about the data you are about to download.
+
+                    </div>
+                  </div>
+                </q-tooltip>
+              </q-icon>
+            </div>
+              <div class="col-md-1 text-right">
                 <q-btn
                   flat
                   round
@@ -591,11 +626,6 @@
                 <li><span style="color: #075C7A;">{{ organizationsCount }}</span> organizations</li>
                 <li><span style="color: #075C7A;">{{ stationsCount }}</span> stations</li>
                 <li><span style="color: #075C7A;">Parameter List</span>: {{ listParameters() }}</li>
-              </ul>
-
-              <ul>
-                <li v-show="formattedStartDateMap">that were collected after {{ formattedStartDateMap }}</li>
-                <li v-show="formattedEndDateMap">that were collected before {{ formattedEndDateMap }}</li>
               </ul>
             </p>
           </q-card-section>
@@ -646,7 +676,7 @@
           <q-card-section>
             <div class='row q-mt-md'>
               <div class='col-11 '>
-                <div style="font-size:20px">Help us learn about you</div>
+                <div style="font-size:20px">Help us learn about how you plan to use these data.</div>
               </div>
               <div class = "col-1">
                 <q-icon class="fa-solid fa-circle-info" size="24px" color="primary">
@@ -654,7 +684,7 @@
                     <div class="q-pa-md" style="max-width: 360px">
                       <div class="tooltip-header">Data Use Information</div>
                       <div class="q-mt-sm tooltip-text">
-                        We would like to learn more about how these data are used.
+                        We would like to learn more about how you plan to use these data.
                         We require that you provide your email address, role, the purpose for the requested data, and
                         an acknowledgement of the proper data citation requirements prior to retrieving the requested data.
                         This information will help us understand who is using the data and how it is being used.
@@ -668,7 +698,7 @@
             <div class="row q-mt-md">
               <div class="col">
                 <!--, val => !!val || 'Email is required']"-->
-                <q-input v-model="email" label="Email *" :dense="dense"
+                <q-input v-model="email" label="Email *"
                   :rules="[(val) => validateEmail(val) || 'Must be a valid email.', val => !!val || 'Field is required']"
                 />
                 <q-select  v-model="selectedRole" :options="roleOptions" label="Role *" :rules="[val => !!val || 'Field is required']" />
@@ -739,13 +769,7 @@
               <div class="q-pa-md" style="max-width: 360px">
                 <div class="tooltip-header">Stations Table</div>
                 <div class="q-mt-sm tooltip-text">
-                  The stations table shows the results from the information
-                  selected on the data query form above. The search box at the
-                  top right of the table allows the user to filter the displayed
-                  data based on attributes such as station name, organization,
-                  waterbody name, date or station status (ex. active or
-                  inactive). Using the search box will also update the map and
-                  query form.
+                  The stations table shows the results from the information selected on the data filters form above and the stations currently shown on the map. Click on a station to view the station details below.
                 </div>
               </div>
             </q-tooltip>
@@ -862,13 +886,7 @@
                   <div class="q-pa-md" style="max-width: 360px">
                     <div class="tooltip-header">Station Details</div>
                     <div class="q-mt-sm tooltip-text">
-                      The station details panel reflects the station selection
-                      on map or table above. In this panel, you can visualize or
-                      download water quality monitoring data for this station.
-                      When selecting a parameter or changing the date range, the
-                      interactive time series plot will update. Click on the
-                      Download button to download data for the time period shown
-                      in the plot.
+                      In this panel, you can visualize or download water quality monitoring data collected at the station selected on the map or table above.  Select a depth or date range for all plots, then select parameters for each individual plot. You can add up to two parameters for each plot. Click the plus sign at the bottom right of the panel to add another plot.
                     </div>
                   </div>
                 </q-tooltip>
@@ -1208,6 +1226,7 @@ const lastName = ref("");
 const email = ref("");
 const comments = ref("");
 const showQueryError = ref(false);
+const showDownloadError = ref(false);
 const stationDetailsContainer = ref();
 const stations = ref(null);
 
@@ -1550,7 +1569,7 @@ const writeCSV = (data,pivot,payload) => {
   }else{
     axios.post("https://cmc.vims.edu/DashboardApi/FetchConditionsForDownload", payload)
       .then((response) => {
-        console.log("getSamplesForDownload");
+        console.log("getConditionsForDownload");
         console.log(response.data);
         const conditions = response.data;
 
@@ -1568,7 +1587,7 @@ const writeCSV = (data,pivot,payload) => {
         let csvString = '';
         let csvRow = '';
         let csvRowArray = [];
-        console.log('data',data);
+        //console.log('data',data);
 
         data.forEach((row) => {
           let newRow = {};
@@ -1627,76 +1646,36 @@ const writeCSV = (data,pivot,payload) => {
 
 
         });
-        // do the same for the conditions data except no need for problem and qualifier
+        //check if condtions data exists
+        if(conditions.length>0){
+          // do the same for the conditions data except no need for problem and qualifier
         conditions.forEach((row) => {
-          // let newRow = {};
-          // //check if combination of the following keys exists in the csv array: StationCode,GroupCode,DateTime,SampleDepth,SampleId
-          // let exists = false;
-          // csv.forEach((csvRow) => {
-          //   if(csvRow.StationCode === row.StationCode && csvRow.GroupCode === row.GroupCode && csvRow.DateTime === row.DateTime &&
-          //      csvRow.Comments === row.Comments){
-          //     exists = true;
-          //   }
-          // });
-          // if(!exists){
-          //   newRow['StationCode'] = row.StationCode;
-          //   newRow['GroupCode'] = row.GroupCode;
-          //   newRow['DateTime'] = row.DateTime;
-          //   newRow['SampleDepth'] = row.SampleDepth;
-          //   newRow['Comments'] = row.Comments;
-          //   if(!headers.includes('StationCode')){
-          //     headers.push('StationCode');
-          //     headers.push('GroupCode');
-          //     headers.push('DateTime');
-          //     headers.push('SampleDepth');
-          //     headers.push('Comments');
-          //   }
-          //   csv.push(newRow);
-          // }
-          //find the index of the object in the csv array that has the same StationCode,GroupCode,DateTime,SampleDepth,SampleId
 
-
-          // let index = csv.findIndex((csvRow) => {
-          //   return csvRow.StationCode === row.StationCode && csvRow.GroupCode === row.GroupCode && csvRow.DateTime === row.DateTime ;
-          // });
-
-          //find all the indexes of the object in the csv array that has the same StationCode,GroupCode,DateTime,SampleDepth,SampleId
-          let indexes = csv.reduce((acc, e, i) => {
-            if (e.StationCode === row.StationCode && e.GroupCode === row.GroupCode && e.DateTime === row.DateTime) {
-              acc.push(i);
-            }
-            return acc;
-          }, []);
-
-          //check all indexes, if the object exists, add the ParameterCode as and Value  as value to the object
-          indexes.forEach((index) => {
-            if(index > -1){
-              //check if the Value is undefined and set it to an empty string if it is
-              if(row.Value === undefined){
-                row.Value = '';
+            //find all the indexes of the object in the csv array that has the same StationCode,GroupCode,DateTime,SampleDepth,SampleId
+            let indexes = csv.reduce((acc, e, i) => {
+              if (e.StationCode === row.StationCode && e.GroupCode === row.GroupCode && e.DateTime === row.DateTime) {
+                acc.push(i);
               }
-              csv[index][row.ParameterCode] = row.Value;
-              if(!headers.includes(row.ParameterCode)){
-                headers.push(row.ParameterCode);
+              return acc;
+            }, []);
+
+            //check all indexes, if the object exists, add the ParameterCode as and Value  as value to the object
+            indexes.forEach((index) => {
+              if(index > -1){
+                //check if the Value is undefined and set it to an empty string if it is
+                if(row.Value === undefined){
+                  row.Value = '';
+                }
+                csv[index][row.ParameterCode] = row.Value;
+                if(!headers.includes(row.ParameterCode)){
+                  headers.push(row.ParameterCode);
+                }
               }
-            }
+            });
           });
+        }
 
 
-          // //if the object exists, add the ParameterCode, Problem, and Qualifier to the object
-          // if(index > -1){
-          //   //check if the Value is undefined and set it to an empty string if it is
-          //   if(row.Value === undefined){
-          //     row.Value = '';
-          //   }
-          //   csv[index][row.ParameterCode] = row.Value;
-          //   if(!headers.includes(row.ParameterCode)){
-          //     headers.push(row.ParameterCode);
-          //   }
-          // }
-
-
-        });
 
 
 
@@ -1735,14 +1714,15 @@ const writeCSV = (data,pivot,payload) => {
         a.click();
         window.URL.revokeObjectURL(url);
         console.log('pivot done',new Date().toLocaleTimeString());
+        if(!optionalMetaParams.value && !optionalMetaCalibration.value && !optionalMetaGroups.value && !optionalMetaStations.value){
+          downloading.value = false;
+        }
       });
 
 
   }
 
-  if(!optionalMetaParams.value && !optionalMetaCalibration.value && !optionalMetaGroups.value && !optionalMetaStations.value){
-    downloading.value = false;
-  }
+
 };
 
 const downloadData = () => {
@@ -1910,6 +1890,28 @@ const getStationsFromCMC = async (load,download) => {
 
       stations.value = res.data;
 
+      //sum samplesCount for all stations
+      let sampleCountVal = stations.value.reduce((acc, station) => {
+        return acc + station.SamplesCount;
+      }, 0);
+
+      console.log('download',download)
+      //convert the number of samples to a number
+      console.log('sampleCount',sampleCountVal)
+      if(download){
+
+        if(sampleCountVal > 100000){
+          downloadDialog.value = false;
+          showDownloadError.value = true;
+          filtering.value = false;
+        }else{
+          downloadDialog.value = true;
+          showDownloadError.value = false;
+          filtering.value = false;
+        }
+
+      }
+
       if (load & (res.data.length > 0)) {
         localStorage.setItem(STATIONS, res_str);
         // get min date as StartDate of the oldest station in transformedStations. exclude nulls
@@ -1930,12 +1932,11 @@ const getStationsFromCMC = async (load,download) => {
         );
         formattedLoadEndDate.value = new Date(loadMaxDate.value).toISOString().substring(0, 10)
         showDateClose.value = true;
+        filtering.value = false;
+
 
       }
-      filtering.value = false;
-      if(download){
-        downloadDialog.value = true
-      }
+
 
     })
     .catch((error) => {

@@ -1,56 +1,49 @@
 <template>
   <q-page class="q-px-xl q-mx-xl">
     <div class="row q-mt-xl">
-      <div class="col about-header">
-        Working together to understand the health of our waters
-      </div>
-    </div>
-
-
-    <div class="row q-my-lg justify-center">
-<!--      <q-img-->
-<!--        src="images/about-vims-image.png"-->
-<!--        style="max-width: 800px; height: 400px"-->
-<!--        :ratio="16 / 9"-->
-<!--      />-->
-<!--      <q-video-->
-<!--          :ratio="16/9"-->
-<!--          src="https://www.youtube.com/embed/7oWA6sWWnAM?si=MHc75uqRS4r8G_fz"-->
-<!--      />-->
-      <iframe width="800" height="400" src="https://www.youtube.com/embed/7oWA6sWWnAM?si=MHc75uqRS4r8G_fz&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      <div class="col about-header">About</div>
     </div>
 
     <div class="row">
       <div class="col q-mt-lg about-text">
         <p>
-          The <a href="https://www.chesapeakemonitoringcoop.org" target="_blank">Chesapeake Monitoring Cooperative</a>
-          (CMC) is a group of leading
-          organizations that provide technical, programmatic, and outreach
-          support in order to integrate volunteer-based and non-traditional
-          water quality and benthic macroinvertebrate monitoring data monitoring
-          data into the Chesapeake Bay Program partnership. Currently there are
-          many sources of data, including data collected by volunteers, local
-          governments and NGOs, that are not being used to track Bay health.
-          Data contribution by this network of volunteer and non-traditional
-          sources will provide valuable information and create a comprehensive
-          understanding of the Chesapeake Bay watershed, the health of the bay,
-          and the success of restoration efforts.
+          The CMC Data Explorer is a tool for storing and sharing data collected
+          by the network of water quality and benthic macroinvertebrate
+          monitoring programs working with the
+          <a href="https://www.chesapeakemonitoringcoop.org" target="_blank"
+            >Chesapeake Monitoring Cooperative</a
+          >
+          The CMC is funded through 6-year cooperative agreements with the EPA’s
+          Chesapeake Bay Program (CBP). The first agreement (2015-2021)
+          supported the development of the Chesapeake Data Explorer by Green Fin
+          Studios and the Environmental Data Center at the Chesapeake Bay
+          National Estuarine Research Reserve - Va, Virginia Institute of Marine
+          Science (CBNERR-VA/VIMS). The second agreement (2021-2027) supports
+          updates and ongoing maintenance by CBNERR-VA/VIMS.
         </p>
 
         <p>
-          The EPA’s Chesapeake Bay Program (CBP) requested and funded the
-          development of The Chesapeake Data Explorer. Green Fin Studios and the
-          Environmental Data Center at the Chesapeake Bay National Estuaring
-          Research Reserve - Va, Virginia Institute of Marine Science (VIMS)
-          developed and continues to manage the Chesapeake Data Explorer.
+          All data shared with the CMC Data Explorer are publicly accessible and
+          can be downloaded from the homepage map. Data are annually uploaded to
+          the Chesapeake Bay Program through their Data Upload and Evaluation
+          Tool (DUET) and to the EPA’s Water Quality Exchange (WQX). Data are
+          also utilized by State agencies through their data solicitation
+          notices.
         </p>
 
         <p>
-          The CMC membership includes: The Alliance for the Chesapeake Bay,
-          Izaac Walton League, Dickinson College’s Alliance for Aquatic Resource
-          Monitoring, the University of Maryland Center for Environmental
-          Science, Green Fin Studios and the Virginia Institute of Marine
-          Science (VIMS).
+          Visit the CMC website for more information about the
+          <a
+            href="https://www.chesapeakemonitoringcoop.org/about/cmc-team/"
+            target="_blank"
+            >CMC Team</a
+          >
+          or
+          <a
+            href="https://www.chesapeakemonitoringcoop.org/about/members/"
+            target="_blank"
+            >participating monitoring organizations.</a
+          >
         </p>
       </div>
     </div>
@@ -206,4 +199,3 @@ const slide = ref(1);
   max-width: 240px !important;
 }
 </style>
-

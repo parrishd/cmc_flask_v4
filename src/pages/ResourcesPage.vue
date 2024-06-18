@@ -24,14 +24,21 @@
           </a>
           <a href="/resource-documents/parameters.csv"> Parameters List </a>
           <a href="/resource-documents/problemCodes.csv"> Problem Code List </a>
+          <a href="/resource-documents/codes_factsheet.pdf">
+            Qualifier and Problem Code Factsheet
+          </a>
           <a href="/resource-documents/qualifierCodes.csv">
             Qualifier Code List
           </a>
+
           <a href="/resource-documents/water_quality_condition_categories.csv">
             Water Quality Condition Code List
           </a>
           <a href="/resource-documents/benthic_condition_categories.csv">
             Benthic Condition Code List
+          </a>
+          <a href="/resource-documents/connecting_stations.pdf">
+            Connecting Stations to Groups Fact Sheet
           </a>
         </div>
       </div>
@@ -73,9 +80,6 @@
         <div class="q-px-md resource-links">
           <a href="https://youtu.be/of0vuk5VcZs" target="_blank">
             Creating a user account
-          </a>
-          <a href="https://youtu.be/WgZYOinH5WU" target="_blank">
-            Submitting a station
           </a>
           <a href="https://youtu.be/dI3UFrtjdAw" target="_blank">
             Uploading water quality data online form

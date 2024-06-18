@@ -20,6 +20,7 @@
           <a href="/about">ABOUT</a>
           <a href="/resources">RESOURCES</a>
           <a href="/contact">CONTACT</a>
+          <a href="/data-ethics">DATA ETHICS</a>
           <a href="https://cmc.vims.edu/admin">MANAGE DATA</a>
 
           <q-btn-dropdown

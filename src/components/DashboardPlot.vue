@@ -755,30 +755,33 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
     },
   };
   const chartId = "chart-" + plotIndex.value;
+  const config = {
+    displayModeBar: false, // this is the line that hides the bar.
+  };
   if (dataType.value === "Benthic Macroinvertebrates") {
     console.log("layout", layout);
 
-    Plotly.newPlot("chart-" + plotIndex.value, [trace], layout);
+    Plotly.newPlot("chart-" + plotIndex.value, [trace], layout, config);
     calcStats(chartId);
     listenPlotZoom(chartId);
     return;
   }
   if (showSecondParam.value) {
     console.log("layout", layout);
-    Plotly.newPlot(chartId, [trace, fit, trace2, fit2], layout);
+    Plotly.newPlot(chartId, [trace, fit, trace2, fit2], layout, config);
     calcStats(chartId);
     listenPlotZoom(chartId);
     return;
   }
   if (paramType.value === "Parameter") {
     console.log("layout", layout);
-    Plotly.newPlot(chartId, trace, layout);
+    Plotly.newPlot(chartId, trace, layout, config);
     calcStats(chartId);
     listenPlotZoom(chartId);
 
     return;
   } else {
-    Plotly.newPlot("chart-" + plotIndex.value, [trace, fit], layout);
+    Plotly.newPlot("chart-" + plotIndex.value, [trace, fit], layout, config);
     calcStats(chartId);
     listenPlotZoom(chartId);
     return;

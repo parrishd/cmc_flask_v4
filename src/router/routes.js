@@ -72,6 +72,13 @@ const routes = [
       { path: "", component: () => import("pages/ResourcesPage.vue") },
     ],
   },
+  {
+    path: "/data-ethics",
+    component: () => import("layouts/SiteLayout.vue"),
+    children: [
+      { path: "", component: () => import("pages/DataEthicsPage.vue") },
+    ],
+  },
 
   {
     path: "/admin",
