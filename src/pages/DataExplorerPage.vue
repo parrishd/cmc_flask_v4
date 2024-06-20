@@ -1836,6 +1836,7 @@ const downloadData = () => {
                 a.download = filename+ ".csv";
                 console.log("a",a);
                 document.body.appendChild(a);
+                filtering.value = false;
               }
 
             }
@@ -1910,6 +1911,8 @@ const getStationsFromCMC = async (load,download) => {
           filtering.value = false;
         }
 
+      }else{
+        filtering.value = false;
       }
 
       if (load & (res.data.length > 0)) {
@@ -1936,7 +1939,6 @@ const getStationsFromCMC = async (load,download) => {
 
 
       }
-
 
     })
     .catch((error) => {
