@@ -216,7 +216,7 @@
                   :offset="[360, 10]"
                 >
                   <div class="q-pa-md" style="max-width: 360px">
-                    <div class="tooltip-header">Map Data Layers</div>
+                    <div class="tooltip-header">Data Filters</div>
                     <div class="q-mt-sm tooltip-text">
                       <p>Use the form below to build a search that will select the specific data you want to view or download. You can select as many filters as you want and as many options within each filter as you want. However, if you click “Filter Map” after each new selection, this will update the map and possible options available in the other filters and help you refine your search. Each filter acts as AND statements and multiple selections within each filter act as OR statements. For example if you select the James River Watershed and the parameters: bacteria and water temperature, you will see stations within the James River watershed that monitor bacteria OR water temperature.</p>
                       <p>Click “Clear Filters” to remove all selections or click the X on a specific filter and then Filter Map to remove just that filter.</p>
@@ -593,9 +593,9 @@
                   :offset="[360, 10]"
                 >
                   <div class="q-pa-md" style="max-width: 360px">
-                    <div class="tooltip-header">Map Data Layers</div>
+                    <div class="tooltip-header">Data Download</div>
                     <div class="q-mt-sm tooltip-text">
-                      The filters used on the map will select the data downloaded. The summary at the top of this page shows you basic statistics about the data you are about to download.
+                      The filters used on the map will select the data for download. The summary at the top of this page shows you basic statistics about the data you are about to download.
 
                     </div>
                   </div>
