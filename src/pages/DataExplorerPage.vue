@@ -2075,8 +2075,16 @@ const aggregateStations = () => {
     //check if station StartDate is less
 
     if (existingStation) {
+      if(existingStation.StationCode == 'ACB.FOR17'){
+        console.log('for17 test,')
+        console.log('existingStation',existingStation);
+        console.log('station',station);
+      }
       existingStation.GroupNames = `${existingStation.GroupName}, ${station.GroupName}`;
       existingStation.GroupCodes = `${existingStation.GroupCode}, ${station.GroupCode}`;
+      if(existingStation.Status === 'Current' || station.Status === 'Current'){
+        existingStation.Status = 'Current';
+      }
       existingStation.StartDate = new Date(
         Math.min(
           new Date(existingStation.StartDate),
@@ -2104,9 +2112,13 @@ const aggregateStations = () => {
     }
   });
   console.log("agg time3: " + new Date().toLocaleTimeString());
+  console.log(aggregatedStations)
   //sort aggregatedStations by StationCode
   aggregatedStations.sort((a, b) => a.StationCode.localeCompare(b.StationCode));
+
   filteredStations.value = aggregatedStations;
+  console.log("filteredStations.value");
+  console.log(filteredStations.value);
 };
 
 const getUniqueValues = (data, param) => {

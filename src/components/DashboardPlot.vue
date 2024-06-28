@@ -476,12 +476,21 @@ const filterSamples = (param, param2) => {
       console.log("param", param);
       console.log("param.value", param.value);
       let searchArray = param.value.split(",");
+      //remove spaces from searchArray
+      searchArray = searchArray.map((s) => s.trim());
+
+      console.log("searchArray", searchArray);
+      console.log("plotData.value", plotData.value);
       filteredData = plotData.value.filter((sample) =>
         searchArray.includes(sample.parameterCode)
       );
+      console.log("filteredData", filteredData);
     } else {
       let searchArray = param.value.split(",");
+      searchArray = searchArray.map((s) => s.trim());
       let searchArray2 = param2.value.split(",");
+      searchArray2 = searchArray2.map((s) => s.trim());
+
       filteredData = plotData.value.filter((sample) =>
         searchArray.includes(sample.parameterCode)
       );
