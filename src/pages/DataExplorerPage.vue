@@ -1,56 +1,50 @@
 <template>
   <q-page class="q-px-none q-mx-none">
-    <div class="q-px-xl q-mx-xl">
-
+    <div class="q-px-sm q-mx-sm">
       <!-- stats bar -->
       <div class="viewing-stats q-mt-lg">
-        <div class="row">
-          <div class="col-11"></div>
-          <div class="col-1">
-            <q-icon class="fa-solid fa-circle-info q-ml-xl" size="22px">
-              <q-tooltip
-                anchor="bottom left"
-                self="top left"
-                class="bg-grey-2"
-                :offset="[360, 10]"
-              >
-                <div class="q-pa-md" style="max-width: 360px">
-                  <div class="tooltip-header">Data Explorer Information</div>
-                  <div class="q-mt-sm tooltip-text">
-                    The CMC Data Explorer is a tool for storing, sharing, and visualizing data collected by the network of water quality and benthic macroinvertebrate monitoring programs working with the Chesapeake Monitoring Cooperative. The statistics above the map reflect the stations and associated data currently being viewed on the map. Active stations are those that have been sampled in the last 5 years.
-                  </div>
-                </div>
-              </q-tooltip>
-            </q-icon>
-          </div>
-        </div>
         <div class="row q-mt-md">
           <!--<div class="col-1">Currently Viewing:</div>-->
             <div class="col">
-              <q-icon class="fa-solid fa-file-lines q-mr-sm" size="32px" />
-              <span class='vertical-middle' style="font-size:20px">{{ sampleCount }} Samples</span>
+              <q-icon class="fa-solid fa-file-lines q-mr-sm" size="24px" />
+              <span class='vertical-middle' style="font-size:18px">{{ sampleCount }} Samples</span>
             </div>
             <div class="col">
-              <q-icon class="fa-solid fa-building q-mr-sm" size="32px" />
-              <span class='vertical-middle' style="font-size:20px">{{ organizationsCount }} Organizations</span>
+              <q-icon class="fa-solid fa-building q-mr-sm" size="24px" />
+              <span class='vertical-middle' style="font-size:18px">{{ organizationsCount }} Organizations</span>
             </div>
             <div class="col">
-              <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" />
-              <span class='vertical-middle' style="font-size:20px">{{ stationsCount }} Total Stations</span>
+              <q-icon class="fa-solid fa-location-dot q-mr-sm" size="24px" />
+              <span class='vertical-middle' style="font-size:18px">{{ stationsCount }} Total Stations</span>
             </div>
             <div class="col">
-              <q-icon class="fa-solid fa-location-dot q-mr-sm" size="32px" :class="{
+              <q-icon class="fa-solid fa-location-dot q-mr-sm" size="24px" :class="{
                         'dot-purple': selectedDataType == 'Water Quality',
                         'dot-orange': selectedDataType != 'Water Quality',
                       }" />
-              <span class='vertical-middle' style="font-size:20px"
+              <span class='vertical-middle' style="font-size:18px"
                     >{{ activeStationsCount }} Active Stations</span>
-
-
             </div>
             <div class="col ">
-              <q-icon class="fa-solid fa-calendar q-mr-sm" size="32px" />
-              <span class='vertical-middle' style="font-size:20px">{{ formattedStartDateStats }} - {{formattedEndDateStats}}</span>
+              <q-icon class="fa-solid fa-calendar q-mr-sm" size="24px" />
+              <span class='vertical-middle' style="font-size:18px">{{ formattedStartDateStats }} - {{formattedEndDateStats}}</span>
+            </div>
+            <div class="col-1">
+              <q-icon class="fa-solid fa-circle-info q-ml-xl" size="22px">
+                <q-tooltip
+                  anchor="bottom left"
+                  self="top left"
+                  class="bg-grey-2"
+                  :offset="[360, 10]"
+                >
+                  <div class="q-pa-md" style="max-width: 360px">
+                    <div class="tooltip-header">Data Explorer Information</div>
+                    <div class="q-mt-sm tooltip-text">
+                      The CMC Data Explorer is a tool for storing, sharing, and visualizing data collected by the network of water quality and benthic macroinvertebrate monitoring programs working with the Chesapeake Monitoring Cooperative. The statistics above the map reflect the stations and associated data currently being viewed on the map. Active stations are those that have been sampled in the last 5 years.
+                    </div>
+                  </div>
+                </q-tooltip>
+              </q-icon>
             </div>
         </div>
       </div>
