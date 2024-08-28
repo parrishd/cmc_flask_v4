@@ -232,9 +232,7 @@
                 multiple
                 outlined
                 dense
-                use-input
                 color="teal"
-                input-debounce="0"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'state')"
                 >
 
@@ -263,9 +261,7 @@
                 multiple
                 outlined
                 dense
-                use-input
-                color="red"
-                input-debounce="0"
+                color="teal"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'county')"
               >
               </q-select>
@@ -293,9 +289,7 @@
                 multiple
                 outlined
                 dense
-                use-input
-                color="red"
-                input-debounce="0"
+                color="teal"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'watershed')"
               >
               </q-select>
@@ -323,9 +317,7 @@
                 multiple
                 outlined
                 dense
-                use-input
-                color="red"
-                input-debounce="0"
+                color="teal"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'subwatershed')"
               >
               </q-select>
@@ -354,9 +346,7 @@
                 multiple
                 outlined
                 dense
-                use-input
-                color="red"
-                input-debounce="0"
+                color="teal"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'group')"
               >
               </q-select>
@@ -385,9 +375,7 @@
                 multiple
                 outlined
                 dense
-                use-input
-                color="red"
-                input-debounce="0"
+                color="teal"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'station')"
               >
               </q-select>
@@ -416,8 +404,7 @@
                 multiple
                 outlined
                 dense
-                use-input
-                input-debounce="0"
+                color="teal"
                 v-show="selectedDataType == 'Water Quality'"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'parameter')"
               >
@@ -834,7 +821,10 @@
             <div class="col">
               <q-icon
                 class="fa-solid fa-location-dot float-left q-mr-lg"
-                size="110px"
+                size="160px"
+                v-bind:style= "[{ 'color': selectedStationDetails.color }]"
+                style="-webkit-text-stroke-width: 2px;
+   -webkit-text-stroke-color: white;"
               />
               <div
                 class="result-details-header-text-1"
@@ -852,6 +842,12 @@
                 class="result-details-header-text-2"
                 v-show="showStationDetails"
               >
+                Name: {{ selectedStationDetails.nameLong }}
+              </div>
+              <div
+                class="result-details-header-text-2"
+                v-show="showStationDetails"
+              >
                 Monitored by: {{ selectedStationDetails.groupNames }}
               </div>
               <div
@@ -860,6 +856,12 @@
               >
                 Location: {{ selectedStationDetails.latitude }},
                 {{ selectedStationDetails.longitude }}
+              </div>
+              <div
+                class="result-details-header-text-2"
+                v-show="showStationDetails"
+              >
+                Watershed: {{ selectedStationDetails.watershed }}
               </div>
               <div
                 class="result-details-header-text-2"
@@ -1873,14 +1875,22 @@ const getStationsFromCMC = async (load,download) => {
   if (payload.endDate !== '' && payload.endDate !== null && typeof payload.endDate !== 'undefined' && !load) {
     payload.endDate = addDayToDate(payload.endDate);
   }
+  console.log('payload',payload)
+  console.log(payload)
   axios
     .post(
       "https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
-      //"https://cmc.vims.edu/odata/FetchStationsForDashboardMap",
       payload
     )
     .then((res) => {
+
       console.log("current time2: " + new Date().toLocaleTimeString());
+      console.log('res')
+      console.log(res)
+      if(res.data.length === 0){
+        showQueryError.value = true;
+        return
+      }
       const res_str = JSON.stringify(res.data);
 
       stations.value = res.data;
@@ -2019,6 +2029,8 @@ const getStationsFromCMC = async (load,download) => {
 };
 
 const aggregateStations = () => {
+  console.log('aggregateStations')
+  console.log(stations.value)
   if (stations.value === null || stations.value.length === 0) {
     return;
   }
@@ -2370,6 +2382,12 @@ watch(filteredStations, () => {
 });
 
 watch(selectedDataType, () => {
+  stations.value = [];
+  console.log("selectedDataType changed");
+  console.log(selectedDataType.value);
+  console.log(filteredStations.value);
+  filteredStations.value = [];
+  console.log(filteredStations.value)
   selectedStates.value = [];
   selectedStations.value = [];
   selectedCounties.value = [];
@@ -2379,6 +2397,7 @@ watch(selectedDataType, () => {
   selectedParams.value = [];
   formattedStartDateMap.value = '';
   formattedEndDateMap.value = '';
+
   getStationsFromCMC(true);
 });
 

@@ -151,6 +151,8 @@ watch(mapData, () => {
   if (mapData.value.length > 0) {
     removePopUps();
     getStations();
+  } else {
+    removeStations();
   }
 });
 
@@ -183,7 +185,7 @@ watch(selectedGeoType, () => {
   togglePolygon2();
 });
 watch(selectedDataType, () => {
-  console.log("geoType: " + selectedGeoType.value);
+  console.log("dataType: " + selectedDataType.value);
   toggleStations();
 });
 
@@ -212,12 +214,19 @@ const getStations = () => {
       type: "FeatureCollection",
       features: [],
     };
+    let color = "#F09300";
+    if (selectedDataType.value == "Water Quality") {
+      color = "#990799";
+    }
+    console.log("mapData.value");
+    console.log(mapData.value);
     mapData.value.forEach((s) => {
       let station = {
         type: "Feature",
         properties: {
           selected: false,
           code: s.StationCode,
+          nameLong: s.StationName,
           groupNames: s.GroupNames,
           id: s.StationId,
           latitude: s.Lat,
@@ -225,6 +234,8 @@ const getStations = () => {
           status: s.Status,
           startDate: s.formattedStartDate,
           endDate: s.formattedEndDate,
+          watershed: s.Subwatershed,
+          color: s.Status === "Current" ? color : "#5A5A5A",
         },
         geometry: {
           type: "Point",
@@ -294,6 +305,7 @@ const togglePolygon2 = () => {
 };
 
 const toggleStations = () => {
+  console.log("toggleStations");
   removePopUps();
   if (showStations.value === true) {
     console.log("should be showing the stationss");
@@ -649,33 +661,63 @@ const setupStationsOnMap = () => {
       status: feature.properties.status,
       startDate: feature.properties.startDate,
       endDate: feature.properties.endDate,
+      color: feature.properties.color,
+      nameLong: feature.properties.nameLong,
+      watershed: feature.properties.watershed,
     };
     console.log(stationDetails);
     console.log(feature.properties);
     console.log(feature.properties.code);
     console.log(feature.properties.groupNames);
     const innerHtmlContent = `
-    <div style="padding: 10px 20px 10px 20px">
-      <div style="color: #075C7A; font-size: 1.95em; font-weight: 700;">
-        Station
-      </div>
-      <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
-        ${feature.properties.code}
-      </div>
-      <div style="margin-top:10px; color: #075C7A; font-size: 1.95em; font-weight: 700;">
-        Monitored By
-      </div>
-      <div style="margin-top: 10px; padding-left: 20px; font-size: 1.35em; font-weight: 400;">
-        ${feature.properties.groupNames}
-      </div>
-      <div style="margin-top: 10px">
+        <div class="row q-mt-md" style=''>
+        <div class="col">
+          <div class="row q-py-md q-px-lg map-details-header">
+            <div class="col-2">
+              <q-icon
+                class="fa-solid fa-location-dot"
+                style="font-size:70px; color: ${feature.properties.color};"
+              />
+            </div>
+            <div class="col-10">
 
+              <div
+                class="map-details-header-text-1 q-ml-md"
+
+              >
+                 ${feature.properties.code}
+              </div>
+
+               <div
+                class="map-details-header-text-2 q-ml-md"
+
+              >
+                 ${feature.properties.groupNames}
+              </div>
+               <br/>
+              <div
+                class="map-details-header-text-2 q-ml-md"
+              >
+                 ${feature.properties.latitude.toFixed(
+                   3
+                 )}, ${feature.properties.longitude.toFixed(3)}
+              </div>
+              <div
+                class="map-details-header-text-2 q-ml-md"
+
+              >
+               ${feature.properties.startDate} - ${feature.properties.endDate}
+
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
-    </div>
     `;
     const divElement = document.createElement("div");
     const assignBtn = document.createElement("div");
-    assignBtn.innerHTML = ` <button style="background-color: #075C7A;cursor:pointer; color: white; padding: 8px 10px 8px 10px; border: none; border-radius: 5px;">
+    assignBtn.innerHTML = ` <button class='q-mt-sm' style="background-color: #075C7A;cursor:pointer; color: white; padding: 8px 10px 8px 10px; border: none; border-radius: 5px;">
               View Station Details
             </button>`;
     divElement.innerHTML = innerHtmlContent;
@@ -705,6 +747,10 @@ const setupStationsOnMap = () => {
   });
   console.log("time stamp map stations 5: " + new Date().getTime());
   //}
+
+  if (showStations.value === false) {
+    removeStations();
+  }
 };
 
 const updateMarkersOnMap = () => {

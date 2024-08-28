@@ -62,3 +62,30 @@ $vims-light-gray: #ababab;
   font-size: 16px;
   color: $vims-dark-gray;
 }
+
+.map-details-container {
+  font-family: "Roboto", sans-serif;
+}
+.map-details-header {
+  border: 5px solid $vims-medium-blue;
+  align-items: center;
+  color: $vims-medium-blue;
+}
+.map-details-header-text-1 {
+  font-size: 18px;
+  font-weight: 600;
+}
+.map-details-header-text-2 {
+  color: $vims-dark-gray;
+  font-size: 14px;
+  font-weight: 500;
+}
+.mapboxgl-popup-close-button {
+  color: $vims-medium-blue;
+  size: 24px;
+  font-size: 24px;
+}
+
+mapboxgl-popup {
+  max-width: 500px;
+}
