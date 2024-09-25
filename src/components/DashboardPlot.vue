@@ -1,7 +1,7 @@
 <template>
   <div class="plot-container">
     <div class="row q-mt-lg">
-      <div class="col-4" v-show="paramType !== 'Parameter'">
+      <div class="col-3" v-show="paramType !== 'Parameter'">
         <q-select
           label-color="primary"
           :label="paramLabel"
@@ -13,28 +13,7 @@
           dense
         ></q-select>
       </div>
-
-      <div class="col q-ml-sm" v-show="paramType !== 'Parameter'">
-        <q-icon
-          class="fa-solid fa-circle-info q-mt-sm"
-          size="24px"
-          color="primary"
-        >
-          <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
-            <div class="q-pa-md" style="max-width: 360px">
-              <div class="tooltip-header">
-                {{ selectedParamPlot.name }}
-              </div>
-              <div class="q-mt-sm tooltip-text">
-                <li>Code: {{ selectedParamPlot.value }}</li>
-                <li>Equipment: {{ selectedParamPlot.equipment }}</li>
-                <li>Tier: {{ selectedParamPlot.tier }}</li>
-              </div>
-            </div>
-          </q-tooltip>
-        </q-icon>
-      </div>
-      <div class="col-4 text-right">
+      <div class="col-4 q-ml-md" v-show="paramOptionsPlot.length > 1">
         <q-btn
           color="primary"
           class="full-width"
@@ -46,9 +25,24 @@
         </q-btn>
       </div>
     </div>
-
+    <div class="row">
+      <div
+        class="col q-ml-sm"
+        v-show="
+          paramType !== 'Parameter' &&
+          selectedParamPlot.value !== '' &&
+          selectedParamPlot.value !== null
+        "
+      >
+        <div class="q-mt-sm tooltip-text">
+          Code: {{ selectedParamPlot.value }}, Method:
+          {{ selectedParamPlot.equipment }}, Tier
+          {{ selectedParamPlot.tier }}
+        </div>
+      </div>
+    </div>
     <div class="row q-mt-lg" v-show="showSecondParam">
-      <div class="col-4">
+      <div class="col-3">
         <q-select
           label-color="primary"
           :label="paramLabel"
@@ -60,28 +54,7 @@
           dense
         ></q-select>
       </div>
-      <div class="col q-ml-sm">
-        <q-icon
-          class="fa-solid fa-circle-info q-mt-sm"
-          size="24px"
-          color="primary"
-        >
-          <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
-            <div class="q-pa-md" style="max-width: 360px">
-              <div class="tooltip-header">
-                {{ selectedParamPlot2.name }}
-              </div>
-              <div class="q-mt-sm tooltip-text">
-                <li>Code: {{ selectedParamPlot2.value }}</li>
-                <li>Equipment: {{ selectedParamPlot2.equipment }}</li>
-                <li>Tier: {{ selectedParamPlot2.tier }}</li>
-              </div>
-            </div>
-          </q-tooltip>
-        </q-icon>
-      </div>
-
-      <div class="col-4 text-right">
+      <div class="col-4 q-ml-md">
         <q-btn
           color="teal"
           class="full-width"
@@ -90,6 +63,15 @@
         >
           Remove Parameter from Plot
         </q-btn>
+      </div>
+    </div>
+    <div class="row" v-show="showSecondParam">
+      <div class="col q-ml-sm" v-show="paramType !== 'Parameter'">
+        <div class="q-mt-sm tooltip-text">
+          Code: {{ selectedParamPlot2.value }}, Method:
+          {{ selectedParamPlot2.equipment }}, Tier
+          {{ selectedParamPlot2.tier }}
+        </div>
       </div>
     </div>
     <div class="row q-mt-lg">
@@ -131,28 +113,37 @@
     </div>
     <div class="row q-mt-lg" v-if="plotStats.length > 0">
       <div class="col-12">
-        <q-icon
-          class="fa-solid fa-calculator q-mr-lg q-mt-xs float-left"
-          size="24px"
-          color="teal"
-        ></q-icon>
-        <div class="text-h5" style="color: teal">Plot Summary Statistics</div>
-        <li v-for="(stat, index) in plotStats" :key="stat" class="q-mt-sm">
-          <span
-            class="vertical-middle text-h6"
-            :style="{ color: index > 0 ? '#ff7f0e' : '#075c7a' }"
+        <div style="color: teal" class="col text-h6">Plot Statistics</div>
+        <div class="q-pa-md">
+          <q-table
+            flat
+            bordered
+            title=""
+            :rows="plotStats"
+            :columns="columns"
+            row-key="name"
+            hide-bottom
+            ><template v-slot:header="props">
+              <q-tr :props="props">
+                <q-th
+                  v-for="col in props.cols"
+                  :key="col.name"
+                  :props="props"
+                  style="font-size: 16px; color: teal; font-weight: bold"
+                >
+                  {{ col.label }}
+                </q-th>
+              </q-tr>
+            </template></q-table
           >
-            {{ stat.name }}: Min: {{ stat.min }}, Max: {{ stat.max }}, Mean:
-            {{ (stat.sum / stat.count).toFixed(2) }}
-          </span>
-        </li>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch, toRefs } from "vue";
+import { onMounted, onUnmounted, reactive, ref, watch, toRefs } from "vue";
 import Plotly, { filterObject, get, list, plot } from "plotly.js-dist";
 import { data } from "autoprefixer";
 
@@ -170,6 +161,7 @@ const { dataType } = toRefs(props);
 const { stationName } = toRefs(props);
 
 //const trace1 = ref([]);
+const width = window.innerWidth;
 const selectedParamPlot = ref([]);
 const selectedParamPlot2 = ref([]);
 const paramOptionsPlot = ref([]);
@@ -177,6 +169,39 @@ const paramLabel = ref("Select Parameter(s)");
 const showSecondParam = ref(false);
 const plotStats = ref([]);
 const dataOnPlot = ref([]);
+const columns = [
+  {
+    name: "name",
+    required: true,
+    label: "Parameter",
+    align: "left",
+    field: (row) => row.name,
+    format: (val) => `${val}`,
+    sortable: true,
+  },
+  {
+    name: "min",
+    align: "left",
+    label: "Minimum",
+    field: "min",
+    sortable: true,
+  },
+  {
+    name: "max",
+    align: "left",
+    label: "Maximum",
+    field: "max",
+    sortable: true,
+  },
+  { name: "mean", align: "left", label: "Mean", field: "mean", sortable: true },
+  {
+    name: "count",
+    align: "left",
+    label: "Count",
+    field: "count",
+    sortable: true,
+  },
+];
 
 watch(
   () => plotData.value,
@@ -206,8 +231,9 @@ const downloadPlot = (plot) => {
   Plotly.relayout(plot, update);
 };
 
-const downloadPlotData = (plot) => {
+const downloadPlotData = () => {
   let data = dataOnPlot.value;
+  console.log("data on plot", data);
   //create new array pivotData with x as datetime and additional properties for each unique name value
   let pivotData = [];
   data.forEach((d) => {
@@ -224,11 +250,8 @@ const downloadPlotData = (plot) => {
   console.log(pivotData);
   //format datetime in pivotData as "yyyy-MM-dd HH:mm:ss"
   pivotData.forEach((d) => {
-    console.log(d);
     d.date = new Date(d.x).toISOString().slice(0, 10);
     d.time = new Date(d.x).toISOString().slice(11, 16);
-    console.log(d.date);
-    console.log(d.time);
   });
 
   //dowload pivotData as csv file
@@ -249,14 +272,19 @@ const downloadPlotData = (plot) => {
   pivotData.forEach((d) => {
     let row = d.date + "," + d.time + ",";
     names.forEach((name) => {
+      console.log(name, d[name]);
       if (d[name]) {
         row += d[name] + ",";
+      } else if (d[name] === 0) {
+        row += "0,";
       } else {
         row += ",";
       }
     });
     csv += row + "\n";
   });
+
+  console.log("csv", csv);
   var encodedUri = encodeURI(csv);
   var link = document.createElement("a");
   link.setAttribute("href", encodedUri);
@@ -266,10 +294,6 @@ const downloadPlotData = (plot) => {
 };
 const addParameter = () => {
   showSecondParam.value = !showSecondParam.value;
-  console.log("addParameter", showSecondParam.value);
-  console.log("showSecondParam", showSecondParam.value);
-  console.log("selectedParamPlot", selectedParamPlot.value);
-  console.log("selectedParamPlot", selectedParamPlot2.value);
   if (selectedParamPlot2.value === selectedParamPlot.value) {
     //set selectedParamPlot2 to the next parameter in the paramOptionsPlot array
     let index = paramOptionsPlot.value.findIndex(
@@ -295,14 +319,12 @@ const getUniqueParams = (data) => {
   }
 
   if (dataType.value === "Benthic Macroinvertebrates") {
-    console.log("benthic_options");
     paramOptionsPlot.value = [
       { value: "speciesCount", name: "Number of Species", units: "N/A" },
       { value: "totalCount", name: "Total Count", units: "N/A" },
     ];
     selectedParamPlot.value = paramOptionsPlot.value[0];
     selectedParamPlot2.value = paramOptionsPlot.value[1];
-    console.log("paramOptionsPlot", paramOptionsPlot.value);
     return;
   }
   console.log("getUniqueParams", data);
@@ -325,6 +347,8 @@ const getUniqueParams = (data) => {
       );
     //create new unique params array. loop through uniqueparams. if name is not in the array, add it to the array with units and value. if name is in the array,
     // concatenate the value to the nalue with a comma separator.
+
+    //check if uniqueParams legngth is greater than 1. If so, concatenate the value and equipment properties for each parameter code
     let uniqueParams2 = [];
     uniqueParams.forEach((param) => {
       if (uniqueParams2.length === 0) {
@@ -362,7 +386,9 @@ const getUniqueParams = (data) => {
   uniqueParams.sort((a, b) => (a.name > b.name ? 1 : -1));
   paramOptionsPlot.value = uniqueParams;
   selectedParamPlot.value = uniqueParams[0];
-  selectedParamPlot2.value = uniqueParams[1];
+  if (uniqueParams.length > 1) {
+    selectedParamPlot2.value = uniqueParams[1];
+  }
 };
 
 watch(
@@ -391,6 +417,12 @@ watch(
   }
 );
 watch(
+  () => width.value,
+  (newVal, oldVal) => {
+    resizePlot();
+  }
+);
+watch(
   () => paramType.value,
   (newVal, oldVal) => {
     console.log("paramType", newVal);
@@ -401,6 +433,13 @@ watch(
     }
   }
 );
+const resizePlot = () => {
+  let chartId = "chart-" + plotIndex.value;
+  if (document.getElementById(chartId) === null) {
+    return;
+  }
+  Plotly.Plots.resize(document.getElementById(chartId));
+};
 
 function linearRegression(x, y) {
   var lr = {};
@@ -614,7 +653,7 @@ const filterSamples = (param, param2) => {
       type: "scatter",
       name: param2.name,
       yaxis: "y2",
-      marker: { size: 12 },
+      marker: { size: 12, symbol: "diamond" },
       showlegend: true,
     };
     var x_data_64 = filteredData2.map((sample) =>
@@ -765,7 +804,7 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
   };
   const chartId = "chart-" + plotIndex.value;
   const config = {
-    displayModeBar: false, // this is the line that hides the bar.
+    displayModeBar: true, // this is the line that hides the bar.
   };
   if (dataType.value === "Benthic Macroinvertebrates") {
     console.log("layout", layout);
@@ -863,6 +902,11 @@ const calcStats = (chartId) => {
     }
   });
   console.log("stats", stats);
+  stats.forEach((s) => {
+    s.mean = (s.sum / s.count).toFixed(2);
+    s.min = s.min.toFixed(2);
+    s.max = s.max.toFixed(2);
+  });
   plotStats.value = stats;
 };
 
@@ -870,6 +914,12 @@ onMounted(() => {
   console.log("onMounted");
   getUniqueParams(plotData.value);
   filterSamples(selectedParamPlot.value);
+  window.addEventListener("resize", resizePlot);
+  resizePlot();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", resizePlot);
 });
 </script>
 

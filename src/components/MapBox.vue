@@ -109,6 +109,8 @@ const { showLegend } = toRefs(props);
 const { collapsed } = toRefs(props);
 const { selectedDataType } = toRefs(props);
 const { selectedGeoType } = toRefs(props);
+const DataTypeSwitched = ref(false);
+const currentStyle = ref("mapbox://styles/mapbox/streets-v9");
 
 const emit = defineEmits(["selectedStation"]);
 
@@ -138,8 +140,6 @@ const mapStyleOptions = ref([
   },
 ]);
 
-let stationLayersIdsMap = new Map();
-
 // locs static foo data for demo on markers
 let locs = reactive({
   type: "FeatureCollection",
@@ -165,40 +165,41 @@ if (showLegend.value === true) {
 }
 
 watch(showPolygon1, () => {
-  console.log("showpolygon1: " + showPolygon1.value);
   togglePolygon1();
 });
 
 watch(showPolygon2, () => {
-  console.log("showpolygon2: " + showPolygon2.value);
   togglePolygon2();
 });
 
 watch(showStations, () => {
-  console.log("showStations: " + showStations.value);
   toggleStations();
 });
 
 watch(selectedGeoType, () => {
-  console.log("geoType: " + selectedGeoType.value);
   togglePolygon1();
   togglePolygon2();
 });
 watch(selectedDataType, () => {
-  console.log("dataType: " + selectedDataType.value);
-  toggleStations();
+  console.log("dataTypeSwitched1: " + DataTypeSwitched.value);
+  DataTypeSwitched.value = true;
+  console.log("dataTypeSwitched1: " + DataTypeSwitched.value);
+  //toggleStations();
 });
 
 // https://github.com/mapbox/mapbox-gl-js/issues/8660
 // https://github.com/mapbox/mapbox-gl-js/issues/2267
 // links above is for issues with layers and sources when toggling map styles
 watch(mapStyle, () => {
-  console.log('mapStyle.value " + mapStyle.value');
+  DataTypeSwitched.value = true;
   if (mapStyle.value) {
     if (mapStyle.value === "raster") {
-      map.setStyle("mapbox://styles/mapbox/satellite-streets-v12");
+      //map.setStyle("mapbox://styles/mapbox/satellite-streets-v12");
+
+      getStations("aerial");
     } else {
-      map.setStyle("mapbox://styles/mapbox/streets-v12");
+      getStations("streets");
+      //map.setStyle("mapbox://styles/mapbox/streets-v12");
     }
   }
 });
@@ -206,9 +207,7 @@ watch(mapStyle, () => {
 //  *** Functions ***
 
 // used to populate static data from foo json files
-const getStations = () => {
-  console.log("getStations");
-  console.log(mapData.value);
+const getStations = (base) => {
   if (mapData.value) {
     let locations = {
       type: "FeatureCollection",
@@ -218,8 +217,6 @@ const getStations = () => {
     if (selectedDataType.value == "Water Quality") {
       color = "#990799";
     }
-    console.log("mapData.value");
-    console.log(mapData.value);
     mapData.value.forEach((s) => {
       let station = {
         type: "Feature",
@@ -246,34 +243,43 @@ const getStations = () => {
       locations.features.push(station);
     });
     locs = locations;
+    console.log("here is the map", Object.keys(map).length);
+    let zoom = 10;
+    let center = [-77.636161, 39.77338];
+    let style = "mapbox://styles/mapbox/streets-v9";
+    if (Object.keys(map).length > 0) {
+      zoom = map.getZoom();
+      center = map.getCenter();
+      style = currentStyle.value;
+    }
+    if (base === "aerial") {
+      style = "mapbox://styles/mapbox/satellite-streets-v12";
+    } else if (base === "streets") {
+      style = "mapbox://styles/mapbox/streets-v9";
+    }
 
-    createMap();
+    createMap(zoom, center, style);
   }
 };
 
-const createMap = () => {
+const createMap = (zoom, center, style) => {
   mapboxgl.accessToken =
     "pk.eyJ1IjoibXlha2F2ZW5rYSIsImEiOiJjbDlxMDJrNmcwMmE2M3dxeDYyZWE0OWQ0In0.dKzXgJu-ZUH3epnFzxvllg";
+  mapOptions.value.zoom = zoom;
+  mapOptions.value.center = center;
+  mapOptions.value.style = style; // "mapbox://styles/mapbox/streets-v12";
+  currentStyle.value = style;
   map = new mapboxgl.Map(mapOptions.value);
+
   map.addControl(new mapboxgl.NavigationControl());
 
-  //this was causing the map to flash, removing for now. There may be a better way to handle this. Leave this commented code here for now.
-  //map.on("load", () => {
-  //  addStatesPolygons();
-  //  updateMarkersOnMap();
-  //});
-
   map.on("style.load", () => {
-    console.log("A styledata event occurred.");
-
     if (showPolygon1.value === true) {
       // re-add polygons in case check box was still on
-      //console.log("skip polygons for now");
       addPolygon1();
     }
     if (showPolygon2.value === true) {
       // re-add polygons in case check box was still on
-      //console.log("skip polygons for now");
       addPolygon2();
     }
     // re-add all the markers per whatever data type is selected
@@ -284,10 +290,10 @@ const createMap = () => {
 const togglePolygon1 = () => {
   removePopUps();
   if (showPolygon1.value === true) {
+    DataTypeSwitched.value = true;
     addPolygon1();
     updateMarkersOnMap();
   } else {
-    console.log("should be hiding the polygons");
     removePolygon1();
     removePopUps();
   }
@@ -295,20 +301,18 @@ const togglePolygon1 = () => {
 const togglePolygon2 = () => {
   removePopUps();
   if (showPolygon2.value === true) {
+    DataTypeSwitched.value = true;
     addPolygon2();
     updateMarkersOnMap();
   } else {
-    console.log("should be hiding the polygons");
     removePolygon2();
     removePopUps();
   }
 };
 
 const toggleStations = () => {
-  console.log("toggleStations");
   removePopUps();
   if (showStations.value === true) {
-    console.log("should be showing the stationss");
     setupStationsOnMap();
   } else {
     removeStations();
@@ -364,13 +368,6 @@ const removePolygon2 = () => {
 // Add a data source containing GeoJSON data.
 // https://docs.mapbox.com/mapbox-gl-js/example/polygon-popup-on-click/
 const addPolygon1 = () => {
-  console.log("addPolygon1");
-  console.log("window.location.origin: " + window.location.origin);
-  //console.log(window.location.origin);
-  //console.log(counties);
-  //console.log(counties.value);
-  //console.log(huc8.value);
-
   let polygons = states;
   if (selectedGeoType.value === "Watershed") {
     polygons = huc8;
@@ -412,9 +409,6 @@ const addPolygon1 = () => {
   map.on("click", "polygon1-layer", (e) => {
     map.fire("closeAllStationsPopups");
     map.fire("closeAllPolygonPopups");
-    console.log("On click polygon event");
-    console.log(e);
-    console.log(e.features[0]);
     let polyName = e.features[0].properties.STATE_NAME;
     if (selectedGeoType.value === "Watershed") {
       polyName = e.features[0].properties.ACTNAME;
@@ -423,13 +417,6 @@ const addPolygon1 = () => {
       .setLngLat(e.lngLat)
       .setHTML(polyName)
       .addTo(map);
-
-    // flag used to persist this pop up if data type changes as those pop ups need to be removed.
-    // isShowingPolygonPopUp.value = true;
-    // popup.on("close", () => {
-    //   console.log("Why tho here? we set it false on close..");
-    //   isShowingPolygonPopUp.value = false;
-    // });
     map.on("closeAllPolygonPopups", () => {
       popup.remove();
     });
@@ -439,19 +426,10 @@ const addPolygon1 = () => {
 // Add a data source containing GeoJSON data.
 // https://docs.mapbox.com/mapbox-gl-js/example/polygon-popup-on-click/
 const addPolygon2 = () => {
-  console.log("addPolygon2");
-  console.log("window.location.origin: " + window.location.origin);
-  //console.log(window.location.origin);
-  //console.log(counties);
-  //console.log(counties.value);
-  //console.log(huc8.value);
-
   let polygons = counties;
   if (selectedGeoType.value === "Watershed") {
     polygons = huc12;
   }
-  console.log("addPolygon2");
-  console.log(map.getSource("polygon2"));
   if (map.getSource("polygon2")) {
     ("removing polygon2 layer and source");
     removePolygon2();
@@ -491,9 +469,6 @@ const addPolygon2 = () => {
   map.on("click", "polygon2-layer", (e) => {
     map.fire("closeAllStationsPopups");
     map.fire("closeAllPolygonPopups");
-    console.log("On click polygon event");
-    console.log(e);
-    console.log(e.features[0]);
     let polyName = e.features[0].properties.NAMELSAD20;
     if (selectedGeoType.value === "Watershed") {
       polyName = e.features[0].properties.NAME;
@@ -502,17 +477,9 @@ const addPolygon2 = () => {
       .setLngLat(e.lngLat)
       .setHTML(polyName)
       .addTo(map);
-
-    // flag used to persist this pop up if data type changes as those pop ups need to be removed.
-    // isShowingPolygonPopUp.value = true;
-    // popup.on("close", () => {
-    //   console.log("Why tho here? we set it false on close..");
-    //   isShowingPolygonPopUp.value = false;
-    // });
     map.on("closeAllPolygonPopups", () => {
       popup.remove();
     });
-    //map.fire("closeAllPolygonPopups");
   });
 };
 // Change the cursor to a pointer when
@@ -527,28 +494,6 @@ const onMouseLeaveEvent = () => {
   map.getCanvas().style.cursor = "";
 };
 
-// When a click event occurs on a feature in the states layer,
-// open a popup at the location of the click, with description
-// HTML from the click event's properties.
-// const onClickPolygon = (e) => {
-//   console.log(e)
-//   console.log('On click polygon event');
-//
-//   removePopUps();
-//   const popup = new mapboxgl.Popup()
-//     .setLngLat(e.lngLat)
-//     .setHTML(e.features[0].properties.name)
-//     .addTo(map);
-//
-//   // flag used to persist this pop up if data type changes as those pop ups need to be removed.
-//   console.log("Why tho here?");
-//   isShowingPolygonPopUp.value = true;
-//   popup.on('close', () => {
-//     isShowingPolygonPopUp.value = false
-//   })
-//   console.log("yoyoyoy testing foo");
-// }
-
 // checks per data type id and then loops over the data to find and remove each layer prior to removing the source
 // used to clear out map on toggle of data source
 const removeStations = () => {
@@ -559,17 +504,14 @@ const removeStations = () => {
 };
 
 function stationDetailsClicked(station) {
-  console.log("stationDetailsClicked");
-  console.log(station);
   emit("selectedStation", station);
 }
 
 const setupStationsOnMap = () => {
-  console.log("setup stations on map");
-  console.log(locs);
-
-  console.log("time stamp map stations 1: " + new Date().getTime());
   if (locs.features.length === 0) {
+    return;
+  }
+  if (Object.keys(map).length === 0) {
     return;
   }
   if (map.getSource("stations")) {
@@ -580,38 +522,45 @@ const setupStationsOnMap = () => {
     data: locs,
   });
   map.getSource("stations").setData(locs);
-  console.log("time stamp map stations 2: " + new Date().getTime());
-  let minLong = 0;
-  let maxLong = -100;
-  let minLat = 40;
-  let maxLat = 30;
-  locs.features.forEach((f, index) => {
-    //console.log(f.properties["latitude"], f.properties["longitude"]);
-    if (f.properties["longitude"] < minLong) {
-      minLong = f.properties["longitude"];
-    }
-    if (f.properties["latitude"] < minLat) {
-      minLat = f.properties["latitude"];
-    }
-    if (f.properties["longitude"] > maxLong) {
-      maxLong = f.properties["longitude"];
-    }
-    if (f.properties["latitude"] > maxLat) {
-      maxLat = f.properties["latitude"];
-    }
-  });
-  //console log time stamp
-  console.log("time stamp map stations 3: " + new Date().getTime());
 
-  //if (showLegend.value === true) {
-  let centerLat = (minLat + maxLat) / 2; // + 1.8;
-  let centerLong = (minLong + maxLong) / 2;
-  let centerCoordinates = { lng: centerLong, lat: centerLat };
-  map.setCenter(centerCoordinates);
-  console.log("centerCoordinates: " + centerLat + " " + centerLong);
+  console.log("dataTypeSwitched: " + DataTypeSwitched.value);
+  if (DataTypeSwitched.value === true) {
+    DataTypeSwitched.value = false;
+  } else {
+    let minLong = 0;
+    let maxLong = -100;
+    let minLat = 40;
+    let maxLat = 30;
+    locs.features.forEach((f, index) => {
+      if (f.properties["longitude"] < minLong) {
+        minLong = f.properties["longitude"];
+      }
+      if (f.properties["latitude"] < minLat) {
+        minLat = f.properties["latitude"];
+      }
+      if (f.properties["longitude"] > maxLong) {
+        maxLong = f.properties["longitude"];
+      }
+      if (f.properties["latitude"] > maxLat) {
+        maxLat = f.properties["latitude"];
+      }
+    });
+    //console log time stamp
+
+    //if (showLegend.value === true) {
+    let centerLat = (minLat + maxLat) / 2; // + 1.8;
+    let centerLong = (minLong + maxLong) / 2;
+    let centerCoordinates = { lng: centerLong, lat: centerLat };
+    map.setCenter(centerCoordinates);
+
+    let max_bound =
+      Math.max(Math.abs(minLong - maxLong), Math.abs(minLat - maxLat)) * 111;
+    let zoom = 12.1 - Math.log(max_bound);
+    map.setZoom(zoom);
+  }
   let locColor = "#990799";
   if (selectedDataType.value === "Benthic Macroinvertebrates") {
-    locColor = "#8b6508";
+    locColor = "#F09300";
   }
   map.addLayer({
     id: "places",
@@ -636,18 +585,15 @@ const setupStationsOnMap = () => {
       ],
       "circle-stroke-color": "white",
       "circle-stroke-width": 1,
-      "circle-opacity": 0.5,
+      "circle-opacity": 0.8,
     },
   });
-  console.log("time stamp map stations 4: " + new Date().getTime());
   // When a click event occurs on a feature in the places layer, open a popup at the
   // location of the feature, with description HTML from its properties.
   map.on("click", "places", (e) => {
     // Copy coordinates array.
     map.fire("closeAllPolygonPopups");
     map.fire("closeAllStationPopups");
-    console.log(e);
-    console.log(e.features[0].properties.groupnames);
     const coordinates = e.features[0].geometry.coordinates.slice();
     const description = e.features[0].properties.id;
     const feature = e.features[0];
@@ -665,10 +611,6 @@ const setupStationsOnMap = () => {
       nameLong: feature.properties.nameLong,
       watershed: feature.properties.watershed,
     };
-    console.log(stationDetails);
-    console.log(feature.properties);
-    console.log(feature.properties.code);
-    console.log(feature.properties.groupNames);
     const innerHtmlContent = `
         <div class="row q-mt-md" style=''>
         <div class="col">
@@ -724,8 +666,6 @@ const setupStationsOnMap = () => {
     divElement.appendChild(assignBtn);
 
     assignBtn.addEventListener("click", () => {
-      console.log("Button clicked");
-
       stationDetailsClicked(stationDetails);
     });
 
@@ -745,7 +685,6 @@ const setupStationsOnMap = () => {
 
     //new mapboxgl.Popup().setLngLat(coordinates).setHTML(divElement).addTo(map);
   });
-  console.log("time stamp map stations 5: " + new Date().getTime());
   //}
 
   if (showStations.value === false) {
@@ -817,11 +756,11 @@ onUnmounted(() => {
 }
 
 #map {
-  height: 800px; /* 82vh if want %height */
+  height: 640px; /* 82vh if want %height */
 }
 
 #map1 {
-  height: 500px;
+  height: 450px;
 }
 
 .dot-green {
@@ -862,7 +801,7 @@ onUnmounted(() => {
 .dot-orange {
   height: 15px;
   width: 15px;
-  background-color: #8b6508;
+  background-color: #f09300;
   border-radius: 50%;
   display: inline-block;
   vertical-align: middle;

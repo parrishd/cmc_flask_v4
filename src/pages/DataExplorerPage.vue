@@ -2,8 +2,8 @@
   <q-page class="q-px-none q-mx-none">
     <div class="q-px-sm q-mx-sm">
       <!-- stats bar -->
-      <div class="viewing-stats q-mt-lg">
-        <div class="row q-mt-md">
+      <div class="viewing-stats q-mt-md">
+        <div class="row">
           <!--<div class="col-1">Currently Viewing:</div>-->
             <div class="col">
               <q-icon class="fa-solid fa-file-lines q-mr-sm" size="24px" />
@@ -30,12 +30,16 @@
               <span class='vertical-middle' style="font-size:18px">{{ formattedStartDateStats }} - {{formattedEndDateStats}}</span>
             </div>
             <div class="col-1">
-              <q-icon class="fa-solid fa-circle-info q-ml-xl" size="22px">
+
+              <q-icon class="fa-solid fa-circle-info q-ml-xl" size="22px" @click="headerInfoShowing = !headerInfoShowing">
+              </q-icon>
+              <div>
                 <q-tooltip
                   anchor="bottom left"
                   self="top left"
                   class="bg-grey-2"
-                  :offset="[360, 10]"
+                  :offset="[10, 10]"
+                  v-model="headerInfoShowing"
                 >
                   <div class="q-pa-md" style="max-width: 360px">
                     <div class="tooltip-header">Data Explorer Information</div>
@@ -44,13 +48,13 @@
                     </div>
                   </div>
                 </q-tooltip>
-              </q-icon>
+              </div>
             </div>
         </div>
       </div>
 
       <!-- map/form -->
-      <div class="row q-mt-lg">
+      <div class="row q-mt-md">
         <!-- map -->
         <div class="col">
           <MapBox
@@ -62,9 +66,6 @@
             @selected-station="receiveEmit"
             :mapOptions="{
               container: 'map',
-              style: 'mapbox://styles/mapbox/streets-v9',
-              center: [-77.636161, 39.77338],
-              zoom: 6,
             }"
             :key="100"
           />
@@ -85,7 +86,38 @@
         </div>
         <div v-else class="col-4 q-px-md">
           <div class="row">
-            <div class="col">
+
+
+          </div>
+          <div class="row">
+            <div class="col-md-10">
+              <q-label style='color:teal' class="text-h6">Map Data Layers</q-label>
+            </div>
+            <div class="col-md-1 text-right q-mt-sm">
+              <q-icon
+                class="fa-solid fa-circle-info"
+                size="22px"
+                color="primary"
+                @click="mapDataLayerInfoShowing = !mapDataLayerInfoShowing"
+              >
+
+              </q-icon>
+              <div><q-tooltip
+                  anchor="bottom left"
+                  self="top left"
+                  class="bg-grey-2"
+                  :offset="[360, 10]"
+                  v-model="mapDataLayerInfoShowing"
+                >
+                  <div class="q-pa-md" style="max-width: 360px">
+                    <div class="tooltip-header">Map Data Layers</div>
+                    <div class="q-mt-sm tooltip-text">
+                      On this page you can view and download data stored in the CMC Data Explorer database. Use the Map Data Layers to select the layers visible on the map. You can choose between Water Quality or Benthic Macroinvertebrate data and Watershed or Political boundaries to help refine your search. The legend within the map will update based on these selections, where you can turn on and off individual layers.
+                    </div>
+                  </div>
+                </q-tooltip></div>
+            </div>
+            <div class="col-1">
               <!--              <q-icon class="fa-solid fa-arrow-right" size="24px" />-->
               <q-btn
                 icon="fa-solid fa-arrow-right"
@@ -95,43 +127,17 @@
                 color="primary"
               />
             </div>
-
-          </div>
-          <div class="row">
-            <div class="col-md-11">
-              <q-label style='color:teal' class="text-h6">Map Data Layers</q-label>
-            </div>
-            <div class="col-md-1 text-right q-mt-sm">
-              <q-icon
-                class="fa-solid fa-circle-info"
-                size="22px"
-                color="primary"
-              >
-                <q-tooltip
-                  anchor="bottom left"
-                  self="top left"
-                  class="bg-grey-2"
-                  :offset="[360, 10]"
-                >
-                  <div class="q-pa-md" style="max-width: 360px">
-                    <div class="tooltip-header">Map Data Layers</div>
-                    <div class="q-mt-sm tooltip-text">
-                      On this page you can view and download data stored in the CMC Data Explorer database. Use the Map Data Layers to select the layers visible on the map. You can choose between Water Quality or Benthic Macroinvertebrate data and Watershed or Political boundaries to help refine your search. The legend within the map will update based on these selections, where you can turn on and off individual layers.
-                    </div>
-                  </div>
-                </q-tooltip>
-              </q-icon>
-            </div>
           </div>
           <div class="row">
             <div class="col">
-              <div class="q-pa-md">
+              <div class="q-pa-sm">
                 <div class="q-gutter-y-md">
                   <q-btn-toggle
                     v-model="selectedDataType"
                     spread
                     no-caps
                     rounded
+                    dense
                     toggle-color="primary"
                     color="white"
                     text-color="black"
@@ -143,13 +149,14 @@
           </div>
           <div class="row">
             <div class="col">
-              <div class="q-pa-md">
+              <div class="q-pa-sm">
                 <div class="q-gutter-y-md">
                   <q-btn-toggle
                     v-model="selectedGeoType"
                     spread
                     no-caps
                     rounded
+                    dense
                     toggle-color="primary"
                     color="white"
                     text-color="black"
@@ -159,31 +166,7 @@
               </div>
             </div>
           </div>
-          <!--<div class="row q-mt-md">
-            <div class="col">
-              <q-select
-                label="Data Type"
-                v-model="selectedDataType"
-                :options="dataTypes"
-                outlined
-                color="teal"
-                dense
-              ></q-select>
-            </div>
-          </div>
-          <div class="row q-mt-md">
-            <div class="col">
-              <q-select
-                label="Boundary Layer"
-                v-model="selectedGeoType"
-                :options="geoTypesOptions"
-                outlined
-                color="teal"
-                dense
-              ></q-select>
-            </div>
-          </div>-->
-          <div class="row q-mt-lg">
+          <div class="row q-mt-sm">
             <div class="col-md-6">
               <q-label style='color:teal' class="text-h6">Data Filters</q-label>
             </div>
@@ -202,12 +185,17 @@
                 class="fa-solid fa-circle-info"
                 size="22px"
                 color="primary"
+                @click="dataFiltersInfoShowing = !dataFiltersInfoShowing"
               >
+
+              </q-icon>
+              <div>
                 <q-tooltip
                   anchor="bottom left"
                   self="top left"
                   class="bg-grey-2"
                   :offset="[360, 10]"
+                  v-model="dataFiltersInfoShowing"
                 >
                   <div class="q-pa-md" style="max-width: 360px">
                     <div class="tooltip-header">Data Filters</div>
@@ -217,7 +205,8 @@
                     </div>
                   </div>
                 </q-tooltip>
-              </q-icon>
+              </div>
+
             </div>
           </div>
           <div v-if="showCityState" class="row q-mt-md">
@@ -233,6 +222,7 @@
                 outlined
                 dense
                 color="teal"
+                menu-anchor="bottom left"
                 @filter="(val, update, abort) => filterFn(val, update, abort, 'state')"
                 >
 
@@ -280,7 +270,7 @@
           <div v-if="showWatersheds" class="row q-mt-md">
             <div class="col-11">
               <q-select
-                label="Watersheds (pick all that apply)"
+                label="Watersheds (HUC 6) (pick all that apply)"
                 v-model="selectedWatershed"
                 :options="watershedFilteredOptions"
                 ref="qselectWatershed"
@@ -305,10 +295,11 @@
               />
             </div>
           </div>
+
           <div v-if="showWatersheds" class="row q-mt-md">
             <div class="col-11">
               <q-select
-                label="Subwatersheds (pick all that apply)"
+                label="Subwatersheds (HUC 12) (pick all that apply)"
                 v-model="selectedSubwatershed"
                 ref="qselectSubwatershed"
                 :options="subwatershedFilteredOptions"
@@ -428,6 +419,7 @@
               <q-input
                 label="Start Date"
                 v-model="formattedStartDateMap"
+                dense
                 :mask="dateMask"
                 id="date-input"
                 outlined
@@ -464,6 +456,7 @@
               <q-input
                 label="End Date"
                 v-model="formattedEndDateMap"
+                dense
                 :mask="dateMask"
                 id="date-input"
                 outlined
@@ -498,7 +491,7 @@
             <div class="col-1">
               <q-btn
                 icon="close"
-                name="close" v-show="formattedEndDateMap != '' && formattedStartDateMap != '' && showDateClose"
+                name="close" v-show="(formattedEndDateMap != '' || formattedStartDateMap != '') && showDateClose"
                 @click="formattedEndDateMap = ''; formattedStartDateMap = '';"
                 class="cursor-pointer"
                 color="red"
@@ -506,17 +499,23 @@
               />
             </div>
           </div>
-          <div class="row q-mt-xl">
+          <div class="row q-mt-sm">
+            <div class="col">
+              <div v-show="showDateRangeMapError" style="color: red; font-size:20px;">
+                The start date must be before the end date and the start date cannot be later than today.
+              </div>
+            </div>
+          </div>
+          <div class="row q-mt-sm ">
             <div class="col text-center">
               <q-btn
                 label="&nbsp Filter Map"
                 @click="getStationsFromCMC(false)"
                 color="teal"
-                style="width:100%;height:60px;font-size:20px;"
+                style="width:100%;height:30px;font-size:20px;"
                 :loading="filtering"
                 icon="fas fa-filter"
                 >
-
                 <template v-slot:loading>
                   <q-spinner-gears /><span class="q-ml-md">Filtering</span>
                 </template>
@@ -533,7 +532,7 @@
             </div>
           </div>
 
-          <div class="row q-mt-md">
+          <div class="row q-mt-sm">
             <div class="col text-center">
               <q-btn
                 label="Download Data"
@@ -644,7 +643,6 @@
                 <q-checkbox v-model="optionalMetaParams" label="Parameters" />
               </div>
               <div class="col-6" >
-
                 <q-checkbox
                   v-model="optionalMetaCalibration"
                   label="Calibration Samples"
@@ -684,6 +682,7 @@
                 />
                 <q-select  v-model="selectedRole" :options="roleOptions" label="Role *" :rules="[val => !!val || 'Field is required']" />
                 <q-select class="q-mt-md" v-model="selectedPurpose" :options="purposeOptions" label="Purpose *" :rules="[val => !!val || 'Field is required']" />
+                <q-select class="q-mt-md" v-model="selectedLocation" :options="locationOptions" label="Location *" :rules="[val => !!val || 'Field is required']" />
                 <q-input
                   v-model="comments"
                   class="q-mt-md"
@@ -725,7 +724,7 @@
 
           <q-card-actions align="right">
             <!---->
-            <q-btn flat :disabled="!dataUseAcknowledgment || email =='' || selectedRole == '' || selectedPurpose == ''" :loading="downloading" label="Accept" color="primary" icon="download"
+            <q-btn flat :disabled="!dataUseAcknowledgment || email =='' || selectedRole == '' || selectedPurpose == '' || selectedLocation == ''" :loading="downloading" label="Accept" color="primary" icon="download"
                      @click="downloadData">
               <template v-slot:loading>
                 <q-spinner-gears /><span class="q-ml-sm">ACCEPT</span>
@@ -744,9 +743,10 @@
       <!-- results -->
       <div class="row q-py-lg q-px-md results-title">
         <div style='color:teal'  class="col text-h6">Currently Viewing</div>
-        <div class="col-2" style="max-width: 70px">
-          <q-icon class="fa-solid fa-circle-info" size="24px" color="primary">
-            <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2">
+        <div class="col-2" style="max-width: 80px">
+          <q-icon class="fa-solid fa-circle-info" size="24px" color="primary" @click="dataTableInfoShowing = !dataTableInfoShowing"></q-icon>
+          <span>
+            <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2" v-model="dataTableInfoShowing">
               <div class="q-pa-md" style="max-width: 360px">
                 <div class="tooltip-header">Stations Table</div>
                 <div class="q-mt-sm tooltip-text">
@@ -754,8 +754,7 @@
                 </div>
               </div>
             </q-tooltip>
-          </q-icon>
-
+          </span>
           <!--            <q-icon class="fa-solid fa-arrow-left" size="24px" />-->
           <q-btn
             v-show="tableCollapsed"
@@ -777,6 +776,7 @@
             color="primary"
             class=""
           />
+
         </div>
       </div>
       <div v-show="!tableCollapsed" class="row">
@@ -787,6 +787,7 @@
             row-key="StationId"
             flat
             bordered
+            v-model:pagination="pagination"
             @row-click="onRowClick"
 
           >
@@ -840,26 +841,26 @@
               </div>
               <div
                 class="result-details-header-text-2"
-                v-show="showStationDetails"
+                v-show="showStationDetails && selectedStationDetails.nameLong"
               >
                 Name: {{ selectedStationDetails.nameLong }}
               </div>
               <div
                 class="result-details-header-text-2"
-                v-show="showStationDetails"
+                v-show="showStationDetails && selectedStationDetails.groupNames"
               >
                 Monitored by: {{ selectedStationDetails.groupNames }}
               </div>
               <div
                 class="result-details-header-text-2"
-                v-show="showStationDetails"
+                v-show="showStationDetails && ((selectedStationDetails.latitude||selectedStationDetails.longitude))"
               >
                 Location: {{ selectedStationDetails.latitude }},
                 {{ selectedStationDetails.longitude }}
               </div>
               <div
                 class="result-details-header-text-2"
-                v-show="showStationDetails"
+                v-show="showStationDetails && selectedStationDetails.watershed"
               >
                 Watershed: {{ selectedStationDetails.watershed }}
               </div>
@@ -872,12 +873,16 @@
               </div>
             </div>
             <div class="col-1 text-right">
-              <q-icon class="fa-solid fa-circle-info" size="24px">
+              <q-icon class="fa-solid fa-circle-info" size="24px" @click="stationDetailsInfoShowing = !stationDetailsInfoShowing">
+
+              </q-icon>
+              <div>
                 <q-tooltip
                   anchor="bottom left"
                   self="top left"
                   class="bg-grey-2"
                   :offset="[360, 10]"
+                  v-model="stationDetailsInfoShowing"
                 >
                   <div class="q-pa-md" style="max-width: 360px">
                     <div class="tooltip-header">Station Details</div>
@@ -886,21 +891,12 @@
                     </div>
                   </div>
                 </q-tooltip>
-              </q-icon>
+              </div>
             </div>
           </div>
           <div v-show="showStationDetails">
             <!-- details -->
             <div class="row q-mt-md">
-              <!--<div class="col-3 q-pr-xl" v-show="selectedDataType=='Water Quality'">
-                <q-select
-                  label="Data Type"
-                  v-model="selectedParamTypePlot"
-                  :options="paramTypeOptions"
-                  outlined
-                  bg-color="white"
-                ></q-select>
-              </div>-->
               <div class="col-4" >
                 <q-select
                   label="Sample Depth"
@@ -984,15 +980,6 @@
                 </q-input>
               </div>
             </div>
-            <!--<div class="row q-mt-md">
-              <div class="col-5">
-                <q-btn
-                  label="Filter Samples for station"
-                  @click="filterSamples(samples,selectedParamTypePlot,primaryFilterPlot.value);"
-                  color="primary"
-                />
-              </div>
-            </div>-->
             <div class="row q-mt-lg">
               <div class="col">
                 <q-separator />
@@ -1120,20 +1107,26 @@ const columns = [
   {
     name: "formattedStartDate",
     align: "left",
-    label: "First Sampled",
+    label: "First Sample",
     field: "formattedStartDate",
+    sort: (a, b) => new Date(a) - new Date(b),
+    sortable: true,
   },
   {
     name: "formattedEndDate",
     align: "left",
-    label: "Most Recent Sampled",
+    label: "Most Recent Sample",
     field: "formattedEndDate",
+    sort: (a, b) => new Date(a) - new Date(b),
+    sortable: true,
   },
+
   {
     name: "SamplesCount",
     align: "left",
     label: "Number of Samples",
     field: "SamplesCount",
+    sortable: true,
   },
   // {
   //   name: "status",
@@ -1184,6 +1177,16 @@ const purposeOptions = [
   "Outreach",
   "Other",
 ];
+const locationOptions = [
+  "Maryland",
+  "Virginia",
+  "Delaware",
+  "West Virginia",
+  "Pennsylvania",
+  "New York",
+  "District of Columbia",
+  "Outside of the Chesapeake Bay Watershed",
+];
 const model = ref("one");
 const secondModel = ref("one");
 const qselectWatershed = ref(null);
@@ -1216,16 +1219,20 @@ const selectedSubwatershed = ref([]);
 const selectedGroups = ref([]);
 const selectedParams = ref([]);
 const selectedPurpose = ref("");
+const selectedLocation = ref("");
 const selectedRole= ref("");
-const firstName = ref("");
-const lastName = ref("");
 const email = ref("");
 const comments = ref("");
 const showQueryError = ref(false);
+const showDateRangeMapError = ref(false);
 const showDownloadError = ref(false);
 const stationDetailsContainer = ref();
 const stations = ref(null);
-
+const stationDetailsInfoShowing = ref(false);
+const dataTableInfoShowing = ref(false);
+const dataFiltersInfoShowing = ref(false);
+const headerInfoShowing = ref(false);
+const mapDataLayerInfoShowing = ref(false);
 const paramsForMapFilter = ref([]);
 const loadMaxDate = ref(new Date());
 const loadMinDate = ref(new Date("1/1/1901"));
@@ -1241,8 +1248,13 @@ const groupFilteredOptions = ref([]);
 const stationIdFilteredOptions = ref([]);
 const paramOptions = ref([]);
 const paramFilteredOptions = ref([]);
-const dateFormat = "YYYY-MM-DD";
+const dateFormat = "MM/DD/YYYY";
 const STATIONS = "stations";
+const CMC_EMAIL = "cmc_email";
+const CMC_ROLE = "cmc_role";
+const CMC_PURPOSE = "cmc_purpose";
+const CMC_LOCATION = "cmc_location";
+const CMC_COMMENTS = "cmc_comments";
 const samples = ref([]);
 const samplesForPlot = ref([]);
 const plotCount = ref(1);
@@ -1250,7 +1262,6 @@ const downloadDialog = ref(false); //show the download modal
 const disabledDownload = ref(true); //disable the download button
 const downloading = ref(false); //show the spinner
 const filtering = ref(false); //show the spinner
-//console.log(JSON.parse(localStorage.getItem(STATIONS)));
 const isJson = (str) => {
   try {
     JSON.parse(str);
@@ -1265,56 +1276,59 @@ if (
   localStorage.getItem(STATIONS) !== ""
 ) {
   if (isJson(localStorage.getItem(STATIONS))) {
-    console.log("isjson");
     try {
-      console.log("trying this");
       stations.value = JSON.parse(localStorage.getItem(STATIONS));
-      console.log(stations.value);
     } catch (e) {
       console.log("could not parse stations in local storage");
       console.log(e);
     }
   }
 }
-const rows = ref([]);
-// const filteredStations = ref([
-//   {
-//     Name: "P7",
-//     CityCounty: "Wicomico County",
-//     EndDate: "11/06/2022",
-//     GroupNames: "Nanticoke Watershed Alliance",
-//     GroupCodes: "NWA",
-//     Lat: 38.4555,
-//     Long: -75.7569,
-//     SamplesCount: 1539,
-//     StartDate: "03/27/2017",
-//     State: "Maryland",
-//     StationId: 166,
-//     WaterBody: "Barren Creek-Nanticoke River",
-//     formattedEndDate: "November 6, 2022",
-//     formattedStartDate: "March 27, 2017",
-//     status: "historic",
-//   },
-// ]);
-const filteredStations = ref([]);
+console.log('email', email.value);
+if (
+  typeof localStorage.getItem(CMC_EMAIL) !== null &&
+  localStorage.getItem(CMC_EMAIL) !== ""
+) {
+  email.value = localStorage.getItem(CMC_EMAIL);
+}
+console.log('email', email.value);
 
-//stations.value = localStorage.getItem(STATIONS);
-//if (!stations.value) {
-// stations.value = [
-//   {
-//     StationId: 148,
-//     StationCode: "NWA.MANA3",
-//     Lat: 38.4828,
-//     Long: -75.8232,
-//     EndDate: "11/07/2022",
-//     StartDate: "03/27/2017",
-//     GroupName: "Nanticoke Watershed Alliance",
-//     GroupCode: "NWA",
-//     SamplesCount: 3206,
-//     Status: "Current",
-//   },
-// ];
-//}
+if (
+  typeof localStorage.getItem(CMC_ROLE) !== null &&
+  localStorage.getItem(CMC_ROLE) !== ""
+) {
+  selectedRole.value = localStorage.getItem(CMC_ROLE);
+}
+
+if (
+  typeof localStorage.getItem(CMC_PURPOSE) !== null &&
+  localStorage.getItem(CMC_PURPOSE) !== ""
+) {
+  selectedPurpose.value = localStorage.getItem(CMC_PURPOSE);
+}
+
+if (
+  typeof localStorage.getItem(CMC_LOCATION) !== null &&
+  localStorage.getItem(CMC_LOCATION) !== ""
+) {
+  selectedLocation.value = localStorage.getItem(CMC_LOCATION);
+}
+
+if (
+  typeof localStorage.getItem(CMC_COMMENTS) !== null &&
+  localStorage.getItem(CMC_COMMENTS) !== ""
+) {
+  comments.value = localStorage.getItem(CMC_COMMENTS);
+}
+
+const pagination = ref({
+  sortBy: 'formattedEndDate',
+  descending: true,
+  rowsPerPage: 5,
+});
+
+const rows = ref([]);
+const filteredStations = ref([]);
 
 //Make a mask for the q-input in the form of ####-##-##
 const dateMask = dateFormat.replace(/[DMY]/g, "#");
@@ -1347,25 +1361,27 @@ const formattedLoadEndDate = ref(
 );
 //Format the date for display in the q-input.
 const formattedStartDatePlot = ref(
-  new Date(props.startDatePlot).toISOString().substring(0, 10)
+  //new Date(props.startDatePlot).toISOString().substring(0, 10)
+  //format the date to be in the format of MM/DD/YYYY
+  new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date(props.startDatePlot))
+
 );
 const formattedEndDatePlot = ref(
-  new Date(props.endDatePlot).toISOString().substring(0, 10)
+  new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date(props.endDatePlot))
 
 );
 /****************************
  * Functions
  ***************************/
- //const clearFilter = () => {
-  //console.log('clearFilter',qselect.value)
-  //console.log(qselect.value.modelValue)
-      //if (qselect.value !== void 0) {
-      //  qselect.value.updateInputValue('')
-      //}
-    //}
  const onRowClick = ((evt, row) => {
-  console.log("row", row);
-  console.log(selectedStationDetails.value);
   const station = {
     id: row.StationId,
     code: row.StationCode,
@@ -1394,24 +1410,16 @@ const formattedEndDatePlot = ref(
     return date >= startDate && date <= endDate;
  };
  const listParameters = () => {
-  console.log('listParameters')
-  console.log(selectedParams.value);
-  console.log(paramFilteredOptions.value);
-  console.log(paramFilteredOptions.value.length)
-  console.log(paramOptions.value);
 
   if(paramFilteredOptions.value.length < 1 & selectedParams.value.length === 0){
     let params = '';
-    console.log('test')
 
     paramOptions.value.forEach((param) => {
-      console.log(param)
       if(params.split(',').includes(param.name)){
         return;
       }else{
         params += param.name + ', ';
       }
-
     })
     return params;
   }
@@ -1480,7 +1488,6 @@ const validateEmail = (email) => {
 }
 
 const formPayload =  () => {
-  console.log(selectedWatershed.value);
   const groupCodesCsv = selectedGroups.value
     .map(({ value }) => value)
     .join(",");
@@ -1489,33 +1496,39 @@ const formPayload =  () => {
   const watershedsCsv = selectedWatershed.value
     .map(({ value }) => value)
     .join(",");
-  console.log("watersheds");
-  console.log(watershedsCsv);
   const countiesCsv = selectedCounties.value
     .map(({ value }) => value)
     .join(",");
   const statesCsv = selectedStates.value.map(({ value }) => value).join(",");
-
-  console.log("selectedStations.value");
-  console.log(selectedStations.value);
   const stationsCsv = selectedStations.value
     .map(({ value }) => value)
     .join(",");
-  console.log("stationsCsv");
-  console.log(stationsCsv);
 
   const subwatershedsCsv = selectedSubwatershed.value
     .map(({ value }) => value)
     .join(",");
 
-  let formattedStartDateMapString = formattedStartDateMap.value;
+  let formattedStartDateMapString = formattedStartDateMap.value; //MM/DD/YYYY
+  //format the date to be in the format of YYYY-MM-DD
+
+  console.log('formatted start date',formattedStartDateMapString);
   if(formattedStartDateMapString == ''){
     formattedStartDateMapString = new Date('1901-01-01').toISOString().substring(0, 10);
+  }else{
+    formattedStartDateMapString = new Date(formattedStartDateMapString).toISOString().substring(0, 10);
   }
+  console.log('formatted start date',formattedStartDateMapString);
+
+
+
   let formattedEndDateMapString = formattedEndDateMap.value;
+  console.log('formatted end date',formattedEndDateMapString);
   if(formattedEndDateMapString == ''){
     formattedEndDateMapString = new Date().toISOString().substring(0, 10);
+  }else{
+    formattedEndDateMapString = new Date(formattedEndDateMapString).toISOString().substring(0, 10);
   }
+  console.log('formatted end date',formattedEndDateMapString);
 
 
   const payload = {
@@ -1530,17 +1543,13 @@ const formPayload =  () => {
     startDate: formattedStartDateMapString,
     endDate: formattedEndDateMapString,
   };
-  console.log("payload",payload);
   return payload;
 };
 
 const addDayToDate = (oldDate) => {
-  console.log('adddaytodate',oldDate);
   let newDate = new Date(oldDate);
   newDate.setDate(newDate.getDate() + 1);
-  console.log('newDate',newDate);
   newDate = new Date(newDate).toISOString().substring(0, 10);
-  console.log('newDate',newDate);
   return newDate;
 };
 
@@ -1551,22 +1560,21 @@ const writeCSV = (data,pivot,payload) => {
     )
     csv.unshift(Object.keys(data[0]).join(","));
     const csvString = csv.join("\n");
-    //console.log('csvString',csvString);
     const blob = new Blob([csvString], {
       type: "text/csv",
     });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "cmc_data.csv";
+    //append todays date to the file name
+
+    a.download = "cmc_samples_" + new Date().toISOString().substring(0, 10) + ".csv";
+
     a.click();
     window.URL.revokeObjectURL(url);
-    console.log('unpivot done',new Date().toLocaleTimeString());
   }else{
     axios.post("https://cmc.vims.edu/DashboardApi/FetchConditionsForDownload", payload)
       .then((response) => {
-        console.log("getConditionsForDownload");
-        console.log(response.data);
         const conditions = response.data;
 
 
@@ -1583,7 +1591,6 @@ const writeCSV = (data,pivot,payload) => {
         let csvString = '';
         let csvRow = '';
         let csvRowArray = [];
-        //console.log('data',data);
 
         data.forEach((row) => {
           let newRow = {};
@@ -1706,10 +1713,10 @@ const writeCSV = (data,pivot,payload) => {
         const a = document.createElement
         ("a");
         a.href = url;
-        a.download = "cmc_data_pivot.csv";
+        a.download = "cmc_samples" + new Date().toISOString().substring(0, 10) + ".csv";
+
         a.click();
         window.URL.revokeObjectURL(url);
-        console.log('pivot done',new Date().toLocaleTimeString());
         if(!optionalMetaParams.value && !optionalMetaCalibration.value && !optionalMetaGroups.value && !optionalMetaStations.value){
           downloading.value = false;
         }
@@ -1723,24 +1730,30 @@ const writeCSV = (data,pivot,payload) => {
 
 const downloadData = () => {
   downloading.value = true;
+  console.log('email set', email.value);
+  localStorage.setItem(CMC_EMAIL, email.value);
+  let emailTest = localStorage.getItem(CMC_EMAIL);
+  console.log('email test', emailTest);
+  localStorage.setItem(CMC_ROLE, selectedRole.value);
+  localStorage.setItem(CMC_PURPOSE, selectedPurpose.value);
+  localStorage.setItem(CMC_LOCATION, selectedLocation.value);
+  localStorage.setItem(CMC_COMMENTS, comments.value);
+
+  console.log('email test2', localStorage.getItem(CMC_EMAIL));
+
   const payload = formPayload();
   if (payload.endDate !== '' && payload.endDate !== null && typeof payload.endDate !== 'undefined') {
     payload.endDate = addDayToDate(payload.endDate);
   }
-  console.log('getting data',new Date().toLocaleTimeString());
 
     axios
       .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForDownload", payload)
       .then((response) => {
         if (response.data.length > 0) {
-
-          console.log("getSamplesForDownload");
-          console.log(response.data);
           const samplesForDownload = response.data;
           //write response.data to csv download and include headers
 
           //let csv = Object.keys(response.data[0]).join(",") + "\n";
-          //writeCSV(samplesForDownload,false);
           if(selectedDataType.value === 'Water Quality'){
             writeCSV(samplesForDownload,true,payload);
           }else{
@@ -1801,11 +1814,20 @@ const downloadData = () => {
           }
           Promise.all(requests).then(function(values) {
             for (let i = 0; i < values.length; i++) {
-              let filename = values[i].config.url.split("/")[4];
+              let endpoint = values[i].config.url.split("/")[4];
+              let filename = '';
+              if(endpoint === 'FetchParametersForDashboardDownload'){
+                filename = 'parameters';
+              } else if(endpoint === 'FetchGroupsForDashboardDownload'){
+                filename = 'groups';
+              } else if(endpoint === 'FetchStationsForDashboardDownload'){
+                filename = 'stations';
+              } else if(endpoint === 'FetchCalibrationForDashboardDownload'){
+                filename = 'calibration';
+              }
               let response = values[i];
 
               if (response.data.length > 0) {
-                console.log(i.toString());
                 //loop through each element in each object in response.data and replace comma with empty string
 
                 let obj= JSON.stringify(response.data);
@@ -1816,11 +1838,9 @@ const downloadData = () => {
                 //
                 const csv = json.map((row) =>
                   Object.values(row).join(",")
-                )
-                console.log('csv-groups',csv)              //
+                )         //
                 csv.unshift(Object.keys(json[0]).join(","));
                 const csvString = csv.join("\n");
-                console.log('csvString',csvString);
                 const blob = new Blob([csvString], {
                   type: "text/csv",
                 });
@@ -1829,28 +1849,18 @@ const downloadData = () => {
                 a.setAttribute("id", "btn"+i.toString());
                 a.class="download-btn";
                 a.href = url;
-                a.download = filename+ ".csv";
-                console.log("a",a);
+                a.download = filename +"_"+ new Date().toISOString().substring(0, 10) + ".csv";
                 document.body.appendChild(a);
-                filtering.value = false;
+                downloading.value = false;
               }
 
             }
-            for (let i = 0; i < values.length; i++) {
-              setTimeout(function(){
-                let a = document.getElementById("btn"+i.toString());
-                a.click();
-                console.log("a",a.href);
-                // window.URL.revokeObjectURL(a.href);
-              },i*100);
-            }
+            downloading.value = false;
           });
 
 
         } else {
           downloading.value = false;
-          console.log("getSamplesForDownload error");
-          console.log(error);
         }
       })
       .catch((error) => console.log(error));
@@ -1866,27 +1876,21 @@ const getStationsFromCMC = async (load,download) => {
     subwatershedOptions.value = [];
     paramOptions.value = [];
   }
-  if(selectedDataType.value !== selectedDataTypeForLegend.value){
-    selectedDataTypeForLegend.value = selectedDataType.value;
-  }
+  //if(selectedDataType.value !== selectedDataTypeForLegend.value){
+
+  //}
   const payload = formPayload();
   filtering.value = true;
 
   if (payload.endDate !== '' && payload.endDate !== null && typeof payload.endDate !== 'undefined' && !load) {
     payload.endDate = addDayToDate(payload.endDate);
   }
-  console.log('payload',payload)
-  console.log(payload)
   axios
     .post(
       "https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
       payload
     )
     .then((res) => {
-
-      console.log("current time2: " + new Date().toLocaleTimeString());
-      console.log('res')
-      console.log(res)
       if(res.data.length === 0){
         showQueryError.value = true;
         return
@@ -1900,9 +1904,7 @@ const getStationsFromCMC = async (load,download) => {
         return acc + station.SamplesCount;
       }, 0);
 
-      console.log('download',download)
       //convert the number of samples to a number
-      console.log('sampleCount',sampleCountVal)
       if(download){
 
         if(sampleCountVal > 100000){
@@ -1949,8 +1951,6 @@ const getStationsFromCMC = async (load,download) => {
       if (load) {
         stations.value = JSON.parse(localStorage.getItem(STATIONS));
       }
-      console.log("getStationsFromCMC error");
-      console.log(error);
       filtering.value = false;
     });
   //const res = await axios.get("/src/assets/spatial/stations.json", payload);
@@ -1959,8 +1959,11 @@ const getStationsFromCMC = async (load,download) => {
     .post("https://cmc.vims.edu/DashboardApi/FetchSubWatershedsForMap", payload)
     .then((response) => {
       if (response.data.length > 0) {
+
         subwatershedOptions.value = response.data;
-        console.log("subwatershedOptions.value", subwatershedOptions.value);
+
+        //remove null values from the array
+        subwatershedOptions.value = subwatershedOptions.value.filter((subwatershed) => subwatershed.value !== null && subwatershed.value !== '');
         showQueryError.value = false;
       } else {
         showQueryError.value = true;
@@ -1972,6 +1975,8 @@ const getStationsFromCMC = async (load,download) => {
     .then((response) => {
       if (response.data.length > 0) {
         watershedOptions.value = response.data;
+        watershedOptions.value = watershedOptions.value.filter((watershed) => watershed.value !== null && watershed.value !== '');
+
         showQueryError.value = false;
       } else {
         showQueryError.value = true;
@@ -1982,8 +1987,6 @@ const getStationsFromCMC = async (load,download) => {
     axios
     .post("https://cmc.vims.edu/DashboardApi/FetchParametersForMap", payload)
     .then((response) => {
-      console.log("paramOptions.value", response.data);
-      console.log(response.data);
       if (response.data.length > 0) {
 
         paramOptions.value = response.data;
@@ -2009,6 +2012,7 @@ const getStationsFromCMC = async (load,download) => {
     .then((response) => {
       if (response.data.length > 0) {
         countyOptions.value = response.data;
+        countyOptions.value = countyOptions.value.filter((county) => county.value !== null && county.value !== '');
         showQueryError.value = false;
       } else {
         showQueryError.value = true;
@@ -2020,6 +2024,7 @@ const getStationsFromCMC = async (load,download) => {
     .then((response) => {
       if (response.data.length > 0) {
         stateOptions.value = response.data;
+        stateOptions.value = stateOptions.value.filter((state) => state.value !== null && state.value !== '');
         showQueryError.value = false;
       } else {
         showQueryError.value = true;
@@ -2029,8 +2034,6 @@ const getStationsFromCMC = async (load,download) => {
 };
 
 const aggregateStations = () => {
-  console.log('aggregateStations')
-  console.log(stations.value)
   if (stations.value === null || stations.value.length === 0) {
     return;
   }
@@ -2051,7 +2054,6 @@ const aggregateStations = () => {
       transformedStations.map((s) => new Date(s.StartDate))
     )
   );
-  console.log("AGG time2: " + new Date().toLocaleTimeString());
 
   formattedStartDateStats.value = new Intl.DateTimeFormat("en-US", {
     year: "numeric",
@@ -2081,11 +2083,6 @@ const aggregateStations = () => {
     //check if station StartDate is less
 
     if (existingStation) {
-      if(existingStation.StationCode == 'ACB.FOR17'){
-        console.log('for17 test,')
-        console.log('existingStation',existingStation);
-        console.log('station',station);
-      }
       existingStation.GroupNames = `${existingStation.GroupName}, ${station.GroupName}`;
       existingStation.GroupCodes = `${existingStation.GroupCode}, ${station.GroupCode}`;
       if(existingStation.Status === 'Current' || station.Status === 'Current'){
@@ -2117,18 +2114,13 @@ const aggregateStations = () => {
       aggregatedStations.push(station);
     }
   });
-  console.log("agg time3: " + new Date().toLocaleTimeString());
-  console.log(aggregatedStations)
   //sort aggregatedStations by StationCode
   aggregatedStations.sort((a, b) => a.StationCode.localeCompare(b.StationCode));
 
   filteredStations.value = aggregatedStations;
-  console.log("filteredStations.value");
-  console.log(filteredStations.value);
 };
 
 const getUniqueValues = (data, param) => {
-  console.log("getUniqueParams", data);
   let uniqueParams = [];
   if (param == "Parameter") {
     //get unique parameter names from samples as label in object and collapse all parameter codes for that parameter name concatenated by comma as value
@@ -2156,12 +2148,23 @@ const getUniqueValues = (data, param) => {
           value: sample.depth,
         });
       }
-      //sort acc
-     // acc.sort((a, b) => a - b);
+
       return acc;
     }, []);
+    // data.forEach((sample) => {
+    //   if(sample.depth === null){
+    //     uniqueParams.push({
+    //       name: 'No Depth',
+    //       value: null
+    //     });
+    //   }else if(sample.depth === ''){
+    //     uniqueParams.push({
+    //       name: 'No Depth',
+    //       value: ''
+    //     });
+    //   }
+    // });
   }
-  console.log("uniqueParams", uniqueParams);
   //sort uniqueParams by name
   uniqueParams.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -2176,29 +2179,19 @@ const getUniqueValues = (data, param) => {
 
 const groupOptions = computed(() => {
   if (stations.value !== null && stations.value.length > 0) {
-    console.log("stations.value");
-    console.log(stations.value);
     let subStations = stations.value.map(transformStation);
     subStations = subStations.map((s) => ({
       name: s.GroupName,
       value: s.GroupCode,
     }));
 
-    console.log("subStations");
-    console.log(subStations);
-
     //get unique stations by stationCode
     const uniqueGroups = new Map(subStations.map((o) => [o.name, o])).values();
 
-    console.log("uniqueGroups");
-    console.log(uniqueGroups);
 
     const sortedOptions = [...uniqueGroups].sort((a, b) =>
       a.name.localeCompare(b.name)
     ); //;
-
-    console.log("sortedOptions");
-    console.log(sortedOptions);
 
     return [...sortedOptions];
   } else {
@@ -2209,14 +2202,10 @@ const groupOptions = computed(() => {
 //create stationIdOptions from filteredStations with value and labl as StationCode
 const stationIdOptions = computed(() => {
   if (filteredStations.value !== null && filteredStations.value.length > 0) {
-    console.log("filteredStations.value", filteredStations.value);
     const options = filteredStations.value.map((s) => ({
       value: s.StationId.toString(), //as string,
       name: s.StationCode.substring(s.StationCode.indexOf('.')+1).replace(',','') + " (" + s.StationCode.split(".")[0].replace(',','') + ")",
     }));
-
-    console.log("options");
-    console.log(options);
 
     //sort options by value
     const sortedOptions = [...options].sort((a, b) =>
@@ -2263,6 +2252,30 @@ watch(formattedStartDatePlot, (newDateValue) => {
   //convert to iso string
   const updatedDate = newDate.toISOString();
   emit("update:startDatePlot", updatedDate);
+});
+
+watch(formattedEndDateMap, (newDateValue) => {
+  console.log('new end date value',newDateValue);
+  if((newDateValue !== '' && newDateValue !== null && typeof newDateValue !== 'undefined')){
+    //check if endDate is less than startDate
+    if(new Date(newDateValue) < new Date(formattedStartDateMap.value) || new Date(newDateValue) > new Date()){
+      showDateRangeMapError.value = true;
+    }else{
+      showDateRangeMapError.value = false;
+    }
+  }
+});
+
+watch(formattedStartDateMap, (newDateValue) => {
+  console.log('new start date value',newDateValue);
+  if((newDateValue !== '' && newDateValue !== null && typeof newDateValue !== 'undefined')){
+    //check if endDate is less than startDate
+    if(new Date(newDateValue) > new Date(formattedEndDateMap.value) || new Date(newDateValue) > new Date()){
+      showDateRangeMapError.value = true;
+    }else{
+      showDateRangeMapError.value = false;
+    }
+  }
 });
 
 //set the primaryFilterPlot to the first value in the uniqueParams array
@@ -2331,7 +2344,6 @@ watch(formattedEndDatePlot, (newDateValue) => {
 });
 
 watch(selectedParamTypePlot, () => {
-  console.log("selectedParamTypePlot changed");
   //if the selectedParamTypePlot is Depth, then filter the filterOptionsPlot to only include unique depths from samples.
   //the unique depth should only include one instance of each depth value.
   getUniqueValues(samples.value, selectedParamTypePlot.value);
@@ -2350,44 +2362,23 @@ watch(selectedGeoType, () => {
   }
 });
 
-watch(paramsForMapFilter, () => {
-  console.log("paramsForMapFilter changed");
-  console.log(paramsForMapFilter.value);
-});
 
-watch(paramOptions, () => {
-  console.log("paramsOptions changed");
-  console.log(paramOptions.value);
-});
 
-watch(groupOptions, () => {
-  console.log("groupOptions changed");
-  console.log(groupOptions.value);
-});
 
 watch(stations, () => {
   if (stations.value.length > 0 && stations.value !== null) {
-    console.log("stations changed");
-    console.log(stations.value);
     aggregateStations();
   }
 });
 
 watch(filteredStations, () => {
-  console.log("filteredStations changed");
-  console.log(filteredStations.value);
   rows.value.splice(0, rows.value.length, ...filteredStations.value);
-  console.log("rows");
-  console.log(rows);
 });
 
 watch(selectedDataType, () => {
+  selectedDataTypeForLegend.value = selectedDataType.value;
   stations.value = [];
-  console.log("selectedDataType changed");
-  console.log(selectedDataType.value);
-  console.log(filteredStations.value);
   filteredStations.value = [];
-  console.log(filteredStations.value)
   selectedStates.value = [];
   selectedStations.value = [];
   selectedCounties.value = [];
@@ -2398,7 +2389,7 @@ watch(selectedDataType, () => {
   formattedStartDateMap.value = '';
   formattedEndDateMap.value = '';
 
-  getStationsFromCMC(true);
+  getStationsFromCMC(false,false);
 });
 
 const filterRefs = [
@@ -2429,9 +2420,9 @@ const filterRefs = [
 
 function clearFilters() {
 
-  selectedDataType.value = "Water Quality";
+  //selectedDataType.value = "Water Quality";
 
-  selectedGeoType.value = "Watershed";
+  //selectedGeoType.value = "Watershed";
   selectedStates.value = [];
   selectedStations.value = [];
   selectedCounties.value = [];
@@ -2445,96 +2436,6 @@ function clearFilters() {
   getStationsFromCMC(true);
 }
 
-const matchWatershed = (s) =>
-  selectedWatershed.value.length === 0 ||
-  selectedWatershed.value.includes(s.Watershed);
-const matchSubwatershed = (s) =>
-  selectedSubwatershed.value.length === 0 ||
-  selectedSubwatershed.value.includes(s.Subwatershed);
-const matchState = (s) =>
-  selectedStates.value.length === 0 || selectedStates.value.includes(s.State);
-const matchCounty = (s) =>
-  selectedCounties.value.length === 0 ||
-  selectedCounties.value.includes(s.CityCounty);
-const matchGroup = (s) => {
-  if (selectedGroups.value.length === 0) {
-    return true;
-  }
-  const groupsArray = s.GroupNames.split(",").map((str) => str.trim());
-
-  return selectedGroups.value.some((group) => groupsArray.includes(group));
-};
-const matchStation = (s) =>
-  selectedStations.value.length === 0 ||
-  selectedStations.value.includes(s.StationId);
-const matchParams = (s) => {
-  if (selectedParams.value.length === 0) {
-    return true;
-  }
-  const paramsArray = s.ParameterCodes.split(",").map((str) => str.trim());
-
-  return selectedParams.value.some((param) => paramsArray.includes(param));
-};
-const matchStartDate = (s) => {
-  if (!startDate.value) return true;
-
-  const [year, month, day] = startDate.value.split("/").map(Number);
-  const selectedStartDate = new Date(year, month - 1, day);
-
-  const stationStartDate = new Date(s.StartDate.split("T")[0]);
-
-  return stationStartDate >= selectedStartDate;
-};
-const matchEndDate = (s) => {
-  if (!endDate.value) return true;
-
-  const [year, month, day] = endDate.value.split("/").map(Number);
-  const selectedEndDate = new Date(year, month - 1, day);
-
-  const stationEndDate = new Date(s.EndDate.split("T")[0]);
-
-  return stationEndDate <= selectedEndDate;
-};
-
-// function applyFilters() {
-//   const filterFunctions = [
-//     matchWatershed,
-//     matchSubwatershed,
-//     matchState,
-//     matchCounty,
-//     matchGroup,
-//     matchStation,
-//     matchParams,
-//     matchStartDate,
-//     matchEndDate,
-//   ];
-
-//   const noFilterApplied = filterFunctions.every(
-//     (filter) => filter.length === 0
-//   );
-
-//   if (noFilterApplied) {
-//     filteredStations.value = stations.value.map(transformStation);
-//     return;
-//   }
-
-//   filteredStations.value = stations.value
-//     .filter((s) => filterFunctions.every((filter) => filter(s)))
-//     .map(transformStation);
-// }
-// function checkDate(val) {
-//   return Quasar.utils.date.isValid(val) || "Invalid date.";
-// }
-
-// const dateRule = [
-//   (v) => (v === null || isValidDate(v) ? true : "Invalid Date"),
-// ];
-
-function isValidDate(value) {
-  const dateRegEx = /^\d{4}-\d{2}-\d{2}$/;
-  return dateRegEx.test(value);
-}
-
 function formatDate(dateString) {
   const options = { year: "numeric", month: "long", day: "numeric" };
   return new Date(dateString).toLocaleDateString("en-us", options);
@@ -2542,11 +2443,7 @@ function formatDate(dateString) {
 }
 
 function transformStation(station) {
-  //let transformStation = {};
   let transformStation = station;
-  // station.forEach((item) => {
-  //   transformStation[item["Key"]] = item["Value"];
-  // });
   const formattedStartDate = formatDate(transformStation.StartDate);
   const formattedEndDate = formatDate(transformStation.EndDate);
 
@@ -2558,13 +2455,9 @@ function transformStation(station) {
 }
 
 function getSamples(stationId) {
-  console.log("getSamples");
   if (!stationId) {
     return;
   }
-//check if formattedEndDatePlot.value is a valid date
-
-
   const payload = {
     stationId: stationId,
     startDate: formattedStartDatePlot.value,
@@ -2572,22 +2465,17 @@ function getSamples(stationId) {
     dataType: selectedDataType.value,
   };
 
-  console.log("payload",payload);
-
   if (payload.endDate !== '' && payload.endDate !== null && typeof payload.endDate !== 'undefined') {
 
     payload.endDate = addDayToDate(payload.endDate);
   }
-  console.log("payload2");
-  console.log(payload);
 
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForPlot", payload)
     .then((response) => {
-      console.log("fetch samples for plot");
-      console.log(response.data);
       if (response.data.length > 0) {
         samples.value = response.data;
+        console.log('samples!!!!',samples.value);
 
         if(selectedDataType.value === "Water Quality"){
 
@@ -2601,8 +2489,6 @@ function getSamples(stationId) {
             }
             return acc;
           }, []);
-          console.log("uniqueSampleDates");
-          console.log(uniqueSampleDates);
           //sum the value for each unique sampleDate and write to new array
           let aggSamples = uniqueSampleDates.map((date) => {
             let sumCount = response.data.reduce((acc, sample) => {
@@ -2612,7 +2498,6 @@ function getSamples(stationId) {
               return acc;
             }, 0);
             let speciesCount = response.data.reduce((acc, sample) => {
-              //console.log("sample",sample);
               if (sample.dateTime === date) {
                 acc += 1;
               }
@@ -2621,8 +2506,6 @@ function getSamples(stationId) {
             return { sampleDate: date, totalCount: sumCount, speciesCount: speciesCount};
           });
 
-          console.log("aggSamples");
-          console.log(aggSamples);
           samples.value = aggSamples;
           samplesForPlot.value = aggSamples;
         }
@@ -2636,21 +2519,13 @@ function getSamples(stationId) {
 function filterSamples(data, paramType, value) {
   if(selectedDataType.value === "Water Quality"){
     if (paramType == "Parameter") {
-
-      console.log(value.split(","));
-
       data = data.filter((s) => value.split(",").includes(s.parameterCode));
-      console.log("samplesForPlot!!!!!!!",samplesForPlot.value);
     } else if (paramType == "Sample Depth") {
       data = data.filter((s) => s.depth === value);
     }
   }
-  console.log("samplesForPlot",samplesForPlot.value);
-  console.log("formattedStartDatePlot",formattedStartDatePlot.value);
-  console.log("formattedEndDatePlot",formattedEndDatePlot.value);
   //filter samples by startDate and endDate
   samplesForPlot.value = data.filter((s) => {
-    console.log('s',s)
     let sampleDate = new Date();
     //sampleDate = new Date(s.dateTime);
     if(selectedDataType.value === 'Water Quality'){
@@ -2660,10 +2535,6 @@ function filterSamples(data, paramType, value) {
     }
     const startDate = new Date(formattedStartDatePlot.value);
     let endDate = new Date(formattedEndDatePlot.value);
-    endDate.setDate(endDate.getDate() + 1);
-    console.log("sampleDate",sampleDate);
-    console.log("startDate",startDate);
-    console.log("endDate",endDate);
     return sampleDate >= startDate && sampleDate <= endDate;
   });
 }
@@ -2678,21 +2549,42 @@ function transformParameter(param) {
 }
 
 function receiveEmit(station) {
-  console.log("receiveEmit");
-  console.log(station);
 
   selectedStationDetails.value = station;
   selectedStationDetails.value.name= station.code.substring(station.code.indexOf('.')+1)
 
-  console.log("selectedStationDetails");
-  console.log(selectedStationDetails);
   stationDetailsContainer.value.scrollIntoView({ behavior: "smooth" });
-  console.log("station end date");
-  console.log(station.endDate);
+  //format the station.endDate to be in the format of MM/DD/YYYY
 
-  formattedEndDatePlot.value = new Date(station.endDate).toISOString().substring(0, 10);
+  //if staion.endDate is equal to station.startDate, then add one day to the station.endDate
 
-  formattedStartDatePlot.value = new Date(station.startDate).toISOString().substring(0, 10);
+  console.log('end date',station.endDate);
+
+  if(station.endDate === station.startDate){
+    formattedEndDatePlot.value = new Date(station.endDate);
+    formattedEndDatePlot.value.setDate(formattedEndDatePlot.value.getDate() + 1);
+    console.log('formatted PLLOOOOT end date',formattedEndDatePlot.value);
+    formattedEndDatePlot.value = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).format(formattedEndDatePlot.value);
+  }else{
+    formattedEndDatePlot.value = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).format(new Date(station.endDate));
+  }
+  //format the date to be in the format of MM/DD/YYYY
+  formattedStartDatePlot.value = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date(station.startDate));
+
+
+
   getSamples(station.id);
 }
 
@@ -2712,7 +2604,7 @@ onMounted(() => {
 <style lang="scss" scoped>
   .dot-orange {
 
-    color: #8b6508;
+    color: #F09300
   }
 
   .dot-purple {
