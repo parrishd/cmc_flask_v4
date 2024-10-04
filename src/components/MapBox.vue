@@ -58,10 +58,14 @@
               </p>
             </div>
             <div class="row" v-show="selectedGeoType == 'Watershed'">
-              <q-checkbox v-model="showPolygon1"> Watersheds</q-checkbox>
+              <q-checkbox v-model="showPolygon1">
+                Watersheds (HUC 8)</q-checkbox
+              >
             </div>
             <div class="row" v-show="selectedGeoType == 'Watershed'">
-              <q-checkbox v-model="showPolygon2"> SubWatersheds</q-checkbox>
+              <q-checkbox v-model="showPolygon2">
+                SubWatersheds (HUC 12)</q-checkbox
+              >
             </div>
             <div class="row" v-show="selectedGeoType !== 'Watershed'">
               <q-checkbox v-model="showPolygon1"> States</q-checkbox>
@@ -411,7 +415,11 @@ const addPolygon1 = () => {
     map.fire("closeAllPolygonPopups");
     let polyName = e.features[0].properties.STATE_NAME;
     if (selectedGeoType.value === "Watershed") {
-      polyName = e.features[0].properties.ACTNAME;
+      polyName =
+        e.features[0].properties.ACTNAME +
+        " (" +
+        e.features[0].properties.HUC8 +
+        ")";
     }
     const popup = new mapboxgl.Popup()
       .setLngLat(e.lngLat)
@@ -471,7 +479,11 @@ const addPolygon2 = () => {
     map.fire("closeAllPolygonPopups");
     let polyName = e.features[0].properties.NAMELSAD20;
     if (selectedGeoType.value === "Watershed") {
-      polyName = e.features[0].properties.NAME;
+      polyName =
+        e.features[0].properties.NAME +
+        " (" +
+        e.features[0].properties.HUC12 +
+        ")";
     }
     const popup = new mapboxgl.Popup()
       .setLngLat(e.lngLat)

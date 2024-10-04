@@ -6,19 +6,19 @@
         <div class="row">
           <!--<div class="col-1">Currently Viewing:</div>-->
             <div class="col">
-              <q-icon class="fa-solid fa-file-lines q-mr-sm" size="24px" />
+              <q-icon class="fa-solid fa-file-lines" size="24px" />
               <span class='vertical-middle' style="font-size:18px">{{ sampleCount }} Samples</span>
             </div>
             <div class="col">
-              <q-icon class="fa-solid fa-building q-mr-sm" size="24px" />
+              <q-icon class="fa-solid fa-building" size="24px" />
               <span class='vertical-middle' style="font-size:18px">{{ organizationsCount }} Organizations</span>
             </div>
             <div class="col">
-              <q-icon class="fa-solid fa-location-dot q-mr-sm" size="24px" />
+              <q-icon class="fa-solid fa-location-dot" size="24px" />
               <span class='vertical-middle' style="font-size:18px">{{ stationsCount }} Total Stations</span>
             </div>
             <div class="col">
-              <q-icon class="fa-solid fa-location-dot q-mr-sm" size="24px" :class="{
+              <q-icon class="fa-solid fa-location-dot" size="24px" :class="{
                         'dot-purple': selectedDataType == 'Water Quality',
                         'dot-orange': selectedDataType != 'Water Quality',
                       }" />
@@ -26,29 +26,12 @@
                     >{{ activeStationsCount }} Active Stations</span>
             </div>
             <div class="col ">
-              <q-icon class="fa-solid fa-calendar q-mr-sm" size="24px" />
+              <q-icon class="fa-solid fa-calendar" size="24px" />
               <span class='vertical-middle' style="font-size:18px">{{ formattedStartDateStats }} - {{formattedEndDateStats}}</span>
             </div>
             <div class="col-1">
-
-              <q-icon class="fa-solid fa-circle-info q-ml-xl" size="22px" @click="headerInfoShowing = !headerInfoShowing">
+              <q-icon class="fa-solid fa-circle-info q-ml-md" size="22px" @click="helpClick('main')">
               </q-icon>
-              <div>
-                <q-tooltip
-                  anchor="bottom left"
-                  self="top left"
-                  class="bg-grey-2"
-                  :offset="[10, 10]"
-                  v-model="headerInfoShowing"
-                >
-                  <div class="q-pa-md" style="max-width: 360px">
-                    <div class="tooltip-header">Data Explorer Information</div>
-                    <div class="q-mt-sm tooltip-text">
-                      The CMC Data Explorer is a tool for storing, sharing, and visualizing data collected by the network of water quality and benthic macroinvertebrate monitoring programs working with the Chesapeake Monitoring Cooperative. The statistics above the map reflect the stations and associated data currently being viewed on the map. Active stations are those that have been sampled in the last 5 years.
-                    </div>
-                  </div>
-                </q-tooltip>
-              </div>
             </div>
         </div>
       </div>
@@ -98,24 +81,10 @@
                 class="fa-solid fa-circle-info"
                 size="22px"
                 color="primary"
-                @click="mapDataLayerInfoShowing = !mapDataLayerInfoShowing"
+                @click="helpClick('mapDataLayers')"
               >
 
               </q-icon>
-              <div><q-tooltip
-                  anchor="bottom left"
-                  self="top left"
-                  class="bg-grey-2"
-                  :offset="[360, 10]"
-                  v-model="mapDataLayerInfoShowing"
-                >
-                  <div class="q-pa-md" style="max-width: 360px">
-                    <div class="tooltip-header">Map Data Layers</div>
-                    <div class="q-mt-sm tooltip-text">
-                      On this page you can view and download data stored in the CMC Data Explorer database. Use the Map Data Layers to select the layers visible on the map. You can choose between Water Quality or Benthic Macroinvertebrate data and Watershed or Political boundaries to help refine your search. The legend within the map will update based on these selections, where you can turn on and off individual layers.
-                    </div>
-                  </div>
-                </q-tooltip></div>
             </div>
             <div class="col-1">
               <!--              <q-icon class="fa-solid fa-arrow-right" size="24px" />-->
@@ -185,28 +154,10 @@
                 class="fa-solid fa-circle-info"
                 size="22px"
                 color="primary"
-                @click="dataFiltersInfoShowing = !dataFiltersInfoShowing"
+                @click="helpClick('dataFilters')"
               >
 
               </q-icon>
-              <div>
-                <q-tooltip
-                  anchor="bottom left"
-                  self="top left"
-                  class="bg-grey-2"
-                  :offset="[360, 10]"
-                  v-model="dataFiltersInfoShowing"
-                >
-                  <div class="q-pa-md" style="max-width: 360px">
-                    <div class="tooltip-header">Data Filters</div>
-                    <div class="q-mt-sm tooltip-text">
-                      <p>Use the form below to build a search that will select the specific data you want to view or download. You can select as many filters as you want and as many options within each filter as you want. However, if you click “Filter Map” after each new selection, this will update the map and possible options available in the other filters and help you refine your search. Each filter acts as AND statements and multiple selections within each filter act as OR statements. For example if you select the James River Watershed and the parameters: bacteria and water temperature, you will see stations within the James River watershed that monitor bacteria OR water temperature.</p>
-                      <p>Click “Clear Filters” to remove all selections or click the X on a specific filter and then Filter Map to remove just that filter.</p>
-                    </div>
-                  </div>
-                </q-tooltip>
-              </div>
-
             </div>
           </div>
           <div v-if="showCityState" class="row q-mt-md">
@@ -552,6 +503,37 @@
           </div>
         </div>
       </div>
+      <q-dialog v-model="helpDialog" >
+        <q-card style="width: 800px; max-width: 90vw; height: 95vh;" bg-grey-9 text-white>
+          <q-card-section>
+            <div class="row q-py-md q-px-lg result-details-header">
+              <div class="col-md-11">
+                <div class="text-h6">{{ helpTitle }}</div>
+              </div>
+              <div class="col-md-1">
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="close"
+                  class="q-mr-sm"
+                  v-close-popup>
+                </q-btn>
+              </div>
+            </div>
+
+
+          </q-card-section>
+          <q-card-section>
+            <div class='row q-px-lg q-py-md'>
+              <div class='col-11 '>
+                <div style="font-size:20px"><p v-for="item in helpContent" :key="item.id">{{ item.content }}</p></div>
+              </div>
+
+            </div>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
       <q-dialog v-model="downloadDialog" >
         <q-card style="width: 800px; max-width: 90vw; height: 95vh;" bg-grey-9 text-white>
           <q-card-section>
@@ -744,17 +726,8 @@
       <div class="row q-py-lg q-px-md results-title">
         <div style='color:teal'  class="col text-h6">Currently Viewing</div>
         <div class="col-2" style="max-width: 80px">
-          <q-icon class="fa-solid fa-circle-info" size="24px" color="primary" @click="dataTableInfoShowing = !dataTableInfoShowing"></q-icon>
-          <span>
-            <q-tooltip anchor="bottom left" self="top left" class="bg-grey-2" v-model="dataTableInfoShowing">
-              <div class="q-pa-md" style="max-width: 360px">
-                <div class="tooltip-header">Stations Table</div>
-                <div class="q-mt-sm tooltip-text">
-                  The stations table shows the results from the information selected on the data filters form above and the stations currently shown on the map. Click on a station to view the station details below.
-                </div>
-              </div>
-            </q-tooltip>
-          </span>
+          <q-icon class="fa-solid fa-circle-info" size="24px" color="primary" @click="helpClick('stationsTable')"></q-icon>
+
           <!--            <q-icon class="fa-solid fa-arrow-left" size="24px" />-->
           <q-btn
             v-show="tableCollapsed"
@@ -873,25 +846,8 @@
               </div>
             </div>
             <div class="col-1 text-right">
-              <q-icon class="fa-solid fa-circle-info" size="24px" @click="stationDetailsInfoShowing = !stationDetailsInfoShowing">
-
+              <q-icon class="fa-solid fa-circle-info" size="24px" @click="helpClick('stationDetails')">
               </q-icon>
-              <div>
-                <q-tooltip
-                  anchor="bottom left"
-                  self="top left"
-                  class="bg-grey-2"
-                  :offset="[360, 10]"
-                  v-model="stationDetailsInfoShowing"
-                >
-                  <div class="q-pa-md" style="max-width: 360px">
-                    <div class="tooltip-header">Station Details</div>
-                    <div class="q-mt-sm tooltip-text">
-                      In this panel, you can visualize or download water quality monitoring data collected at the station selected on the map or table above.  Select a depth or date range for all plots, then select parameters for each individual plot. You can add up to two parameters for each plot. Click the plus sign at the bottom right of the panel to add another plot.
-                    </div>
-                  </div>
-                </q-tooltip>
-              </div>
             </div>
           </div>
           <div v-show="showStationDetails">
@@ -979,6 +935,7 @@
                   </template>
                 </q-input>
               </div>
+              <div></div>
             </div>
             <div class="row q-mt-lg">
               <div class="col">
@@ -1089,6 +1046,7 @@ const columns = [
     align: "left",
     field: "StationCode",
     sortable: true,
+
   },
   {
     name: "GroupNames",
@@ -1259,6 +1217,9 @@ const samples = ref([]);
 const samplesForPlot = ref([]);
 const plotCount = ref(1);
 const downloadDialog = ref(false); //show the download modal
+const helpDialog = ref(false); //show the help modal
+const helpTitle = ref('');
+const helpContent = ref([{message:'foo'},{message:'bar'}]);
 const disabledDownload = ref(true); //disable the download button
 const downloading = ref(false); //show the spinner
 const filtering = ref(false); //show the spinner
@@ -1322,8 +1283,8 @@ if (
 }
 
 const pagination = ref({
-  sortBy: 'formattedEndDate',
-  descending: true,
+  sortBy: 'StationCode',
+  descending: false,
   rowsPerPage: 5,
 });
 
@@ -1381,7 +1342,32 @@ const formattedEndDatePlot = ref(
 /****************************
  * Functions
  ***************************/
- const onRowClick = ((evt, row) => {
+const helpClick = ((source) => {
+  let title = '';
+  let content = '';
+  if (source == 'main'){
+    title = 'CMC Data Explorer';
+    content = [{id:1,content:'The CMC Data Explorer is a tool for storing, sharing, and visualizing data collected by the network of water quality and benthic macroinvertebrate monitoring programs working with the Chesapeake Monitoring Cooperative. The statistics above the map reflect the stations and associated data currently being viewed on the map. Active stations are those that have been sampled in the last 5 years.'}];
+  }else if(source == 'mapDataLayers'){
+    title = 'Map Data Layers';
+    content = [{id:1,content:'On this page you can view and download data stored in the CMC Data Explorer database. Use the Map Data Layers to select the layers visible on the map. You can choose between Water Quality or Benthic Macroinvertebrate data and Watershed or Political boundaries to help refine your search. The legend within the map will update based on these selections, where you can turn on and off individual layers.'}];
+  }else if(source == 'dataFilters'){
+    title = 'Data Filters';
+    content = [{id:1,content:'Use the form below to build a search that will select the specific data you want to view or download. You can select as many filters as you want and as many options within each filter as you want. However, if you click “Filter Map” after each new selection, this will update the map and possible options available in the other filters and help you refine your search. Each filter acts as AND statements and multiple selections within each filter act as OR statements. For example if you select the James River Watershed and the parameters: bacteria and water temperature, you will see stations within the James River watershed that monitor bacteria OR water temperature.'},
+               {id:2,content:'Click "Clear Filters” to remove all selections or click the X on a specific filter and then Filter Map to remove just that filter.'}];
+  }else if(source == 'stationsTable'){
+    title = 'Stations Table';
+    content = [{id:1,content:'The stations table shows the results from the information selected on the data filters form above and the stations currently shown on the map. Click on a station to view the station details below.'}];
+  }else if(source == 'stationDetails'){
+    title = 'Station Details';
+    content = [{id:1,content:'In this panel, you can visualize or download water quality monitoring data collected at the station selected on the map or table above.  Select a depth or date range for all plots, then select parameters for each individual plot. You can add up to two parameters for each plot. Click the plus sign at the bottom right of the panel to add another plot.'}];
+  }
+
+  helpTitle.value = title;
+  helpContent.value = content;
+  helpDialog.value = true;
+});
+const onRowClick = ((evt, row) => {
   const station = {
     id: row.StationId,
     code: row.StationCode,
@@ -1953,7 +1939,6 @@ const getStationsFromCMC = async (load,download) => {
       }
       filtering.value = false;
     });
-  //const res = await axios.get("/src/assets/spatial/stations.json", payload);
 
   axios
     .post("https://cmc.vims.edu/DashboardApi/FetchSubWatershedsForMap", payload)

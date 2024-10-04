@@ -475,8 +475,8 @@ const filterSamples = (param, param2) => {
   console.log("param2", param2);
   let trace = {};
   let trace2 = {};
-  let fit = {};
-  let fit2 = {};
+  //let fit = {};
+  //let fit2 = {};
   if (typeof param === "undefined" || param.length === 0) {
     return;
   }
@@ -585,22 +585,22 @@ const filterSamples = (param, param2) => {
         );
         // convert x_data to integers
         x_data_64 = x_data_64.map((x) => new Date(x).getTime());
-        var y_data_64 = trace.y;
-        var lr = linearRegression(x_data_64, y_data_64);
+        //var y_data_64 = trace.y;
+        //var lr = linearRegression(x_data_64, y_data_64);
         //console.log(lr);
-        var fit_from = Math.min(...x_data_64);
-        var fit_to = Math.max(...x_data_64);
+        //var fit_from = Math.min(...x_data_64);
+        //var fit_to = Math.max(...x_data_64);
 
-        fit = {
-          x: [fit_from, fit_to],
-          y: [fit_from * lr.sl + lr.off, fit_to * lr.sl + lr.off],
-          mode: "lines",
-          type: "scatter",
-          name: param.name + " trend", //"R^2 = ".concat((Math.round(lr.r2 * 10000) / 10000).toString()),
-          visible: "legendonly",
-        };
+        // fit = {
+        //   x: [fit_from, fit_to],
+        //   y: [fit_from * lr.sl + lr.off, fit_to * lr.sl + lr.off],
+        //   mode: "lines",
+        //   type: "scatter",
+        //   name: param.name + " trend", //"R^2 = ".concat((Math.round(lr.r2 * 10000) / 10000).toString()),
+        //   visible: "legendonly",
+        // };
         data.push(trace);
-        data.push(fit);
+        //data.push(fit);
       });
       console.log("data", data);
     }
@@ -622,23 +622,23 @@ const filterSamples = (param, param2) => {
       new Date(sample.dateTime).toISOString().slice(0, 16)
     );
     // convert x_data to integers
-    x_data_64 = x_data_64.map((x) => new Date(x).getTime());
-    var y_data_64 = trace.y;
-    var lr = linearRegression(x_data_64, y_data_64);
-    //console.log(lr);
+    //x_data_64 = x_data_64.map((x) => new Date(x).getTime());
+    // var y_data_64 = trace.y;
+    // var lr = linearRegression(x_data_64, y_data_64);
+    // //console.log(lr);
 
-    var fit_from = Math.min(...x_data_64);
-    var fit_to = Math.max(...x_data_64);
+    // var fit_from = Math.min(...x_data_64);
+    // var fit_to = Math.max(...x_data_64);
 
-    fit = {
-      x: [fit_from, fit_to],
-      y: [fit_from * lr.sl + lr.off, fit_to * lr.sl + lr.off],
-      mode: "lines",
-      type: "scatter",
-      name: param.name + " trend", //"R^2 = ".concat((Math.round(lr.r2 * 10000) / 10000).toString()),
-      visible: "legendonly",
-      nticks: 5,
-    };
+    // fit = {
+    //   x: [fit_from, fit_to],
+    //   y: [fit_from * lr.sl + lr.off, fit_to * lr.sl + lr.off],
+    //   mode: "lines",
+    //   type: "scatter",
+    //   name: param.name + " trend", //"R^2 = ".concat((Math.round(lr.r2 * 10000) / 10000).toString()),
+    //   visible: "legendonly",
+    //   nticks: 5,
+    // };
 
     //console.log(fit);
   }
@@ -662,39 +662,40 @@ const filterSamples = (param, param2) => {
     );
     // convert x_data to integers
     x_data_64 = x_data_64.map((x) => new Date(x).getTime());
-    var y_data_64 = trace2.y;
-    var lr = linearRegression(x_data_64, y_data_64);
-    //console.log(lr);
+    // var y_data_64 = trace2.y;
+    // var lr = linearRegression(x_data_64, y_data_64);
+    // //console.log(lr);
 
-    var fit_from = Math.min(...x_data_64);
-    var fit_to = Math.max(...x_data_64);
+    // var fit_from = Math.min(...x_data_64);
+    // var fit_to = Math.max(...x_data_64);
 
-    fit2 = {
-      x: [fit_from, fit_to],
-      y: [fit_from * lr.sl + lr.off, fit_to * lr.sl + lr.off],
-      mode: "lines",
-      type: "scatter",
-      yaxis: "y2",
-      name: param2.name + " trend", //"R^2 = ".concat((Math.round(lr.r2 * 10000) / 10000).toString()),
-      visible: "legendonly",
-    };
+    // fit2 = {
+    //   x: [fit_from, fit_to],
+    //   y: [fit_from * lr.sl + lr.off, fit_to * lr.sl + lr.off],
+    //   mode: "lines",
+    //   type: "scatter",
+    //   yaxis: "y2",
+    //   name: param2.name + " trend", //"R^2 = ".concat((Math.round(lr.r2 * 10000) / 10000).toString()),
+    //   visible: "legendonly",
+    // };
   }
   console.log("trace", trace);
   if (showSecondParam.value) {
-    updatePlot(trace, param, fit, trace2, param2, fit2);
+    updatePlot(trace, param, trace2, param2); //fit, fit2);
     return;
   } else {
     if (paramType.value === "Parameter") {
       updatePlot(data, param);
       return;
     } else {
-      updatePlot(trace, param, fit);
+      updatePlot(trace, param); //, fit);
       return;
     }
   }
 };
 
-const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
+const updatePlot = (trace, param, trace2, param2) => {
+  //, fit, fit2) => {
   console.log("updatePlot");
   console.log("trace", trace);
   //console.log("trace2", trace2);
@@ -816,7 +817,7 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
   }
   if (showSecondParam.value) {
     console.log("layout", layout);
-    Plotly.newPlot(chartId, [trace, fit, trace2, fit2], layout, config);
+    Plotly.newPlot(chartId, [trace, trace2], layout, config); //fit,fit2
     calcStats(chartId);
     listenPlotZoom(chartId);
     return;
@@ -829,7 +830,7 @@ const updatePlot = (trace, param, fit, trace2, param2, fit2) => {
 
     return;
   } else {
-    Plotly.newPlot("chart-" + plotIndex.value, [trace, fit], layout, config);
+    Plotly.newPlot("chart-" + plotIndex.value, [trace], layout, config); //fit
     calcStats(chartId);
     listenPlotZoom(chartId);
     return;
