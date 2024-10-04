@@ -1208,6 +1208,7 @@ const paramOptions = ref([]);
 const paramFilteredOptions = ref([]);
 const dateFormat = "MM/DD/YYYY";
 const STATIONS = "stations";
+const BENTHIC_STATIONS = "benthic_stations";
 const CMC_EMAIL = "cmc_email";
 const CMC_ROLE = "cmc_role";
 const CMC_PURPOSE = "cmc_purpose";
@@ -1245,14 +1246,14 @@ if (
     }
   }
 }
-console.log('email', email.value);
 if (
   typeof localStorage.getItem(CMC_EMAIL) !== null &&
   localStorage.getItem(CMC_EMAIL) !== ""
 ) {
   email.value = localStorage.getItem(CMC_EMAIL);
 }
-console.log('email', email.value);
+
+
 
 if (
   typeof localStorage.getItem(CMC_ROLE) !== null &&
@@ -1347,20 +1348,23 @@ const helpClick = ((source) => {
   let content = '';
   if (source == 'main'){
     title = 'CMC Data Explorer';
-    content = [{id:1,content:'The CMC Data Explorer is a tool for storing, sharing, and visualizing data collected by the network of water quality and benthic macroinvertebrate monitoring programs working with the Chesapeake Monitoring Cooperative. The statistics above the map reflect the stations and associated data currently being viewed on the map. Active stations are those that have been sampled in the last 5 years.'}];
+    content = [{id:1,content:'The CMC Data Explorer lets you view and share water quality and benthic macroinvertebrate data. The stats to the left show details from the monitoring stations shown on the map. Active stations have samples uploaded to the database within the last 5 years.'}];
   }else if(source == 'mapDataLayers'){
     title = 'Map Data Layers';
-    content = [{id:1,content:'On this page you can view and download data stored in the CMC Data Explorer database. Use the Map Data Layers to select the layers visible on the map. You can choose between Water Quality or Benthic Macroinvertebrate data and Watershed or Political boundaries to help refine your search. The legend within the map will update based on these selections, where you can turn on and off individual layers.'}];
+    content = [{id:1,content:'Explore and download water quality or benthic macroinvertebrate data using the map. Choose layers like watersheds or political boundaries to customize your view. The map legend will adjust as you toggle layers on and off.'}];
   }else if(source == 'dataFilters'){
     title = 'Data Filters';
-    content = [{id:1,content:'Use the form below to build a search that will select the specific data you want to view or download. You can select as many filters as you want and as many options within each filter as you want. However, if you click “Filter Map” after each new selection, this will update the map and possible options available in the other filters and help you refine your search. Each filter acts as AND statements and multiple selections within each filter act as OR statements. For example if you select the James River Watershed and the parameters: bacteria and water temperature, you will see stations within the James River watershed that monitor bacteria OR water temperature.'},
-               {id:2,content:'Click "Clear Filters” to remove all selections or click the X on a specific filter and then Filter Map to remove just that filter.'}];
+    content = [{id:1,content:'Use the filters to select the data you want to view or download. After each selection, click "Filter Map" to update the map and see new options. Multiple selections within a filter show results that match any of your choices, while different filters narrow the results further.'},
+               {id:2,content:'Click "Clear Filters" to reset all, or the "X" to remove individual filters.'}];
   }else if(source == 'stationsTable'){
     title = 'Stations Table';
-    content = [{id:1,content:'The stations table shows the results from the information selected on the data filters form above and the stations currently shown on the map. Click on a station to view the station details below.'}];
+    content = [{id:1,content:'This table lists the stations shown on the map based on your selected filters. Click a station to see more details below.'}];
   }else if(source == 'stationDetails'){
     title = 'Station Details';
-    content = [{id:1,content:'In this panel, you can visualize or download water quality monitoring data collected at the station selected on the map or table above.  Select a depth or date range for all plots, then select parameters for each individual plot. You can add up to two parameters for each plot. Click the plus sign at the bottom right of the panel to add another plot.'}];
+    content = [{id:1,content:'View or download data from the selected station. Choose a depth or date range, then select up to two parameters per plot. Use the "+" to add another plot.'}];
+  }else if(source == 'firstVisit'){
+    title = 'Welcome to the CMC Data Explorer';
+    content = [{id:1,content:'The CMC Data Explorer is a tool for storing, sharing, and visualizing data collected by the network of water quality and benthic macroinvertebrate monitoring programs working with the Chesapeake Monitoring Cooperative. On this page you can view and download data stored in the CMC Data Explorer database.'}];
   }
 
   helpTitle.value = title;
@@ -1862,15 +1866,51 @@ const getStationsFromCMC = async (load,download) => {
     subwatershedOptions.value = [];
     paramOptions.value = [];
   }
-  //if(selectedDataType.value !== selectedDataTypeForLegend.value){
+  if(load){
+    checkFirstVisit();
+    function checkFirstVisit(){
+      console.log('checkfirstvisit');
+      console.log(localStorage.getItem('was_visited'));
+      if(localStorage.getItem('was_visited')>=1){
+        localStorage.setItem('was_visited', parseInt(localStorage.getItem('was_visited'))+1);
+        return;
+      }else{
+        localStorage.setItem('was_visited', 1);
+        helpClick('firstVisit');
+      }
+    }
 
-  //}
+    //get benthic stations in background on load and set in local storage
+    const payloadBenthic = {
+      dataType: 'Benthic Macroinvertebrates',
+      groups: '',
+      stations: '',
+      states: '',
+      counties: '',
+      watersheds: '',
+      subwatersheds: '',
+      parameters: '',
+      startDate: "1901-01-01", endDate: "2024-10-04"
+    };
+    axios
+    .post(
+      "https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
+      payloadBenthic
+    )
+    .then((res) => {
+      const res_str = JSON.stringify(res.data);
+      console.log('benthic stations',res.data);
+
+      localStorage.setItem(BENTHIC_STATIONS, res_str);
+    })
+  }
   const payload = formPayload();
   filtering.value = true;
 
   if (payload.endDate !== '' && payload.endDate !== null && typeof payload.endDate !== 'undefined' && !load) {
     payload.endDate = addDayToDate(payload.endDate);
   }
+  console.log('payload',payload);
   axios
     .post(
       "https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
@@ -1908,7 +1948,9 @@ const getStationsFromCMC = async (load,download) => {
       }
 
       if (load & (res.data.length > 0)) {
+
         localStorage.setItem(STATIONS, res_str);
+
         // get min date as StartDate of the oldest station in transformedStations. exclude nulls
         loadMinDate.value = new Date(
           Math.min.apply(
@@ -1931,7 +1973,6 @@ const getStationsFromCMC = async (load,download) => {
 
 
       }
-
     })
     .catch((error) => {
       if (load) {
@@ -2373,8 +2414,13 @@ watch(selectedDataType, () => {
   selectedParams.value = [];
   formattedStartDateMap.value = '';
   formattedEndDateMap.value = '';
+  if(selectedDataType.value === 'Water Quality'){
+    stations.value = JSON.parse(localStorage.getItem(STATIONS));
+  }else{
+    stations.value = JSON.parse(localStorage.getItem(BENTHIC_STATIONS));
+  }
 
-  getStationsFromCMC(false,false);
+  //getStationsFromCMC(false,false);
 });
 
 const filterRefs = [
@@ -2417,7 +2463,11 @@ function clearFilters() {
   selectedParams.value = [];
   formattedStartDateMap.value = '';
   formattedEndDateMap.value = '';
-  stations.value = JSON.parse(localStorage.getItem(STATIONS));
+  if(selectedDataType.value === 'Water Quality'){
+    stations.value = JSON.parse(localStorage.getItem(STATIONS));
+  }else{
+    stations.value = JSON.parse(localStorage.getItem(BENTHIC_STATIONS));
+  }
   getStationsFromCMC(true);
 }
 
