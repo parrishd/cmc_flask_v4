@@ -1543,59 +1543,45 @@ const addDayToDate = (oldDate) => {
   return newDate;
 };
 
-const writeCSV = (data,pivot,payload) => {
-  if(!pivot){
-    const csv = data.map((row) =>
-      Object.values(row).join(",")
-    )
-    csv.unshift(Object.keys(data[0]).join(","));
-    const csvString = csv.join("\n");
-    const blob = new Blob([csvString], {
-      type: "text/csv",
-    });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    //append todays date to the file name
+const writeCSV = (data,payload) => {
 
-    a.download = "cmc_samples_" + new Date().toISOString().substring(0, 10) + ".csv";
-
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }else{
-    axios.post("https://cmc.vims.edu/DashboardApi/FetchConditionsForDownload", payload)
-      .then((response) => {
-        const conditions = response.data;
+  axios.post("https://cmc.vims.edu/DashboardApi/FetchConditionsForDownload", payload)
+    .then((response) => {
+      const conditions = response.data;
 
 
-        // loop through the data and pivot by creating a new object for each unique StationCode,GroupCode,DateTime,SampleDepth, and SampleId.
-        // Each object will have the ParameterCode as the key and the value as the parameter value.
-        // Concatenate the ParameterCode and '_Problem' as another key with the value as the Problem value.
-        // Concatenate the QualifierCode and '_Qualifier' as another key with the value as the Problem value.
-        // So, each object will have the following keys: StationCode,GroupCode,DateTime,SampleDepth,SampleId,ParameterCode1,ParameterCode2,...,ParameterCodeN,ParameterCode1_Problem,ParameterCode2_Problem,...,ParameterCodeN_Problem,ParameterCode1_Qualifier,ParameterCode2_Qualifier,...,ParameterCodeN_Qualifier
-        // Then, loop through the objects and create a csv string with the keys as the header and the values as the rows.
-        // Write the csv string to a csv file and download it.
-        let csv = [];
-        let headers = [];
-        let header = '';
-        let csvString = '';
-        let csvRow = '';
-        let csvRowArray = [];
+      // loop through the data and pivot by creating a new object for each unique StationCode,GroupCode,DateTime,SampleDepth, and SampleId.
+      // Each object will have the ParameterCode as the key and the value as the parameter value.
+      // Concatenate the ParameterCode and '_Problem' as another key with the value as the Problem value.
+      // Concatenate the QualifierCode and '_Qualifier' as another key with the value as the Problem value.
+      // So, each object will have the following keys: StationCode,GroupCode,DateTime,SampleDepth,SampleId,ParameterCode1,ParameterCode2,...,ParameterCodeN,ParameterCode1_Problem,ParameterCode2_Problem,...,ParameterCodeN_Problem,ParameterCode1_Qualifier,ParameterCode2_Qualifier,...,ParameterCodeN_Qualifier
+      // Then, loop through the objects and create a csv string with the keys as the header and the values as the rows.
+      // Write the csv string to a csv file and download it.
+      let csv = [];
+      let headers = [];
+      let header = '';
+      let csvString = '';
+      let csvRow = '';
+      let csvRowArray = [];
 
-        data.forEach((row) => {
-          let newRow = {};
-          //check if combination of the following keys exists in the csv array: StationCode,GroupCode,DateTime,SampleDepth,SampleId
-          let exists = false;
+      data.forEach((row) => {
+        let newRow = {};
+        //check if combination of the following keys exists in the csv array: StationCode,GroupCode,DateTime,SampleDepth,SampleId
+        let exists = false;
+        if(selectedDataType.value == 'Water Quality'){
           csv.forEach((csvRow) => {
             if(csvRow.StationCode === row.StationCode && csvRow.GroupCode === row.GroupCode && csvRow.DateTime === row.DateTime &&
               csvRow.SampleDepth === row.SampleDepth && csvRow.SampleId === row.SampleId && csvRow.Comments === row.Comments){
               exists = true;
             }
           });
+
           if(!exists){
             newRow['StationCode'] = row.StationCode;
             newRow['GroupCode'] = row.GroupCode;
             newRow['DateTime'] = row.DateTime;
+            newRow['Date'] = row.DateTime;
+            newRow['Time'] = row.DateTime;
             newRow['SampleDepth'] = row.SampleDepth;
             newRow['SampleId'] = row.SampleId;
             newRow['Comments'] = row.Comments;
@@ -1603,117 +1589,146 @@ const writeCSV = (data,pivot,payload) => {
               headers.push('StationCode');
               headers.push('GroupCode');
               headers.push('DateTime');
+              headers.push('Date');
+              headers.push('Time');
               headers.push('SampleDepth');
               headers.push('SampleId');
               headers.push('Comments');
             }
             csv.push(newRow);
           }
-          //find the index of the object in the csv array that has the same StationCode,GroupCode,DateTime,SampleDepth,SampleId
-          let index = csv.findIndex((csvRow) => {
-            return csvRow.StationCode === row.StationCode && csvRow.GroupCode === row.GroupCode && csvRow.DateTime === row.DateTime &&
-                    csvRow.SampleDepth === row.SampleDepth && csvRow.SampleId === row.SampleId && row.Comments === csvRow.Comments;
-          });
+        }else{
+          newRow['StationCode'] = row.StationCode;
+          newRow['GroupCode'] = row.GroupCode;
+          newRow['DateTime'] = row.DateTime;
+          newRow['Date'] = row.DateTime;
+          newRow['Time'] = row.DateTime;
+          newRow['Comments'] = row.Comments;
+          newRow['BenthicCode'] = row.ParameterCode;
+          newRow['Count'] = row.Value;
+          if(!headers.includes('StationCode')){
+            headers.push('StationCode');
+            headers.push('GroupCode');
+            headers.push('DateTime');
+            headers.push('Date');
+            headers.push('Time');
+            headers.push('Comments');
+            headers.push('BenthicCode');
+            headers.push('Count');
+          }
+          csv.push(newRow);
+        }
+        //find the index of the object in the csv array that has the same StationCode,GroupCode,DateTime,SampleDepth,SampleId
+        let index = csv.findIndex((csvRow) => {
+          return csvRow.StationCode === row.StationCode && csvRow.GroupCode === row.GroupCode && csvRow.DateTime === row.DateTime &&
+                  csvRow.SampleDepth === row.SampleDepth && csvRow.SampleId === row.SampleId && row.Comments === csvRow.Comments;
+        });
 
-          //if the object exists, add the ParameterCode, Problem, and Qualifier to the object
+        //if the object exists, add the ParameterCode, Problem, and Qualifier to the object
+        if(selectedDataType.value === 'Water Quality'){
           if(index > -1){
             //check if the Value is undefined and set it to an empty string if it is
             if(row.Value === undefined){
               row.Value = '';
             }
+            csv[index][row.ParameterCode] = row.Value;
+            if(!headers.includes(row.ParameterCode)){
+              headers.push(row.ParameterCode);
+            }
+
             if(row.ProblemCode === undefined){
               row.ProblemCode = '';
             }
             if(row.QualifierCode === undefined){
               row.QualifierCode = '';
             }
-            csv[index][row.ParameterCode] = row.Value;
+
             csv[index][row.ParameterCode + '_Problem'] = row.ProblemCode;
             csv[index][row.ParameterCode + '_Qualifier'] = row.QualifierCode;
-            if(!headers.includes(row.ParameterCode)){
-              headers.push(row.ParameterCode);
+            if(!headers.includes(row.ParameterCode + '_Problem')){
               headers.push(row.ParameterCode + '_Problem');
               headers.push(row.ParameterCode + '_Qualifier');
             }
+
           }
-
-
-        });
-        //check if condtions data exists
-        if(conditions.length>0){
-          // do the same for the conditions data except no need for problem and qualifier
-        conditions.forEach((row) => {
-
-            //find all the indexes of the object in the csv array that has the same StationCode,GroupCode,DateTime,SampleDepth,SampleId
-            let indexes = csv.reduce((acc, e, i) => {
-              if (e.StationCode === row.StationCode && e.GroupCode === row.GroupCode && e.DateTime === row.DateTime) {
-                acc.push(i);
-              }
-              return acc;
-            }, []);
-
-            //check all indexes, if the object exists, add the ParameterCode as and Value  as value to the object
-            indexes.forEach((index) => {
-              if(index > -1){
-                //check if the Value is undefined and set it to an empty string if it is
-                if(row.Value === undefined){
-                  row.Value = '';
-                }
-                csv[index][row.ParameterCode] = row.Value;
-                if(!headers.includes(row.ParameterCode)){
-                  headers.push(row.ParameterCode);
-                }
-              }
-            });
-          });
         }
 
 
+      });
+      //check if condtions data exists
+      if(conditions.length>0){
+        // do the same for the conditions data except no need for problem and qualifier
+        conditions.forEach((row) => {
+
+          //find all the indexes of the object in the csv array that has the same StationCode,GroupCode,DateTime,SampleDepth,SampleId
+          let indexes = csv.reduce((acc, e, i) => {
+            if (e.StationCode === row.StationCode && e.GroupCode === row.GroupCode && e.DateTime === row.DateTime) {
+              acc.push(i);
+            }
+            return acc;
+          }, []);
+
+          //check all indexes, if the object exists, add the ParameterCode as and Value  as value to the object
+          indexes.forEach((index) => {
+            if(index > -1){
+              //check if the Value is undefined and set it to an empty string if it is
+              if(row.Value === undefined){
+                row.Value = '';
+              }
+              csv[index][row.ParameterName] = row.Value;
+              if(!headers.includes(row.ParameterName)){
+                headers.push(row.ParameterName);
+              }
+            }
+          });
+        });
+      }
 
 
 
-        //headers = headers.sort();
-        // move comments to the end of the headers array
-        let commentsIndex = headers.indexOf('Comments');
-        headers.splice(commentsIndex,1);
-        headers.push('Comments');
+
+
+      //headers = headers.sort();
+      // move comments to the end of the headers array
+      let commentsIndex = headers.indexOf('Comments');
+      headers.splice(commentsIndex,1);
+      headers.push('Comments');
+      headers.forEach((header) => {
+        csvRow += header + ',';
+      });
+      csvRow = csvRow.slice(0,-1);
+      csvString += csvRow + '\n';
+      csv.forEach((row) => {
+        //check if undefined values exist and set them to empty strings
         headers.forEach((header) => {
-          csvRow += header + ',';
+          if(row[header] === undefined){
+            row[header] = '';
+          }
+        });
+        csvRow = '';
+        headers.forEach((header) => {
+          csvRow += row[header] + ',';
         });
         csvRow = csvRow.slice(0,-1);
         csvString += csvRow + '\n';
-        csv.forEach((row) => {
-          //check if undefined values exist and set them to empty strings
-          headers.forEach((header) => {
-            if(row[header] === undefined){
-              row[header] = '';
-            }
-          });
-          csvRow = '';
-          headers.forEach((header) => {
-            csvRow += row[header] + ',';
-          });
-          csvRow = csvRow.slice(0,-1);
-          csvString += csvRow + '\n';
-        });
-        const blob = new Blob([csvString], {
-          type: "text/csv",
-        });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement
-        ("a");
-        a.href = url;
-        a.download = "cmc_samples" + new Date().toISOString().substring(0, 10) + ".csv";
-
-        a.click();
-        window.URL.revokeObjectURL(url);
-        if(!optionalMetaParams.value && !optionalMetaCalibration.value && !optionalMetaGroups.value && !optionalMetaStations.value){
-          downloading.value = false;
-        }
       });
+      const blob = new Blob([csvString], {
+        type: "text/csv",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement
+      ("a");
+      a.href = url;
+      a.download = "cmc_samples" + new Date().toISOString().substring(0, 10) + ".csv";
+
+      a.click();
+      window.URL.revokeObjectURL(url);
+      if(!optionalMetaParams.value && !optionalMetaCalibration.value && !optionalMetaGroups.value && !optionalMetaStations.value){
+        downloading.value = false;
+      }
+    });
 
 
-  }
 
 
 };
@@ -1721,15 +1736,11 @@ const writeCSV = (data,pivot,payload) => {
 const downloadData = () => {
   downloading.value = true;
   console.log('email set', email.value);
-  localStorage.setItem(CMC_EMAIL, email.value);
   let emailTest = localStorage.getItem(CMC_EMAIL);
-  console.log('email test', emailTest);
   localStorage.setItem(CMC_ROLE, selectedRole.value);
   localStorage.setItem(CMC_PURPOSE, selectedPurpose.value);
   localStorage.setItem(CMC_LOCATION, selectedLocation.value);
   localStorage.setItem(CMC_COMMENTS, comments.value);
-
-  console.log('email test2', localStorage.getItem(CMC_EMAIL));
 
   const payload = formPayload();
   if (payload.endDate !== '' && payload.endDate !== null && typeof payload.endDate !== 'undefined') {
@@ -1744,11 +1755,8 @@ const downloadData = () => {
           //write response.data to csv download and include headers
 
           //let csv = Object.keys(response.data[0]).join(",") + "\n";
-          if(selectedDataType.value === 'Water Quality'){
-            writeCSV(samplesForDownload,true,payload);
-          }else{
-            writeCSV(samplesForDownload,false);
-          }
+
+          writeCSV(samplesForDownload,payload);
 
 
           //get unique parameter codes as comma separated string from samplesForDownload
@@ -1841,7 +1849,7 @@ const downloadData = () => {
                 a.href = url;
                 a.download = filename +"_"+ new Date().toISOString().substring(0, 10) + ".csv";
                 document.body.appendChild(a);
-                downloading.value = false;
+                //downloading.value = false;
               }
 
             }
@@ -1869,8 +1877,6 @@ const getStationsFromCMC = async (load,download) => {
   if(load){
     checkFirstVisit();
     function checkFirstVisit(){
-      console.log('checkfirstvisit');
-      console.log(localStorage.getItem('was_visited'));
       if(localStorage.getItem('was_visited')>=1){
         localStorage.setItem('was_visited', parseInt(localStorage.getItem('was_visited'))+1);
         return;
