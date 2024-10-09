@@ -504,7 +504,7 @@
         </div>
       </div>
       <q-dialog v-model="helpDialog" >
-        <q-card style="width: 800px; max-width: 90vw; height: 95vh;" bg-grey-9 text-white>
+        <q-card style="width: 800px; max-width: 90vw; " bg-grey-9 text-white>
           <q-card-section>
             <div class="row q-py-md q-px-lg result-details-header">
               <div class="col-md-11">
