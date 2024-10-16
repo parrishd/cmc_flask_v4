@@ -79,11 +79,11 @@ const routes = [
       { path: "", component: () => import("pages/DataEthicsPage.vue") },
     ],
   },
-
   {
     path: "/admin",
-    component: () => import("layouts/SiteLayout.vue"),
-    children: [{ path: "", component: () => import("pages/DataPage.vue") }],
+    beforeEnter(to, from, next) {
+      window.location.href = "https://cmc2.vims.edu/Admin/";
+    },
   },
 
   {
@@ -213,6 +213,7 @@ const routes = [
       },
     ],
   },
+
   {
     path: "/manage-groups",
     component: () => import("layouts/SiteLayout.vue"),
@@ -283,7 +284,7 @@ const routes = [
   {
     path: "/va",
     beforeEnter(to, from, next) {
-      window.location.href = "https://cmc.vims.edu/va";
+      window.location.href = "https://cmc2.vims.edu/va";
     },
   },
   // Always leave this as last one,
