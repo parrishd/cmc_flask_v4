@@ -18,7 +18,7 @@
           <li>
             Author/Rightsholder.
             <i>Title of data set including date range (Version number)</i>
-            [Description of form]. Accessed from http:// (date data was
+            [Description of form]. Accessed from https:// (date data was
             accessed/downloaded).
           </li>
           <li>
