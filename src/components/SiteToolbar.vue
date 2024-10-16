@@ -21,7 +21,7 @@
           <a href="/resources">RESOURCES</a>
           <a href="/contact">CONTACT</a>
           <a href="/data-ethics">DATA ETHICS</a>
-          <a href="https://cmc.vims.edu/admin">MANAGE DATA</a>
+          <a href="/admin">MANAGE DATA</a>
 
           <q-btn-dropdown
             v-if="loggedIn"

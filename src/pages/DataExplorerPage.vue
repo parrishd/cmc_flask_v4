@@ -1558,7 +1558,7 @@ const addDayToDate = (oldDate) => {
 
 const writeCSV = (data,payload) => {
 
-  axios.post("https://cmc.vims.edu/DashboardApi/FetchConditionsForDownload", payload)
+  axios.post("https://cmc2.vims.edu/DashboardApi/FetchConditionsForDownload", payload)
     .then((response) => {
       const conditions = response.data;
 
@@ -1761,7 +1761,7 @@ const downloadData = () => {
   }
 
     axios
-      .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForDownload", payload)
+      .post("https://cmc2.vims.edu/DashboardApi/FetchSamplesForDownload", payload)
       .then((response) => {
         if (response.data.length > 0) {
           const samplesForDownload = response.data;
@@ -1799,28 +1799,28 @@ const downloadData = () => {
           if(optionalMetaParams.value){
               requests.push(
                 axios
-                .post("https://cmc.vims.edu/DashboardApi/FetchParametersForDashboardDownload", paramCodes)
+                .post("https://cmc2.vims.edu/DashboardApi/FetchParametersForDashboardDownload", paramCodes)
               )
           }
 
           if(optionalMetaGroups.value){
             requests.push(
               axios
-              .post("https://cmc.vims.edu/DashboardApi/FetchGroupsForDashboardDownload", groupCodes)
+              .post("https://cmc2.vims.edu/DashboardApi/FetchGroupsForDashboardDownload", groupCodes)
             )
           }
 
           if(optionalMetaStations.value){
             requests.push(
               axios
-              .post("https://cmc.vims.edu/DashboardApi/FetchStationsForDashboardDownload", stationCodes)
+              .post("https://cmc2.vims.edu/DashboardApi/FetchStationsForDashboardDownload", stationCodes)
             )
           }
 
           if(optionalMetaCalibration.value && selectedDataType.value === 'Water Quality'){
             requests.push(
               axios
-              .post("https://cmc.vims.edu/DashboardApi/FetchCalibrationForDashboardDownload", payload)
+              .post("https://cmc2.vims.edu/DashboardApi/FetchCalibrationForDashboardDownload", payload)
             )
           }
           Promise.all(requests).then(function(values) {
@@ -1913,7 +1913,7 @@ const getStationsFromCMC = async (load,download) => {
     };
     axios
     .post(
-      "https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
+      "https://cmc2.vims.edu/DashboardApi/FetchStationsForMap",
       payloadBenthic
     )
     .then((res) => {
@@ -1932,7 +1932,7 @@ const getStationsFromCMC = async (load,download) => {
   console.log('payload',payload);
   axios
     .post(
-      "https://cmc.vims.edu/DashboardApi/FetchStationsForMap",
+      "https://cmc2.vims.edu/DashboardApi/FetchStationsForMap",
       payload
     )
     .then((res) => {
@@ -2001,7 +2001,7 @@ const getStationsFromCMC = async (load,download) => {
     });
 
   axios
-    .post("https://cmc.vims.edu/DashboardApi/FetchSubWatershedsForMap", payload)
+    .post("https://cmc2.vims.edu/DashboardApi/FetchSubWatershedsForMap", payload)
     .then((response) => {
       if (response.data.length > 0) {
 
@@ -2016,7 +2016,7 @@ const getStationsFromCMC = async (load,download) => {
     })
     .catch((error) => console.log(error));
   axios
-    .post("https://cmc.vims.edu/DashboardApi/FetchWatershedsForMap", payload)
+    .post("https://cmc2.vims.edu/DashboardApi/FetchWatershedsForMap", payload)
     .then((response) => {
       if (response.data.length > 0) {
         watershedOptions.value = response.data;
@@ -2030,7 +2030,7 @@ const getStationsFromCMC = async (load,download) => {
     .catch((error) => console.log(error));
   if(selectedDataType.value === 'Water Quality'){
     axios
-    .post("https://cmc.vims.edu/DashboardApi/FetchParametersForMap", payload)
+    .post("https://cmc2.vims.edu/DashboardApi/FetchParametersForMap", payload)
     .then((response) => {
       if (response.data.length > 0) {
 
@@ -2053,7 +2053,7 @@ const getStationsFromCMC = async (load,download) => {
     .catch((error) => console.log(error));
   }
   axios
-    .post("https://cmc.vims.edu/DashboardApi/FetchCountiesForMap", payload)
+    .post("https://cmc2.vims.edu/DashboardApi/FetchCountiesForMap", payload)
     .then((response) => {
       if (response.data.length > 0) {
         countyOptions.value = response.data;
@@ -2065,7 +2065,7 @@ const getStationsFromCMC = async (load,download) => {
     })
     .catch((error) => console.log(error));
   axios
-    .post("https://cmc.vims.edu/DashboardApi/FetchStatesForMap", payload)
+    .post("https://cmc2.vims.edu/DashboardApi/FetchStatesForMap", payload)
     .then((response) => {
       if (response.data.length > 0) {
         stateOptions.value = response.data;
@@ -2525,7 +2525,7 @@ function getSamples(stationId) {
   }
 
   axios
-    .post("https://cmc.vims.edu/DashboardApi/FetchSamplesForPlot", payload)
+    .post("https://cmc2.vims.edu/DashboardApi/FetchSamplesForPlot", payload)
     .then((response) => {
       if (response.data.length > 0) {
         samples.value = response.data;
