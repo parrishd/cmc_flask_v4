@@ -521,16 +521,26 @@
                 </q-btn>
               </div>
             </div>
-
-
           </q-card-section>
           <q-card-section>
             <div class='row q-px-lg q-py-md'>
               <div class='col-11 '>
                 <div style="font-size:20px"><p v-for="item in helpContent" :key="item.id">{{ item.content }}</p></div>
               </div>
-
             </div>
+            <div class='row q-px-lg q-py-md' v-show="showHelpLink" style="font-size:20px">
+              If you would like a brief introduction to the Data Explorer Dashboard, please click the link below:
+              <div class='col-11 ' >
+                <a
+                  class="text-center"
+                  href="/resource-documents/CMC_data_explorer_dashboard_intro.pdf"
+                  target="_blank"
+                >
+                  Data Explorer Dashboard Introduction
+                </a>
+              </div>
+            </div>
+
           </q-card-section>
         </q-card>
       </q-dialog>
@@ -724,7 +734,7 @@
 
       <!-- results -->
       <div class="row q-py-lg q-px-md results-title">
-        <div style='color:teal'  class="col text-h6">Currently Viewing</div>
+        <div style='color:teal'  class="col text-h6">Filtered Stations</div>
         <div class="col-2" style="max-width: 80px">
           <q-icon class="fa-solid fa-circle-info" size="24px" color="primary" @click="helpClick('stationsTable')"></q-icon>
 
@@ -1224,6 +1234,7 @@ const helpContent = ref([{message:'foo'},{message:'bar'}]);
 const disabledDownload = ref(true); //disable the download button
 const downloading = ref(false); //show the spinner
 const filtering = ref(false); //show the spinner
+const showHelpLink = ref(false);
 const isJson = (str) => {
   try {
     JSON.parse(str);
@@ -1346,6 +1357,7 @@ const formattedEndDatePlot = ref(
 const helpClick = ((source) => {
   let title = '';
   let content = '';
+  showHelpLink.value = false;
   if (source == 'main'){
     title = 'CMC Data Explorer';
     content = [{id:1,content:'The CMC Data Explorer lets you view and share water quality and benthic macroinvertebrate data. The stats to the left show details from the monitoring stations shown on the map. Active stations have samples uploaded to the database within the last 5 years.'}];
@@ -1365,6 +1377,7 @@ const helpClick = ((source) => {
   }else if(source == 'firstVisit'){
     title = 'Welcome to the CMC Data Explorer';
     content = [{id:1,content:'The CMC Data Explorer is a tool for storing, sharing, and visualizing data collected by the network of water quality and benthic macroinvertebrate monitoring programs working with the Chesapeake Monitoring Cooperative. On this page you can view and download data stored in the CMC Data Explorer database.'}];
+    showHelpLink.value = true;
   }
 
   helpTitle.value = title;

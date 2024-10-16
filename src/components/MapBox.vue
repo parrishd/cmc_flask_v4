@@ -59,12 +59,12 @@
             </div>
             <div class="row" v-show="selectedGeoType == 'Watershed'">
               <q-checkbox v-model="showPolygon1">
-                Watersheds (HUC 8)</q-checkbox
+                Watersheds (HUC 6)</q-checkbox
               >
             </div>
             <div class="row" v-show="selectedGeoType == 'Watershed'">
               <q-checkbox v-model="showPolygon2">
-                SubWatersheds (HUC 12)</q-checkbox
+                Subwatersheds (HUC 12)</q-checkbox
               >
             </div>
             <div class="row" v-show="selectedGeoType !== 'Watershed'">

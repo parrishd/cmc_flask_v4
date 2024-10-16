@@ -280,6 +280,12 @@ const routes = [
     ],
   },
 
+  {
+    path: "/va",
+    beforeEnter(to, from, next) {
+      window.location.href = "https://cmc.vims.edu/va";
+    },
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

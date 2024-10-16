@@ -10,66 +10,65 @@
 
     <div class="row q-mt-xl">
       <!-- Manual -->
-      <div class="col-4">
+      <div class="col-3">
         <div class="flex justify-center resource-image-container">
           <q-img
             src="/images/resources/manual-resources.svg"
             style="width: 175px; height: 175px"
           />
         </div>
-        <div class="text-center resource-header">Manual</div>
+        <div class="text-center resource-header">Resources</div>
         <div class="q-px-md resource-links">
-          <a href="/resource-documents/UserGuide.pdf" target="_blank">
+          <a
+            class="text-center"
+            href="/resource-documents/CMC_data_explorer_dashboard_intro.pdf"
+            target="_blank"
+          >
+            Data Explorer Dashboard Introduction
+          </a>
+          <a
+            class="text-center"
+            href="/resource-documents/UserGuide.pdf"
+            target="_blank"
+          >
             Chesapeake Data Explorer Manual
           </a>
-          <a href="/resource-documents/parameters.csv"> Parameters List </a>
-          <a href="/resource-documents/problemCodes.csv"> Problem Code List </a>
-          <a href="/resource-documents/codes_factsheet.pdf">
+
+          <a class="text-center" href="/resource-documents/parameters.csv">
+            Parameters List
+          </a>
+          <a class="text-center" href="/resource-documents/problemCodes.csv">
+            Problem Code List
+          </a>
+          <a class="text-center" href="/resource-documents/codes_factsheet.pdf">
             Qualifier and Problem Code Factsheet
           </a>
-          <a href="/resource-documents/qualifierCodes.csv">
+          <a class="text-center" href="/resource-documents/qualifierCodes.csv">
             Qualifier Code List
           </a>
 
-          <a href="/resource-documents/water_quality_condition_categories.csv">
+          <a
+            class="text-center"
+            href="/resource-documents/water_quality_condition_categories.csv"
+          >
             Water Quality Condition Code List
           </a>
-          <a href="/resource-documents/benthic_condition_categories.csv">
+          <a
+            class="text-center"
+            href="/resource-documents/benthic_condition_categories.csv"
+          >
             Benthic Condition Code List
           </a>
-          <a href="/resource-documents/connecting_stations.pdf">
+          <a
+            class="text-center"
+            href="/resource-documents/connecting_stations.pdf"
+          >
             Connecting Stations to Groups Fact Sheet
           </a>
         </div>
       </div>
-
-      <!-- Homepage Tutorials -->
-      <div class="col-4">
-        <div class="flex justify-center resource-image-container">
-          <q-img
-            src="/images/resources/homepage-tutorials-resources.svg"
-            style="width: 175px; height: 175px"
-          />
-        </div>
-        <div class="text-center resource-header">Homepage Tutorials</div>
-        <div class="q-px-md resource-links">
-          <a href="https://www.youtube.com/watch?v=aJyH7YivEO4" target="_blank">
-            Homepage walk through
-          </a>
-          <a href="https://youtu.be/CEn4mx3IAw0" target="_blank">
-            Query page
-          </a>
-          <a href="https://youtu.be/BvJ7eQ-bdZQ" target="_blank">
-            Water quality data download
-          </a>
-          <a href="https://youtu.be/8NZeRRLLFEo" target="_blank">
-            Metadata files
-          </a>
-        </div>
-      </div>
-
       <!-- Manual -->
-      <div class="col-4">
+      <div class="col-3">
         <div class="flex justify-center resource-image-container">
           <q-img
             src="/images/resources/data-upload-resources.svg"
@@ -77,8 +76,12 @@
           />
         </div>
         <div class="text-center resource-header">Data Upload Tutorials</div>
-        <div class="q-px-md resource-links">
-          <a href="https://youtu.be/of0vuk5VcZs" target="_blank">
+        <div class="q-px-md resource-links text-center">
+          <a
+            class="text-center"
+            href="https://youtu.be/of0vuk5VcZs"
+            target="_blank"
+          >
             Creating a user account
           </a>
           <a href="https://youtu.be/dI3UFrtjdAw" target="_blank">
@@ -86,11 +89,8 @@
           </a>
         </div>
       </div>
-    </div>
-
-    <div class="row q-my-xl">
       <!-- Coordinator Tutorials -->
-      <div class="col-4">
+      <div class="col-3">
         <div class="flex justify-center resource-image-container">
           <q-img
             src="/images/resources/coordinated-tutorials-resources.svg"
@@ -99,7 +99,7 @@
           />
         </div>
         <div class="text-center resource-header">Coordinator Tutorials</div>
-        <div class="q-px-md resource-links">
+        <div class="text-center q-px-md resource-links">
           <a href="https://youtu.be/vWifRVhwAAQ" target="_blank">
             Water Quality Bulk Upload Template
           </a>
@@ -110,7 +110,7 @@
       </div>
 
       <!-- Manual -->
-      <div class="col-4">
+      <div class="col-3">
         <div class="flex justify-center resource-image-container">
           <q-img
             src="/images/resources/data-translation-resources.svg"
@@ -118,7 +118,7 @@
           />
         </div>
         <div class="text-center resource-header">Data Translation Macro</div>
-        <div class="q-px-md resource-links">
+        <div class="text-center q-px-md resource-links">
           <a href="resource-documents/macroGuide.pdf" target="_blank">
             Data Translation Macro Guide
           </a>
