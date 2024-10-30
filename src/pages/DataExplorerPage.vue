@@ -716,10 +716,12 @@
 
           <q-card-actions align="right">
             <!---->
-            <q-btn flat :disabled="!dataUseAcknowledgment || email =='' || selectedRole == '' || selectedPurpose == '' || selectedLocation == ''" :loading="downloading" label="Accept" color="primary" icon="download"
+            <q-btn flat :disabled="!dataUseAcknowledgment || email =='' || selectedRole == '' || selectedPurpose == '' || selectedLocation == ''
+                                    || email === null || !validateEmail(email) || selectedRole === null || selectedPurpose === null || selectedLocation === null"
+                                    :loading="downloading" label="Accept" color="primary" icon="download"
                      @click="downloadData">
               <template v-slot:loading>
-                <q-spinner-gears /><span class="q-ml-sm">ACCEPT</span>
+                <q-spinner-gears /><span class="q-ml-sm">DOWNLOAD</span>
               </template>
             </q-btn>
           </q-card-actions>
@@ -1753,6 +1755,9 @@ const downloadData = () => {
   localStorage.setItem(CMC_ROLE, selectedRole.value);
   localStorage.setItem(CMC_PURPOSE, selectedPurpose.value);
   localStorage.setItem(CMC_LOCATION, selectedLocation.value);
+  if(comments.value === null){
+    comments.value = '';
+  }
   localStorage.setItem(CMC_COMMENTS, comments.value);
 
   const payload = formPayload();
@@ -1826,6 +1831,8 @@ const downloadData = () => {
           Promise.all(requests).then(function(values) {
             for (let i = 0; i < values.length; i++) {
               let endpoint = values[i].config.url.split("/")[4];
+              console.log('endpoint',endpoint);
+
               let filename = '';
               if(endpoint === 'FetchParametersForDashboardDownload'){
                 filename = 'parameters';
@@ -1837,6 +1844,7 @@ const downloadData = () => {
                 filename = 'calibration';
               }
               let response = values[i];
+              console.log('response',response.data);
 
               if (response.data.length > 0) {
                 //loop through each element in each object in response.data and replace comma with empty string
@@ -1862,6 +1870,7 @@ const downloadData = () => {
                 a.href = url;
                 a.download = filename +"_"+ new Date().toISOString().substring(0, 10) + ".csv";
                 document.body.appendChild(a);
+                a.click();
                 //downloading.value = false;
               }
 
