@@ -70,15 +70,18 @@ $vims-light-gray: #ababab;
   border: 5px solid $vims-medium-blue;
   align-items: center;
   color: $vims-medium-blue;
+  word-wrap: break-word;
 }
 .map-details-header-text-1 {
   font-size: 18px;
   font-weight: 600;
+  word-wrap: break-word;
 }
 .map-details-header-text-2 {
   color: $vims-dark-gray;
   font-size: 14px;
   font-weight: 500;
+  word-wrap: break-word;
 }
 .mapboxgl-popup-close-button {
   color: $vims-medium-blue;

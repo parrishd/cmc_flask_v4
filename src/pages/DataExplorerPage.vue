@@ -694,8 +694,13 @@
             </div>
 
             <div class="row q-mt-md">
-              <div class="col" style="font-size:20px">
-                Please acknowledge data use prior to download
+              <div class="col" >
+                <p style="font-size:20px">
+                  Please acknowledge data use prior to download.
+                </p>
+                <p>
+                  For more information on data use, please visit our <a href="/data-ethics" target="_blank">Data Ethics</a> page.
+                </p>
               </div>
             </div>
 
@@ -710,10 +715,22 @@
                 provider(s) in any product that uses their data.
               </div>
             </div>
+            <div class="row q-mt-md">
+              <div class="col" >
+                <p style="font-size:20px">
+                  Suggested Reference:
+                </p>
+                <p>
+
+                  {{groupOptions.map(({name}) => name).join(", ")}}. {{selectedDataType}} Data {{ formattedStartDateStats.slice(-4) }} - {{ formattedEndDateStats.slice(-4) }} [Data File]. Accessed through the Chesapeake Monitoring Cooperative Data Explorer (https://cmc.vims.edu) on May 2, 2019.
+                </p>
+              </div>
+            </div>
           </q-card-section>
 
-          <q-separator />
 
+
+          <q-separator />
           <q-card-actions align="right">
             <!---->
             <q-btn flat :disabled="!dataUseAcknowledgment || email =='' || selectedRole == '' || selectedPurpose == '' || selectedLocation == ''
@@ -847,7 +864,7 @@
                 class="result-details-header-text-2"
                 v-show="showStationDetails && selectedStationDetails.watershed"
               >
-                Watershed: {{ selectedStationDetails.watershed }}
+                Subwatershed: {{ selectedStationDetails.watershed }}
               </div>
               <div
                 class="result-details-header-text-2"
@@ -1121,30 +1138,23 @@ const paramTypeOptions = ["Sample Depth", "Parameter"];
 const geoTypesOptions = [{ label: "Watershed", value: "Watershed" },
 { label: "Political", value: "Political" }];
 const roleOptions = [
-  "Coastal Resource Manager",
-  "Federal Agency",
-  "State Agency",
-  "Local Government",
-  "Non-Profit",
-  "General Public",
-  "Private Sector",
-  "K-12 Student",
-  "Undergraduate Student",
-  "Graduate Student",
-  "Scientist",
   "Educator",
-  "Researcher",
+  "General Public",
+  "Government Agency (Federal, State, Local)",
+  "Monitor/Volunteer",
+  "Non-Profit/NGO",
+  "Private Sector/Industry",
+  "Scientist/Researcher",
+  "Student (K-12, Undergraduate, Graduate)",
   "Other",
 ];
 const purposeOptions = [
-  "Research",
-  "Class Project",
-  "Data Synthesis",
-  "Regulatory",
-  "Consulting",
-  "Resource Management",
+  "Advocacy",
+  "Consultint/Advisory",
+  "Data Synthesis/Research",
   "Education",
-  "Outreach",
+  "Public Outreach/Communication",
+  "Regulatory Compliance",
   "Other",
 ];
 const locationOptions = [
@@ -1379,6 +1389,10 @@ const helpClick = ((source) => {
   }else if(source == 'firstVisit'){
     title = 'Welcome to the CMC Data Explorer';
     content = [{id:1,content:'The CMC Data Explorer is a tool for storing, sharing, and visualizing data collected by the network of water quality and benthic macroinvertebrate monitoring programs working with the Chesapeake Monitoring Cooperative. On this page you can view and download data stored in the CMC Data Explorer database.'}];
+    showHelpLink.value = true;
+  }else if (source == 'mobile'){
+    title = 'It appears you are using a mobile device';
+    content = 'The CMC Data Explorer is best viewed on a desktop or tablet. Please switch to a larger device for the best experience.';
     showHelpLink.value = true;
   }
 
@@ -1905,6 +1919,13 @@ const getStationsFromCMC = async (load,download) => {
       }else{
         localStorage.setItem('was_visited', 1);
         helpClick('firstVisit');
+      }
+    }
+
+    checkMobile();
+    function checkMobile(){
+      if(window.innerWidth < 768){
+        helpClick('mobile');
       }
     }
 

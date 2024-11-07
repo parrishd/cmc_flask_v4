@@ -653,7 +653,7 @@ const filterSamples = (param, param2) => {
       type: "scatter",
       name: param2.name,
       yaxis: "y2",
-      marker: { size: 12, symbol: "diamond" },
+      marker: { size: 10, symbol: "diamond", color: "orange" },
       showlegend: true,
     };
     var x_data_64 = filteredData2.map((sample) =>
