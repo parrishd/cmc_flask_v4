@@ -721,8 +721,9 @@
                   Suggested Reference:
                 </p>
                 <p>
-
-                  {{groupOptions.map(({name}) => name).join(", ")}}. {{selectedDataType}} Data {{ formattedStartDateStats.slice(-4) }} - {{ formattedEndDateStats.slice(-4) }} [Data File]. Accessed through the Chesapeake Monitoring Cooperative Data Explorer (https://cmc.vims.edu) on May 2, 2019.
+                  {{groupOptions.map(({name}) => name).join(", ")}}. {{selectedDataType}} Data {{ formattedStartDateStats.slice(-4) }} - {{ formattedEndDateStats.slice(-4) }} [Data File].
+                  Accessed through the Chesapeake Monitoring Cooperative Data Explorer (https://cmc.vims.edu) on
+                  {{ new Date().toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})  }}.
                 </p>
               </div>
             </div>
@@ -1150,7 +1151,7 @@ const roleOptions = [
 ];
 const purposeOptions = [
   "Advocacy",
-  "Consultint/Advisory",
+  "Consultant/Advisory",
   "Data Synthesis/Research",
   "Education",
   "Public Outreach/Communication",
